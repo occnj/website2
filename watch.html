@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Watch — Oasis Christian Centre</title>
+  <meta name="description" content="Watch messages from Oasis Christian Centre online. Every sermon, every series — available anytime.">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .series-tabs {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: var(--sp-4);
+    }
+    .series-tab {
+      padding: 8px 20px;
+      border-radius: 100px;
+      font-size: .85rem;
+      font-weight: 600;
+      border: 1.5px solid var(--border);
+      color: var(--gray-1);
+      cursor: pointer;
+      transition: all .15s;
+      background: #fff;
+    }
+    .series-tab.active, .series-tab:hover {
+      background: var(--blue);
+      color: #fff;
+      border-color: var(--blue);
+    }
+
+    .sermon-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--sp-3);
+    }
+
+    .sermon-card-full {
+      background: #fff;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+      cursor: pointer;
+      transition: transform .2s, box-shadow .2s;
+    }
+    .sermon-card-full:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
+    .sermon-thumb {
+      position: relative;
+      aspect-ratio: 16/9;
+    }
+    .sermon-thumb .play-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(26,40,53,.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity .2s;
+    }
+    .sermon-card-full:hover .play-overlay { opacity: 1; }
+    .play-circle {
+      width: 56px; height: 56px;
+      border-radius: 50%;
+      background: rgba(0,150,199,.9);
+      display: grid; place-items: center;
+    }
+    .sermon-body { padding: var(--sp-3); }
+    .sermon-series-tag { font-size: .7rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--blue); margin-bottom: 6px; }
+    .sermon-title { font-family: var(--font-head); font-size: 1rem; font-weight: 600; line-height: 1.3; margin-bottom: 6px; }
+    .sermon-meta { font-size: .78rem; color: var(--gray-1); display: flex; gap: 12px; }
+
+    .featured-sermon {
+      background: var(--charcoal);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+    }
+    .featured-sermon-video {
+      position: relative;
+      aspect-ratio: 16/9;
+      cursor: pointer;
+      align-self: stretch;
+    }
+    .featured-sermon-info {
+      padding: var(--sp-5);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      color: #fff;
+    }
+
+    .live-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #e53e3e;
+      color: #fff;
+      padding: 4px 12px;
+      border-radius: 100px;
+      font-size: .72rem;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+    .live-badge .live-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: #fff;
+      animation: pulse 1s infinite;
+    }
+
+    .series-banner {
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      align-items: center;
+      background: #fff;
+      box-shadow: var(--shadow-sm);
+      cursor: pointer;
+      transition: box-shadow .2s;
+      margin-bottom: var(--sp-2);
+    }
+    .series-banner:hover { box-shadow: var(--shadow-md); }
+    .series-banner-img { aspect-ratio: 1/1; min-height: 80px; }
+    .series-banner-info { padding: var(--sp-2) var(--sp-3); }
+    .series-banner-info h4 { font-family: var(--font-head); font-size: .95rem; font-weight: 600; margin-bottom: 4px; }
+    .series-banner-info p { font-size: .78rem; color: var(--gray-1); }
+
+    @media (max-width: 900px) {
+      .sermon-grid { grid-template-columns: repeat(2, 1fr); }
+      .featured-sermon { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 600px) {
+      .sermon-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div id="header-mount"></div>
+
+<!-- PAGE HERO -->
+<section class="page-hero" data-screen-label="Page Hero">
+  <div class="container">
+    <p class="t-eyebrow" style="color:var(--amber)">Messages & Media</p>
+    <h1 class="t-display text-white mt-2">Watch</h1>
+    <p style="color:rgba(255,255,255,.7);max-width:480px;margin:var(--sp-3) auto 0;font-size:1.05rem;line-height:1.65;text-align:center">
+      Every message, every series — available anytime. Watch online or join us live every Sunday at 10 AM.
+    </p>
+  </div>
+</section>
+
+<!-- LIVE BANNER (conditional — show on Sundays) -->
+<div style="background:linear-gradient(90deg,#8B0000,#C53030);padding:var(--sp-2) 0" data-screen-label="Live Banner">
+  <div class="container">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:var(--sp-3);flex-wrap:wrap">
+      <div style="display:flex;align-items:center;gap:var(--sp-2);color:#fff">
+        <span class="live-badge"><span class="live-dot"></span>Live Now</span>
+        <span style="font-size:.9rem;font-weight:500">Sunday Service is streaming live right now</span>
+      </div>
+      <a href="#" class="btn btn-ghost btn-sm">Join the Stream →</a>
+    </div>
+  </div>
+</div>
+
+<!-- FEATURED / LATEST -->
+<section class="section" data-screen-label="Latest Message Featured">
+  <div class="container">
+    <div class="section-label">
+      <p class="t-eyebrow">Latest Message</p>
+    </div>
+    <div class="featured-sermon">
+      <div class="featured-sermon-video" data-featured-sermon>
+        <div class="img-placeholder img-placeholder-dark" style="height:100%;min-height:340px">
+          <svg width="48" height="48" viewBox="0 0 48 48" fill="none"><rect x="4" y="8" width="40" height="28" rx="4" stroke="rgba(255,255,255,.3)" stroke-width="1.5"/><polygon points="19,18 33,22 19,26" fill="rgba(255,255,255,.4)"/></svg>
+          <span>Video embed / YouTube<br>Latest sermon</span>
+        </div>
+        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;">
+          <div class="play-circle" style="width:72px;height:72px;box-shadow:0 4px 24px rgba(0,0,0,.4)">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="white" style="margin-left:4px"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          </div>
+        </div>
+      </div>
+      <div class="featured-sermon-info">
+        <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(0,150,199,.2);border-radius:100px;padding:4px 14px;font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--blue);margin-bottom:var(--sp-2)">Current Series</div>
+        <h2 class="t-h2 text-white">Anchored: Finding Stability in an Uncertain World</h2>
+        <p style="color:rgba(255,255,255,.65);margin-top:var(--sp-2);font-size:.9rem;line-height:1.65">What does it look like to stay grounded when everything around you feels uncertain? In this message, we explore the anchor that never shifts.</p>
+        <div style="display:flex;align-items:center;gap:12px;margin-top:var(--sp-3)">
+          <div class="img-placeholder" style="width:40px;height:40px;border-radius:50%;padding:0;flex-shrink:0">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="rgba(255,255,255,.3)" stroke-width="1.5"/><path d="M4 20c0-4.418 3.582-8 8-8s8 3.582 8 8" stroke="rgba(255,255,255,.3)" stroke-width="1.5" stroke-linecap="round"/></svg>
+          </div>
+          <div>
+            <div style="font-size:.85rem;font-weight:600;color:#fff">Pastor Name</div>
+            <div style="font-size:.75rem;color:rgba(255,255,255,.5)">April 20, 2026</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:var(--sp-2);margin-top:var(--sp-4);flex-wrap:wrap">
+          <a href="#" class="btn btn-primary">Watch Message</a>
+          <a href="#" class="btn btn-ghost btn-sm">Share</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ALL MESSAGES -->
+<section class="section bg-off" data-screen-label="All Messages">
+  <div class="container">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:var(--sp-2);margin-bottom:var(--sp-4)">
+      <div>
+        <p class="t-eyebrow">Library</p>
+        <h2 class="t-h2 mt-1">All Messages</h2>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center">
+        <input type="text" class="form-input" placeholder="Search messages..." style="max-width:220px;padding:10px 16px">
+      </div>
+    </div>
+
+    <div class="series-tabs" id="series-tabs">
+      <div class="series-tab active" onclick="filterSeries(this,'all')">All</div>
+      <div class="series-tab" onclick="filterSeries(this,'anchored')">Anchored</div>
+      <div class="series-tab" onclick="filterSeries(this,'overflow')">Overflow</div>
+      <div class="series-tab" onclick="filterSeries(this,'roots')">Roots</div>
+      <div class="series-tab" onclick="filterSeries(this,'generous')">Generous Life</div>
+    </div>
+
+    <div class="sermon-grid">
+      <!-- Cards -->
+      <div class="sermon-card-full">
+        <div class="sermon-thumb">
+          <div class="img-placeholder img-placeholder-dark" style="height:100%">
+            <svg width="32" height="32" viewBox="0 0 48 48" fill="none"><polygon points="16,13 36,24 16,35" fill="rgba(255,255,255,.3)"/></svg>
+          </div>
+          <div class="play-overlay"><div class="play-circle"><svg width="20" height="20" viewBox="0 0 24 24" fill="white" style="margin-left:3px"><polygon points="5 3 19 12 5 21 5 3"/></svg></div></div>
+        </div>
+        <div class="sermon-body">
+          <div class="sermon-series-tag">Anchored</div>
+          <div class="sermon-title">Peace That Passes Understanding</div>
+          <div class="sermon-meta"><span>Pastor Name</span><span>Apr 13, 2026</span></div>
+        </div>
+      </div>
+      <div class="sermon-card-full">
+        <div class="sermon-thumb">
+          <div class="img-placeholder img-placeholder-dark" style="height:100%">
+            <svg width="32" height="32" viewBox="0 0 48 48" fill="none"><polygon points="16,13 36,24 16,35" fill="rgba(255,255,255,.3)"/></svg>
+          </div>
+          <div class="play-overlay"><div class="play-circle"><svg width="20" height="20" viewBox="0 0 24 24" fill="white" style="margin-left:3px"><polygon points="5 3 19 12 5 21 5 3"/></svg></div></div>
+        </div>
+        <div class="sermon-body">
+          <div class="sermon-series-tag">Anchored</div>
+          <div class="sermon-title">Holding On When You Want to Let Go</div>
+          <div class="sermon-meta"><span>Pastor Name</span><span>Apr 6, 2026</span></div>
+        </div>
+      </div>
+      <div class="sermon-card-full">
+        <div class="sermon-thumb">
+          <div class="img-placeholder img-placeholder-dark" style="height:100%">
+            <svg width="32" height="32" viewBox="0 0 48 48" fill="none"><polygon points="16,13 36,24 16,35" fill="rgba(255,255,255,.3)"/></svg>
+          </div>
+          <div class="play-overlay"><div class="play-circle"><svg width="20" height="20" viewBox="0 0 24 24" fill="white" style="margin-left:3px"><polygon points="5 3 19 12 5 21 5 3"/></svg></div></div>
+        </div>
+        <div class="sermon-body">
+          <div class="sermon-series-tag">Overflow</div>
+          <div class="sermon-title">When Your Cup Runs Over</div>
+          <div class="sermon-meta"><span>Guest Speaker</span><span>Mar 30, 2026</span></div>
+        </div>
+      </div>
+      <div class="sermon-card-full">
+        <div class="sermon-thumb">
+          <div class="img-placeholder img-placeholder-dark" style="height:100%">
+            <svg width="32" height="32" viewBox="0 0 48 48" fill="none"><polygon points="16,13 36,24 16,35" fill="rgba(255,255,255,.3)"/></svg>
+          </div>
+          <div class="play-overlay"><div class="play-circle"><svg width="20" height="20" viewBox="0 0 24 24" fill="white" style="margin-left:3px"><polygon points="5 3 19 12 5 21 5 3"/></svg></div></div>
+        </div>
+        <div class="sermon-body">
+          <div class="sermon-series-tag">Overflow</div>
+          <div class="sermon-title">Living Beyond the Limit</div>
+          <div class="sermon-meta"><span>Pastor Name</span><span>Mar 23, 2026</span></div>
+        </div>
+      </div>
+      <div class="sermon-card-full">
+        <div class="sermon-thumb">
+          <div class="img-placeholder img-placeholder-dark" style="height:100%">
+            <svg width="32" height="32" viewBox="0 0 48 48" fill="none"><polygon points="16,13 36,24 16,35" fill="rgba(255,255,255,.3)"/></svg>
+          </div>
+          <div class="play-overlay"><div class="play-circle"><svg width="20" height="20" viewBox="0 0 24 24" fill="white" style="margin-left:3px"><polygon points="5 3 19 12 5 21 5 3"/></svg></div></div>
+        </div>
+        <div class="sermon-body">
+          <div class="sermon-series-tag">Roots</div>
+          <div class="sermon-title">Going Deeper: The Practice of Prayer</div>
+          <div class="sermon-meta"><span>Pastor Name</span><span>Mar 16, 2026</span></div>
+        </div>
+      </div>
+      <div class="sermon-card-full">
+        <div class="sermon-thumb">
+          <div class="img-placeholder img-placeholder-dark" style="height:100%">
+            <svg width="32" height="32" viewBox="0 0 48 48" fill="none"><polygon points="16,13 36,24 16,35" fill="rgba(255,255,255,.3)"/></svg>
+          </div>
+          <div class="play-overlay"><div class="play-circle"><svg width="20" height="20" viewBox="0 0 24 24" fill="white" style="margin-left:3px"><polygon points="5 3 19 12 5 21 5 3"/></svg></div></div>
+        </div>
+        <div class="sermon-body">
+          <div class="sermon-series-tag">Roots</div>
+          <div class="sermon-title">Why the Bible Still Matters</div>
+          <div class="sermon-meta"><span>Pastor Name</span><span>Mar 9, 2026</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div style="text-align:center;margin-top:var(--sp-5)">
+      <button class="btn btn-secondary">Load More Messages</button>
+    </div>
+  </div>
+</section>
+
+<!-- PODCAST CTA -->
+<section class="section bg-charcoal" data-screen-label="Podcast CTA">
+  <div class="container text-center">
+    <p class="t-eyebrow" style="color:var(--amber)">Listen Anywhere</p>
+    <h2 class="t-h2 text-white mt-2" style="margin-bottom:var(--sp-2)">Subscribe to the Oasis Podcast</h2>
+    <p style="color:rgba(255,255,255,.6);max-width:440px;margin:0 auto var(--sp-4);font-size:.95rem">Take the message with you. Available on Spotify, Apple Podcasts, and wherever you listen.</p>
+    <div style="display:flex;gap:var(--sp-2);justify-content:center;flex-wrap:wrap">
+      <a href="#" class="btn btn-secondary text-white" style="border-color:rgba(255,255,255,.2);color:#fff">Apple Podcasts</a>
+      <a href="#" class="btn btn-secondary text-white" style="border-color:rgba(255,255,255,.2);color:#fff">Spotify</a>
+      <a href="#" class="btn btn-secondary text-white" style="border-color:rgba(255,255,255,.2);color:#fff">YouTube</a>
+    </div>
+  </div>
+</section>
+
+<div id="footer-mount"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="nav.js"></script>
+<script src="site-data.js"></script>
+<script>
+function filterSeries(el, series) {
+  document.querySelectorAll('.series-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+}
+</script>
+</body>
+</html>

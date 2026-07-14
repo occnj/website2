@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Plan Your Visit — Oasis Christian Centre</title>
+  <meta name="description" content="Everything you need to know before your first visit to Oasis Christian Centre in Rahway, NJ.">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .faq-item {
+      border-bottom: 1px solid var(--border);
+      padding: var(--sp-3) 0;
+    }
+    .faq-q {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 1rem;
+      gap: var(--sp-3);
+    }
+    .faq-q svg { flex-shrink: 0; transition: transform .2s; }
+    .faq-item.open .faq-q svg { transform: rotate(180deg); }
+    .faq-a {
+      display: none;
+      padding-top: var(--sp-2);
+      font-size: .95rem;
+      color: var(--gray-1);
+      line-height: 1.7;
+      max-width: 640px;
+    }
+    .faq-item.open .faq-a { display: block; }
+
+    .visit-step {
+      display: flex;
+      gap: var(--sp-3);
+      padding: var(--sp-4);
+      background: #fff;
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
+      align-items: flex-start;
+      transition: transform .2s, box-shadow .2s;
+    }
+    .visit-step:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+    .visit-step-num {
+      width: 48px; height: 48px;
+      border-radius: 50%;
+      background: var(--blue);
+      color: #fff;
+      font-family: var(--font-head);
+      font-size: 1.2rem;
+      font-weight: 700;
+      display: grid; place-items: center;
+      flex-shrink: 0;
+    }
+    .visit-step-content h3 { font-family: var(--font-head); font-size: 1.05rem; font-weight: 600; margin-bottom: 6px; }
+    .visit-step-content p { font-size: .88rem; color: var(--gray-1); line-height: 1.6; }
+
+    .ministry-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--blue-light);
+      border-radius: var(--radius-sm);
+      padding: 10px 16px;
+      font-size: .88rem;
+      font-weight: 600;
+      color: var(--blue-dark);
+      margin: 4px;
+    }
+
+    .map-placeholder {
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      aspect-ratio: 16/7;
+    }
+  </style>
+</head>
+<body>
+<div id="header-mount"></div>
+
+<!-- PAGE HERO -->
+<section class="page-hero" data-screen-label="Page Hero">
+  <div class="container">
+    <p class="t-eyebrow" style="color:var(--amber)">First Time?</p>
+    <h1 class="t-display text-white mt-2">Plan Your Visit</h1>
+    <p style="color:rgba(255,255,255,.7);max-width:520px;margin:var(--sp-3) auto 0;font-size:1.05rem;line-height:1.65;text-align:center">
+      We've thought through the details so you don't have to. Here's everything you need for a great first Sunday.
+    </p>
+    <div style="margin-top:var(--sp-4);display:flex;gap:var(--sp-2);justify-content:center;flex-wrap:wrap">
+      <a href="contact.html" class="btn btn-primary">Have a Question?</a>
+      <a href="#what-to-expect" class="btn btn-ghost">What to Expect ↓</a>
+    </div>
+  </div>
+</section>
+
+<!-- SERVICE INFO BAR -->
+<div style="background:var(--amber);padding:var(--sp-3) 0">
+  <div class="container">
+    <div style="display:flex;align-items:center;justify-content:center;gap:var(--sp-5);flex-wrap:wrap">
+      <div class="info-item">
+        <div class="info-item-text">
+          <strong>Sundays at 10:00 AM</strong>
+          <span>15 Main St, Rahway, NJ 07065</span>
+        </div>
+      </div>
+      <div style="color:rgba(255,255,255,.6)">·</div>
+      <div class="info-item">
+        <div class="info-item-text">
+          <strong>15 Main St, Rahway, NJ 07065</strong>
+        </div>
+      </div>
+      <div style="color:rgba(255,255,255,.6)">·</div>
+      <a href="#" style="color:#fff;font-weight:600;font-size:.9rem;text-decoration:underline;text-underline-offset:3px">Get Directions →</a>
+    </div>
+  </div>
+</div>
+
+<!-- WHAT TO EXPECT -->
+<section class="section" id="what-to-expect" data-screen-label="What to Expect">
+  <div class="container">
+    <div class="split-2" style="gap:var(--sp-7)">
+      <div>
+        <p class="t-eyebrow">Your First Sunday</p>
+        <h2 class="t-h1 mt-2">Here's what happens<br>when you arrive.</h2>
+        <p class="t-body t-muted mt-3">No dress code. No pressure. Just a warm welcome from real people who are genuinely glad you're here.</p>
+        <div style="display:flex;flex-direction:column;gap:var(--sp-2);margin-top:var(--sp-4)">
+          <div class="visit-step">
+            <div class="visit-step-num">1</div>
+            <div class="visit-step-content">
+              <h3>Park & Walk In</h3>
+              <p>Free parking is available in our lot and on the surrounding streets. Look for the Oasis signs — we're easy to spot.</p>
+            </div>
+          </div>
+          <div class="visit-step">
+            <div class="visit-step-num">2</div>
+            <div class="visit-step-content">
+              <h3>Meet Our Welcome Team</h3>
+              <p>Friendly faces at the door will greet you, answer any questions, and point you in the right direction.</p>
+            </div>
+          </div>
+          <div class="visit-step">
+            <div class="visit-step-num">3</div>
+            <div class="visit-step-content">
+              <h3>Check In Your Kids</h3>
+              <p>Our secure, fun check-in system means your children are safe and enjoying an age-appropriate experience while you worship.</p>
+            </div>
+          </div>
+          <div class="visit-step">
+            <div class="visit-step-num">4</div>
+            <div class="visit-step-content">
+              <h3>Find a Seat & Settle In</h3>
+              <p>Grab a coffee and find a seat. Our service runs about 75 minutes and includes worship, prayer, and a practical message.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="img-placeholder" style="aspect-ratio:4/5;border-radius:var(--radius-lg);min-height:480px">
+          <svg width="48" height="48" viewBox="0 0 48 48" fill="none"><rect x="6" y="6" width="36" height="36" rx="4" stroke="#9BABB6" stroke-width="1.5"/><circle cx="18" cy="18" r="6" stroke="#9BABB6" stroke-width="1.5"/><path d="M8 42c0-8 4-14 10-14M22 42c2-6 6-11 14-14" stroke="#9BABB6" stroke-width="1.5" stroke-linecap="round"/></svg>
+          <span>Welcome team / lobby<br>Warm, inviting entrance photo</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SERVICE EXPERIENCE -->
+<section class="section bg-off" data-screen-label="Service Experience">
+  <div class="container">
+    <div class="text-center" style="max-width:600px;margin:0 auto var(--sp-6)">
+      <p class="t-eyebrow">The Experience</p>
+      <h2 class="t-h1 mt-2">What our services are like</h2>
+      <p class="t-body t-muted mt-3">Expect about 75 minutes of worship, community, and a message that's honest, relevant, and grounded in Scripture.</p>
+    </div>
+    <div class="grid-3">
+      <div style="text-align:center;padding:var(--sp-4)">
+        <div style="width:64px;height:64px;border-radius:var(--radius-md);background:var(--blue-light);display:grid;place-items:center;margin:0 auto var(--sp-3)">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="1.5"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+        </div>
+        <h3 class="t-h3">Contemporary Worship</h3>
+        <p class="t-small t-muted mt-2">Live music that's modern, Spirit-led, and deeply worshipful. Come ready to sing — or just to listen.</p>
+      </div>
+      <div style="text-align:center;padding:var(--sp-4)">
+        <div style="width:64px;height:64px;border-radius:var(--radius-md);background:var(--amber-light);display:grid;place-items:center;margin:0 auto var(--sp-3)">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="1.5"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        </div>
+        <h3 class="t-h3">Relevant Teaching</h3>
+        <p class="t-small t-muted mt-2">Messages rooted in the Bible and applied to real life — honest, clear, and full of hope.</p>
+      </div>
+      <div style="text-align:center;padding:var(--sp-4)">
+        <div style="width:64px;height:64px;border-radius:var(--radius-md);background:#EDF7F0;display:grid;place-items:center;margin:0 auto var(--sp-3)">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#4A8C6A" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <h3 class="t-h3">Welcoming Community</h3>
+        <p class="t-small t-muted mt-2">You'll never feel like a stranger for long. Oasis is full of real, warm people who are excited to meet you.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- KIDS -->
+<section class="section" data-screen-label="Kids & Family">
+  <div class="container">
+    <div class="split-2">
+      <div>
+        <div class="img-placeholder" style="aspect-ratio:4/3;border-radius:var(--radius-lg)">
+          <svg width="48" height="48" viewBox="0 0 48 48" fill="none"><circle cx="24" cy="16" r="8" stroke="#9BABB6" stroke-width="1.5"/><path d="M10 40c0-7.732 6.268-14 14-14s14 6.268 14 14" stroke="#9BABB6" stroke-width="1.5" stroke-linecap="round"/><circle cx="12" cy="20" r="4" stroke="#9BABB6" stroke-width="1.5"/><circle cx="36" cy="20" r="4" stroke="#9BABB6" stroke-width="1.5"/></svg>
+          <span>Kids ministry photo<br>Fun, safe, age-appropriate</span>
+        </div>
+      </div>
+      <div>
+        <p class="t-eyebrow">For Families</p>
+        <h2 class="t-h1 mt-2">Your kids will<br>love it here.</h2>
+        <p class="t-body t-muted mt-3">We have safe, fun, age-appropriate environments for every child — from nursery through high school. Parents worship freely knowing their kids are in great hands.</p>
+        <div style="margin-top:var(--sp-4);display:flex;flex-wrap:wrap;gap:4px">
+          <span class="ministry-chip">Nursery</span>
+          <span class="ministry-chip">Pre-K</span>
+          <span class="ministry-chip">Elementary</span>
+          <span class="ministry-chip">Middle School</span>
+          <span class="ministry-chip">High School</span>
+        </div>
+        <p class="t-small t-muted mt-3">All children's workers are background-checked. Secure check-in with name tags ensures your child's safety throughout the service.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="section bg-off" data-screen-label="FAQ">
+  <div class="container-narrow">
+    <p class="t-eyebrow text-center">FAQ</p>
+    <h2 class="t-h2 text-center mt-2" style="margin-bottom:var(--sp-5)">Common Questions</h2>
+    <div id="faq-list">
+      <div class="faq-item open">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          What should I wear?
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="faq-a">Come as you are, seriously. You'll see everything from jeans to business casual. We care far more about you being here than what you're wearing.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          Is there parking?
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="faq-a">Yes — free parking is available in our lot directly adjacent to the building. Street parking is also available on nearby roads. Look for our signage to guide you in.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          How long is the service?
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="faq-a">Our Sunday services typically run about 75 minutes. You can expect worship music, announcements, and a message. We try to end on time so you can plan your day.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          Do I need to give money?
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="faq-a">Not at all. Giving is a personal act of worship for our members. As a first-time guest, please don't feel any pressure — just enjoy the service.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          Is Oasis welcoming to everyone?
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="faq-a">Absolutely. No matter your background, story, or season of life — you are welcome at Oasis. We believe every person matters and everyone belongs.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          What if I have more questions?
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="faq-a">We'd love to hear from you. Reach out via our <a href="contact.html" style="color:var(--blue)">contact page</a> or just show up Sunday and ask one of our welcome team members in person — they're the ones with the big smiles.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MAP + CTA -->
+<section class="section" data-screen-label="Location & CTA">
+  <div class="container">
+    <div class="split-2" style="align-items:start;gap:var(--sp-5)">
+      <div>
+        <p class="t-eyebrow">Find Us</p>
+        <h2 class="t-h2 mt-2">We're in the heart of Rahway</h2>
+        <div style="margin-top:var(--sp-3);display:flex;flex-direction:column;gap:12px">
+          <div style="font-size:.95rem;padding:12px 0;border-bottom:1px solid var(--border)">
+            <strong>15 Main St, Rahway, NJ 07065</strong>
+          </div>
+          <div style="font-size:.95rem;padding:12px 0;border-bottom:1px solid var(--border)">
+            Sundays at 10:00 AM
+          </div>
+          <div style="font-size:.95rem;padding:12px 0;border-bottom:1px solid var(--border)">
+            (732) 555-0100
+          </div>
+          <div style="font-size:.95rem;padding:12px 0">
+            info@oasisnj.net
+          </div>
+        </div>
+        <div style="margin-top:var(--sp-4);display:flex;gap:var(--sp-2);flex-wrap:wrap">
+          <a href="https://maps.google.com/?q=Oasis+Christian+Centre+Rahway+NJ" target="_blank" rel="noopener" class="btn btn-primary">Get Directions</a>
+          <a href="contact.html" class="btn btn-secondary">Contact Us</a>
+        </div>
+      </div>
+      <div class="map-placeholder img-placeholder" style="min-height:300px;border-radius:var(--radius-lg)">
+        <svg width="40" height="40" viewBox="0 0 40 40" fill="none"><rect x="4" y="4" width="32" height="32" rx="4" stroke="#9BABB6" stroke-width="1.5"/><path d="M12 28l5-10 6 6 4-8" stroke="#9BABB6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="28" cy="14" r="3" stroke="#9BABB6" stroke-width="1.5"/></svg>
+        <span>Google Maps embed<br>15 Main St, Rahway, NJ</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div id="footer-mount"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="nav.js"></script>
+<script src="site-data.js"></script>
+<script>
+function toggleFaq(el) {
+  const item = el.closest('.faq-item');
+  const isOpen = item.classList.contains('open');
+  document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+  if (!isOpen) item.classList.add('open');
+}
+</script>
+</body>
+</html>
