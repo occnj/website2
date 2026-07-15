@@ -88,24 +88,19 @@
     apply();
   });
 
-  // ---- Page hero copy ----
-  sb.from('page_blocks').select('block_key, content, visible, pages!inner(slug)')
-    .eq('pages.slug', slug).then(function (res) {
-      (res.data || []).forEach(function (b) {
-        if (b.block_key !== 'hero' || !b.visible) return;
-        var c = b.content || {};
-        var hero = document.querySelector('.page-hero') || document.querySelector('.hero');
-        if (!hero) return;
-        if (c.eyebrow) { var ey = hero.querySelector('.t-eyebrow'); if (ey) ey.textContent = c.eyebrow; }
-        if (c.title) { var h1 = hero.querySelector('h1'); if (h1) h1.textContent = c.title; }
-        if (c.intro) { var ps = hero.querySelectorAll('p:not(.t-eyebrow)'); if (ps.length) ps[ps.length - 1].textContent = c.intro; }
-        if (c.image) {
-          var img = hero.querySelector('img');
-          if (img) img.src = c.image;
-          else hero.style.backgroundImage = 'url(' + c.image + ')';
-        }
-      });
-    });
+  // ---- Inline visual-editor overrides ----
+  // Generic, page-wide source of truth for text, images, links, colours and
+  // added blocks. Every editable element is keyed by its stable DOM path
+  // (see cms-core.js). This replaces the old per-field hero reader.
+  function applyOverrides() {
+    if (!window.OASIS || !window.OASIS.applyEdits) { return setTimeout(applyOverrides, 60); }
+    sb.from('page_overrides').select('edits').eq('slug', slug).single().then(function (res) {
+      if (res.data && res.data.edits) {
+        try { window.OASIS.applyEdits(res.data.edits); } catch (e) { console.warn('overrides', e); }
+      }
+    }).catch(function () {});
+  }
+  applyOverrides();
 
   // ---- Leadership page ----
   if (slug === 'leadership') {

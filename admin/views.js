@@ -147,7 +147,8 @@ pages: () => safe(async function () {
       return '<div class="data-row"><div class="row-thumb-sq" style="display:grid;place-items:center;color:var(--gray-2)">' + ICONS.pages + '</div>' +
         '<div class="row-main"><div class="row-title">' + esc(p.title) + '</div><div class="row-sub">/' + esc(p.slug) + '.html</div></div>' +
         '<span class="tag ' + (p.published ? 'tag-green' : 'tag-gray') + '" style="margin-right:8px">' + (p.published ? 'Published' : 'Hidden') + '</span>' +
-        '<button class="btn btn-sm btn-outline" onclick="editPage(\'' + p.id + '\')">Edit</button></div>';
+        '<a class="btn btn-sm btn-primary" style="margin-right:6px" href="' + esc(p.slug) + '.html?edit=1" target="_blank">Visual edit ↗</a>' +
+        '<button class="btn btn-sm btn-outline" onclick="editPage(\'' + p.id + '\')">Fields</button></div>';
     }).join('') + '</div></div>';
 }),
 
