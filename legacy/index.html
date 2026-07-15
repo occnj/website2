@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Oasis Christian Centre — Rahway, NJ</title>
+  <meta name="description" content="Know God, Find Hope, Make a Difference. Join us Sundays at 10AM in Rahway, NJ.">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    /* Homepage-specific styles */
+    .hero-home {
+      min-height: 100svh;
+      position: relative;
+      display: flex;
+      align-items: flex-end;
+      overflow: hidden;
+    }
+    .hero-bg-placeholder {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, #0d1f2d 0%, #1A2835 40%, #0a3044 100%);
+    }
+    .hero-bg-pattern {
+      position: absolute;
+      inset: 0;
+      background-image:
+        radial-gradient(ellipse at 70% 40%, rgba(0,150,199,.18) 0%, transparent 55%),
+        radial-gradient(ellipse at 20% 80%, rgba(200,136,58,.12) 0%, transparent 45%);
+    }
+    .hero-photo-area {
+      position: absolute;
+      right: 0; top: 0; bottom: 0;
+      width: 52%;
+      overflow: hidden;
+    }
+    .hero-photo-fade {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to right, #1A2835 0%, rgba(26,40,53,.3) 35%, transparent 65%);
+      z-index: 1;
+    }
+    .hero-content-wrap {
+      position: relative;
+      z-index: 3;
+      width: 100%;
+      padding: calc(var(--header-h) + var(--sp-7)) 0 var(--sp-8);
+    }
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(0,150,199,.15);
+      border: 1px solid rgba(0,150,199,.3);
+      border-radius: 100px;
+      padding: 6px 16px 6px 8px;
+      font-size: .75rem;
+      font-weight: 600;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.9);
+      margin-bottom: var(--sp-3);
+    }
+    .hero-eyebrow .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--blue);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%,100% { opacity: 1; transform: scale(1); }
+      50% { opacity: .5; transform: scale(1.3); }
+    }
+    .hero-headline {
+      font-family: var(--font-head);
+      font-size: clamp(2.8rem, 6vw, 5rem);
+      font-weight: 700;
+      line-height: 1.05;
+      letter-spacing: -0.025em;
+      color: #fff;
+      margin-bottom: var(--sp-3);
+      max-width: 620px;
+    }
+    .hero-headline em {
+      font-style: italic;
+      color: var(--blue);
+    }
+    .hero-sub {
+      font-size: 1.1rem;
+      color: rgba(255,255,255,.72);
+      max-width: 480px;
+      margin-bottom: var(--sp-4);
+      line-height: 1.65;
+    }
+    .hero-actions { display: flex; gap: var(--sp-2); flex-wrap: wrap; }
+    .hero-scroll {
+      position: absolute;
+      bottom: var(--sp-4);
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 3;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      color: rgba(255,255,255,.4);
+      font-size: .72rem;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      animation: fadeInUp .6s 1s both;
+    }
+    .scroll-line {
+      width: 1px; height: 40px;
+      background: linear-gradient(to bottom, rgba(255,255,255,.4), transparent);
+      animation: scrollLine 1.5s ease-in-out infinite;
+    }
+    @keyframes scrollLine {
+      0% { transform: scaleY(0); transform-origin: top; }
+      50% { transform: scaleY(1); transform-origin: top; }
+      51% { transform: scaleY(1); transform-origin: bottom; }
+      100% { transform: scaleY(0); transform-origin: bottom; }
+    }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateX(-50%) translateY(12px); }
+      to { opacity: 1; transform: translateX(-50%) translateY(0); }
+    }
+
+    /* Visit teaser */
+    .visit-teaser {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+    }
+    .visit-teaser-img {
+      min-height: 380px;
+    }
+    .visit-teaser-content {
+      background: var(--charcoal);
+      color: #fff;
+      padding: var(--sp-6) var(--sp-5);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    /* Latest message */
+    .message-featured {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: var(--sp-5);
+      align-items: center;
+    }
+    .message-thumbnail {
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      position: relative;
+      aspect-ratio: 16/9;
+      cursor: pointer;
+    }
+    .message-thumbnail:hover .play-btn { transform: translate(-50%,-50%) scale(1.1); }
+    .play-btn {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%,-50%);
+      width: 72px; height: 72px;
+      border-radius: 50%;
+      background: rgba(0,150,199,.9);
+      display: grid; place-items: center;
+      box-shadow: 0 4px 24px rgba(0,0,0,.4);
+      transition: transform .2s;
+      z-index: 2;
+    }
+    .play-btn svg { margin-left: 4px; }
+
+    /* Steps section */
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: var(--sp-3);
+    }
+
+    /* Give section */
+    .give-section {
+      background: linear-gradient(135deg, var(--charcoal) 0%, #0a2233 100%);
+      position: relative;
+      overflow: hidden;
+    }
+    .give-section::before {
+      content: '';
+      position: absolute;
+      top: -40%;
+      right: -10%;
+      width: 600px; height: 600px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(200,136,58,.12) 0%, transparent 70%);
+    }
+
+    /* Circles section */
+    .circles-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--sp-3);
+    }
+    .circle-card {
+      background: #fff;
+      border-radius: var(--radius-md);
+      padding: var(--sp-4);
+      box-shadow: var(--shadow-sm);
+      border-left: 3px solid var(--blue);
+      transition: transform .2s, box-shadow .2s;
+    }
+    .circle-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+    .circle-card h4 { font-family: var(--font-head); font-size: 1rem; font-weight: 600; margin-bottom: 6px; }
+    .circle-card p { font-size: .85rem; color: var(--gray-1); line-height: 1.55; }
+
+    /* Prayer section */
+    .prayer-section {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--sp-5);
+      align-items: start;
+    }
+
+    /* Tweaks panel */
+    .tweaks-panel {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 999;
+      background: #fff;
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--border);
+      padding: var(--sp-3);
+      width: 240px;
+      display: none;
+    }
+    .tweaks-panel.visible { display: block; }
+    .tweaks-panel h4 { font-size: .8rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--gray-1); margin-bottom: var(--sp-2); }
+    .tweak-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; font-size: .85rem; }
+    .tweak-row label { font-weight: 500; }
+    .tweak-swatch { width: 24px; height: 24px; border-radius: 4px; cursor: pointer; border: 2px solid transparent; }
+    .tweak-swatch.active { border-color: var(--charcoal); }
+    .swatches { display: flex; gap: 6px; }
+
+    @media (max-width: 900px) {
+      .visit-teaser { grid-template-columns: 1fr; }
+      .visit-teaser-img { min-height: 240px; }
+      .message-featured { grid-template-columns: 1fr; }
+      .steps-grid { grid-template-columns: repeat(2, 1fr); }
+      .circles-grid { grid-template-columns: 1fr 1fr; }
+      .prayer-section { grid-template-columns: 1fr; }
+      .hero-photo-area { width: 100%; opacity: .25; }
+    }
+    @media (max-width: 600px) {
+      .steps-grid { grid-template-columns: 1fr; }
+      .circles-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV MOUNT -->
+<div id="header-mount"></div>
+
+<!-- ===== HERO ===== -->
+<section class="hero-home" data-screen-label="Hero">
+  <div class="hero-bg-placeholder"></div>
+  <div class="hero-bg-pattern"></div>
+  <div class="hero-photo-area">
+    <div class="hero-photo-fade"></div>
+    <div class="img-placeholder img-placeholder-dark" style="height:100%;font-size:.8rem">
+      <svg width="40" height="40" viewBox="0 0 40 40" fill="none"><rect x="4" y="10" width="32" height="22" rx="2" stroke="rgba(255,255,255,.3)" stroke-width="1.5"/><circle cx="20" cy="21" r="6" stroke="rgba(255,255,255,.3)" stroke-width="1.5"/><circle cx="20" cy="21" r="2" fill="rgba(255,255,255,.3)"/></svg>
+      <span>Hero photography<br>Congregation / worship moment</span>
+    </div>
+  </div>
+  <div class="hero-content-wrap">
+    <div class="container">
+      <div class="hero-eyebrow"><span class="dot"></span>Sundays · 10:00 AM · Rahway, NJ</div>
+      <h1 class="hero-headline">You were made<br>to <em>belong</em> here.</h1>
+      <p class="hero-sub">Oasis Christian Centre is a warm, Spirit-led community where everyone is welcome. Come as you are — no matter where you've been.</p>
+      <div class="hero-actions">
+        <a href="plan-your-visit.html" class="btn btn-primary btn-lg">Plan Your Visit</a>
+        <a href="watch.html" class="btn btn-ghost btn-lg">Watch a Message</a>
+      </div>
+    </div>
+  </div>
+  <div class="hero-scroll">
+    <div class="scroll-line"></div>
+    <span>Scroll</span>
+  </div>
+</section>
+
+<!-- ===== SERVICE INFO STRIP ===== -->
+<div class="info-strip" data-screen-label="Service Info Strip">
+  <div class="container">
+    <div class="info-strip-inner">
+      <div class="info-item">
+        <div class="info-item-text">
+          <strong>Sunday Service</strong>
+          <span>10:00 AM</span>
+        </div>
+      </div>
+      <div style="width:1px;height:36px;background:rgba(255,255,255,.1)"></div>
+      <div class="info-item">
+        <div class="info-item-text">
+          <strong>15 Main St, Rahway, NJ</strong>
+          <span>Get Directions →</span>
+        </div>
+      </div>
+      <div style="width:1px;height:36px;background:rgba(255,255,255,.1)"></div>
+      <div class="info-item">
+        <div class="info-item-text">
+          <strong>Kids & Youth</strong>
+          <span>Nursery through High School</span>
+        </div>
+      </div>
+      <div style="width:1px;height:36px;background:rgba(255,255,255,.1)"></div>
+      <a href="plan-your-visit.html" class="btn btn-ghost btn-sm">First time? →</a>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PLAN YOUR VISIT ===== -->
+<section class="section" data-screen-label="Plan Your Visit Teaser">
+  <div class="container">
+    <div class="visit-teaser">
+      <div class="visit-teaser-img img-placeholder" style="min-height:380px">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none"><rect x="8" y="8" width="32" height="32" rx="4" stroke="#9BABB6" stroke-width="1.5"/><circle cx="24" cy="22" r="7" stroke="#9BABB6" stroke-width="1.5"/><path d="M12 40c0-6.627 5.373-12 12-12s12 5.373 12 12" stroke="#9BABB6" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <span>Welcoming photo<br>Doors / lobby / greeter</span>
+      </div>
+      <div class="visit-teaser-content">
+        <p class="t-eyebrow" style="color:var(--amber)">New Here?</p>
+        <h2 class="t-h1 text-white mt-2">We've been<br>expecting you.</h2>
+        <p style="color:rgba(255,255,255,.7);margin-top:var(--sp-3);line-height:1.7;font-size:1rem">
+          Your first visit matters. Here's everything you need to know — where to park, what to expect, and how we can make you feel right at home.
+        </p>
+        <div style="display:flex;flex-direction:column;gap:14px;margin-top:var(--sp-4)">
+          <div style="display:flex;align-items:center;gap:14px;font-size:.9rem;color:rgba(255,255,255,.8)">
+            <span style="font-family:var(--font-head);font-size:.75rem;font-weight:700;color:var(--blue);min-width:20px">01</span>
+            Arrive any Sunday at 10:00 AM
+          </div>
+          <div style="display:flex;align-items:center;gap:14px;font-size:.9rem;color:rgba(255,255,255,.8)">
+            <span style="font-family:var(--font-head);font-size:.75rem;font-weight:700;color:var(--blue);min-width:20px">02</span>
+            Our team will welcome you at the door
+          </div>
+          <div style="display:flex;align-items:center;gap:14px;font-size:.9rem;color:rgba(255,255,255,.8)">
+            <span style="font-family:var(--font-head);font-size:.75rem;font-weight:700;color:var(--blue);min-width:20px">03</span>
+            Kids check-in is easy and safe
+          </div>
+        </div>
+        <a href="plan-your-visit.html" class="btn btn-primary mt-4" style="align-self:flex-start">Plan Your Visit →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== GET INVOLVED ===== -->
+<section style="background:var(--charcoal);padding:var(--sp-8) 0;position:relative;overflow:hidden;" data-screen-label="Get Involved">
+  <div style="position:absolute;inset:0;background:radial-gradient(ellipse at 80% 50%,rgba(0,150,199,.08) 0%,transparent 60%);pointer-events:none"></div>
+  <div class="container" style="position:relative;z-index:1">
+
+    <!-- Header -->
+    <div class="split-2" style="align-items:end;margin-bottom:var(--sp-6);padding-bottom:var(--sp-5);border-bottom:1px solid rgba(255,255,255,.1)">
+      <div>
+        <p class="t-eyebrow" style="color:var(--amber)">Get Involved</p>
+        <h2 style="font-family:var(--font-head);font-size:clamp(2.2rem,4.5vw,3.5rem);font-weight:700;line-height:1.05;letter-spacing:-.025em;color:#fff;margin-top:var(--sp-2)">See how God can use<br>your gifts to make an<br><em style="font-style:italic;color:var(--blue)">eternal impact.</em></h2>
+      </div>
+      <div style="display:flex;flex-direction:column;justify-content:flex-end">
+        <p style="color:rgba(255,255,255,.55);font-size:1rem;line-height:1.7;max-width:380px;margin-bottom:var(--sp-4)">Whether you're stepping in for the first time or ready to go deeper — there's a place for you here. Every path forward starts with one step.</p>
+        <a href="#" class="btn btn-amber" style="align-self:flex-start">Explore All Ways to Connect</a>
+      </div>
+    </div>
+
+    <!-- Row items -->
+    <div id="involve-rows">
+      <a href="about.html#ministries" class="involve-row" data-label="Teams">
+        <div class="involve-row-inner">
+          <div class="involve-left">
+            <span class="involve-num">01</span>
+            <div>
+              <div class="involve-title">Teams</div>
+              <div class="involve-desc">Use your gifts where they matter most. Worship, media, hospitality, children's ministry and more.</div>
+            </div>
+          </div>
+          </div>
+      </a>
+      <a href="#circles" class="involve-row" data-label="Circles">
+        <div class="involve-row-inner">
+          <div class="involve-left">
+            <span class="involve-num">02</span>
+            <div>
+              <div class="involve-title">Circles</div>
+              <div class="involve-desc">Small groups built around real community, real faith, and real friendship. Find your people.</div>
+            </div>
+          </div>
+          </div>
+      </a>
+      <a href="contact.html" class="involve-row" data-label="Prayer">
+        <div class="involve-row-inner">
+          <div class="involve-left">
+            <span class="involve-num">03</span>
+            <div>
+              <div class="involve-title">Prayer</div>
+              <div class="involve-desc">You don't have to carry it alone. Our care team will personally stand with you in faith.</div>
+            </div>
+          </div>
+          </div>
+      </a>
+      <a href="life-events.html" class="involve-row" data-label="Life Events">
+        <div class="involve-row-inner">
+          <div class="involve-left">
+            <span class="involve-num">04</span>
+            <div>
+              <div class="involve-title">Life Events</div>
+              <div class="involve-desc">Baptism, baby dedications, and life's most sacred moments — we're here for all of them.</div>
+            </div>
+          </div>
+          </div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<style>
+.involve-row {
+  display: block;
+  border-top: 1px solid rgba(255,255,255,.08);
+  color: #fff;
+  text-decoration: none;
+  transition: background .18s;
+}
+.involve-row:last-child { border-bottom: 1px solid rgba(255,255,255,.08); }
+.involve-row:hover { background: rgba(255,255,255,.04); }
+.involve-row:hover .involve-title { color: var(--blue); }
+.involve-row:hover .involve-row-inner {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: var(--sp-4) 0;
+  gap: var(--sp-4);
+}
+.involve-left {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+}
+.involve-num {
+  font-family: var(--font-head);
+  font-size: .85rem;
+  font-weight: 700;
+  color: rgba(255,255,255,.25);
+  letter-spacing: .05em;
+  min-width: 28px;
+  flex-shrink: 0;
+}
+.involve-title {
+  font-family: var(--font-head);
+  font-size: clamp(1.4rem, 3vw, 2rem);
+  font-weight: 700;
+  line-height: 1;
+  transition: color .18s;
+  margin-bottom: 5px;
+}
+.involve-desc {
+  font-size: .85rem;
+  color: rgba(255,255,255,.45);
+  line-height: 1.5;
+  max-width: 480px;
+}
+@media (max-width: 768px) {
+  .involve-title { font-size: 1.3rem; }
+  .involve-desc { display: none; }
+  .involve-left { gap: var(--sp-3); }
+}
+</style>
+
+<!-- ===== LATEST MESSAGE ===== -->
+<section class="section bg-off" data-screen-label="Latest Message">
+  <div class="container">
+    <div class="section-label">
+      <p class="t-eyebrow">Latest Message</p>
+    </div>
+    <div class="message-featured">
+      <div>
+        <div class="message-thumbnail" onclick="window.location='watch.html'">
+          <div class="img-placeholder img-placeholder-dark" style="aspect-ratio:16/9;border-radius:12px">
+            <svg width="48" height="48" viewBox="0 0 48 48" fill="none"><rect x="4" y="8" width="40" height="28" rx="4" stroke="rgba(255,255,255,.3)" stroke-width="1.5"/><polygon points="19,18 33,22 19,26" fill="rgba(255,255,255,.4)"/></svg>
+            <span>Sermon thumbnail / video preview</span>
+          </div>
+          <div class="play-btn">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="white"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;justify-content:center;padding:var(--sp-2) 0">
+        <div class="sermon-series">Current Series</div>
+        <h2 class="t-h2 mt-2">Anchored: Finding Stability in an Uncertain World</h2>
+        <p class="t-body t-muted mt-3">In this message, Pastor explores what it means to hold firm when the ground beneath us shifts — and how our faith becomes the anchor that keeps us steady.</p>
+        <div style="display:flex;align-items:center;gap:var(--sp-3);margin-top:var(--sp-3)">
+          <div style="display:flex;align-items:center;gap:10px">
+            <div class="img-placeholder" style="width:40px;height:40px;border-radius:50%;flex-shrink:0;padding:0">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="#9BABB6" stroke-width="1.5"/><path d="M4 20c0-4.418 3.582-8 8-8s8 3.582 8 8" stroke="#9BABB6" stroke-width="1.5" stroke-linecap="round"/></svg>
+            </div>
+            <div>
+              <div style="font-size:.85rem;font-weight:600">Pastor Name</div>
+              <div class="sermon-date">April 20, 2026</div>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;gap:var(--sp-2);margin-top:var(--sp-4)">
+          <a href="watch.html" class="btn btn-primary">Watch Now</a>
+          <a href="watch.html" class="btn btn-secondary">All Messages</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== EVENTS ===== -->
+<section class="section bg-off" data-screen-label="Events">
+  <div class="container">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--sp-5);flex-wrap:wrap;gap:var(--sp-2)">
+      <div>
+        <p class="t-eyebrow">What's Happening</p>
+        <h2 class="t-h2 mt-2">Upcoming Events</h2>
+      </div>
+      <a href="#" class="btn btn-secondary btn-sm">View All Events</a>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:var(--sp-2)">
+      <div class="event-card-row">
+        <div class="event-date-block"><div class="month">Apr</div><div class="day">27</div></div>
+        <div class="event-info">
+          <h4>Baptism Sunday</h4>
+          <p>10:00 AM · Main Sanctuary · Open to all</p>
+        </div>
+        <a href="#" class="btn btn-secondary btn-sm" style="margin-left:auto;white-space:nowrap">Details</a>
+      </div>
+      <div class="event-card-row">
+        <div class="event-date-block"><div class="month">May</div><div class="day">03</div></div>
+        <div class="event-info">
+          <h4>WOW Women's Brunch</h4>
+          <p>11:00 AM · Fellowship Hall · Women's Ministry</p>
+        </div>
+        <a href="#" class="btn btn-secondary btn-sm" style="margin-left:auto;white-space:nowrap">Details</a>
+      </div>
+      <div class="event-card-row">
+        <div class="event-date-block"><div class="month">May</div><div class="day">10</div></div>
+        <div class="event-info">
+          <h4>Youth Night — The Collective</h4>
+          <p>6:00 PM · Youth Wing · Young Adults & High School</p>
+        </div>
+        <a href="#" class="btn btn-secondary btn-sm" style="margin-left:auto;white-space:nowrap">Details</a>
+      </div>
+      <div class="event-card-row">
+        <div class="event-date-block"><div class="month">May</div><div class="day">17</div></div>
+        <div class="event-info">
+          <h4>Serve Day — Community Outreach</h4>
+          <p>9:00 AM · Rahway Community · All Welcome</p>
+        </div>
+        <a href="#" class="btn btn-secondary btn-sm" style="margin-left:auto;white-space:nowrap">Details</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== CIRCLES ===== -->
+<section class="section" id="circles" data-screen-label="Circles">
+  <div class="container">
+    <div class="section-label">
+      <p class="t-eyebrow">Community</p>
+    </div>
+    <div class="split-2 split-wide">
+      <div>
+        <h2 class="t-h1">Life is better<br>in a Circle.</h2>
+        <p class="t-body t-muted mt-3">Circles are Oasis's small groups — real, honest, intentional communities where you can grow in faith and find genuine friendship.</p>
+        <a href="contact.html" class="btn btn-primary mt-4">Find Your Circle</a>
+      </div>
+      <div class="circles-grid">
+        <div class="circle-card">
+          <h4>WOW Women</h4>
+          <p>A sisterhood of women growing in faith, prayer, and purpose together.</p>
+        </div>
+        <div class="circle-card" style="border-left-color:var(--amber)">
+          <h4>FMO Men</h4>
+          <p>Men doing life together — anchored, accountable, and moving forward.</p>
+        </div>
+        <div class="circle-card" style="border-left-color:#8B6BAE">
+          <h4>The Journey</h4>
+          <p>For those navigating a new season — recovery, growth, or fresh starts.</p>
+        </div>
+        <div class="circle-card" style="border-left-color:#4A8C6A">
+          <h4>The Collective</h4>
+          <p>Young adults building community, faith, and a vision for their lives.</p>
+        </div>
+        <div class="circle-card" style="border-left-color:#C45E4A">
+          <h4>Couples & Families</h4>
+          <p>Building strong homes and deeper faith together, season by season.</p>
+        </div>
+        <div class="circle-card" style="border-left-color:var(--blue)">
+          <h4>Mixed Groups</h4>
+          <p>Open circles for anyone ready to connect with others in the community.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== GIVE ===== -->
+<section class="section give-section" data-screen-label="Giving">
+  <div class="container" style="position:relative;z-index:1">
+    <div class="split-2">
+      <div>
+        <p class="t-eyebrow" style="color:var(--amber)">Generosity</p>
+        <h2 class="t-h1 text-white mt-2">Your generosity changes lives.</h2>
+        <p style="color:rgba(255,255,255,.7);margin-top:var(--sp-3);font-size:1rem;line-height:1.7">
+          Every gift supports our local community, our global missions, and the work of making Oasis a home for everyone who walks through our doors.
+        </p>
+        <div style="display:flex;gap:var(--sp-2);margin-top:var(--sp-4);flex-wrap:wrap">
+          <a href="#" class="btn btn-amber btn-lg">Give Online</a>
+          <a href="#" class="btn btn-ghost btn-sm" style="align-self:center">Learn About Giving →</a>
+        </div>
+      </div>
+      <div class="grid-2-sm">
+        <div style="background:rgba(255,255,255,.06);border-radius:var(--radius-md);padding:var(--sp-4);border:1px solid rgba(255,255,255,.1)">
+          <div style="font-family:var(--font-head);font-size:2rem;font-weight:700;color:var(--amber)">Local</div>
+          <p style="font-size:.85rem;color:rgba(255,255,255,.6);margin-top:8px;line-height:1.5">Supporting our Rahway neighbors through outreach, care, and community</p>
+        </div>
+        <div style="background:rgba(255,255,255,.06);border-radius:var(--radius-md);padding:var(--sp-4);border:1px solid rgba(255,255,255,.1)">
+          <div style="font-family:var(--font-head);font-size:2rem;font-weight:700;color:var(--blue)">Global</div>
+          <p style="font-size:.85rem;color:rgba(255,255,255,.6);margin-top:8px;line-height:1.5">Funding missions and ministry partners around the world</p>
+        </div>
+        <div style="background:rgba(255,255,255,.06);border-radius:var(--radius-md);padding:var(--sp-4);border:1px solid rgba(255,255,255,.1)">
+          <div style="font-family:var(--font-head);font-size:2rem;font-weight:700;color:#fff">Family</div>
+          <p style="font-size:.85rem;color:rgba(255,255,255,.6);margin-top:8px;line-height:1.5">Building programs and spaces where every age group can thrive</p>
+        </div>
+        <div style="background:rgba(0,150,199,.12);border-radius:var(--radius-md);padding:var(--sp-4);border:1px solid rgba(0,150,199,.25);display:flex;align-items:center;justify-content:center">
+          <a href="#" class="btn btn-amber" style="width:100%;justify-content:center">Give Now →</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== PRAYER ===== -->
+<section class="section bg-blue-light" data-screen-label="Prayer">
+  <div class="container">
+    <div class="prayer-section">
+      <div>
+        <p class="t-eyebrow">Care & Prayer</p>
+        <h2 class="t-h1 mt-2">We're standing<br>with you.</h2>
+        <p class="t-body t-muted mt-3">Whatever you're walking through — our prayer team is here. Submit a request and someone will personally pray over your situation.</p>
+        <div style="margin-top:var(--sp-4);display:flex;flex-direction:column;gap:0">
+          <div style="display:flex;align-items:center;gap:16px;font-size:.95rem;padding:14px 0;border-bottom:1px solid rgba(26,40,53,.08)">
+            <span style="width:2px;height:20px;background:var(--blue);flex-shrink:0;border-radius:2px"></span>
+            Confidential and personal
+          </div>
+          <div style="display:flex;align-items:center;gap:16px;font-size:.95rem;padding:14px 0;border-bottom:1px solid rgba(26,40,53,.08)">
+            <span style="width:2px;height:20px;background:var(--blue);flex-shrink:0;border-radius:2px"></span>
+            Dedicated prayer team responds
+          </div>
+          <div style="display:flex;align-items:center;gap:16px;font-size:.95rem;padding:14px 0">
+            <span style="width:2px;height:20px;background:var(--blue);flex-shrink:0;border-radius:2px"></span>
+            No request is too big or too small
+          </div>
+        </div>
+        <a href="#" class="btn btn-primary mt-4">Submit a Prayer Request</a>
+      </div>
+      <div style="background:#fff;border-radius:var(--radius-lg);padding:var(--sp-5);box-shadow:var(--shadow-md)">
+        <h3 class="t-h3" style="margin-bottom:var(--sp-3)">Send Us Your Request</h3>
+        <div class="form-group">
+          <label class="form-label">Your Name</label>
+          <input type="text" class="form-input" placeholder="First name is fine">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email (optional)</label>
+          <input type="email" class="form-input" placeholder="For a follow-up from our team">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Your Prayer Request</label>
+          <textarea class="form-textarea" placeholder="Share what's on your heart..." style="min-height:100px"></textarea>
+        </div>
+        <label style="display:flex;align-items:flex-start;gap:10px;font-size:.82rem;color:var(--gray-1);cursor:pointer;margin-bottom:var(--sp-3)">
+          <input type="checkbox" style="margin-top:3px;accent-color:var(--blue)">
+          Keep my request confidential (only seen by the prayer team)
+        </label>
+        <button class="btn btn-primary full-w" style="justify-content:center">Submit Request</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FOOTER MOUNT ===== -->
+<div id="footer-mount"></div>
+
+<!-- ===== TWEAKS PANEL ===== -->
+<div class="tweaks-panel" id="tweaks-panel">
+  <h4>Tweaks</h4>
+  <div class="tweak-row">
+    <label>Accent Color</label>
+    <div class="swatches">
+      <div class="tweak-swatch active" style="background:#0096C7" data-color="#0096C7" title="Oasis Blue" onclick="setAccent(this)"></div>
+      <div class="tweak-swatch" style="background:#C8883A" data-color="#C8883A" title="Warm Amber" onclick="setAccent(this)"></div>
+      <div class="tweak-swatch" style="background:#4A8C6A" data-color="#4A8C6A" title="Sage Green" onclick="setAccent(this)"></div>
+      <div class="tweak-swatch" style="background:#8B6BAE" data-color="#8B6BAE" title="Warm Violet" onclick="setAccent(this)"></div>
+    </div>
+  </div>
+  <div class="tweak-row">
+    <label>Page Style</label>
+    <div style="display:flex;gap:6px">
+      <button onclick="setStyle('warm')" class="btn btn-secondary btn-sm" id="tw-warm" style="padding:6px 10px;font-size:.72rem">Warm</button>
+      <button onclick="setStyle('cool')" class="btn btn-secondary btn-sm" id="tw-cool" style="padding:6px 10px;font-size:.72rem">Cool</button>
+    </div>
+  </div>
+  <div class="tweak-row">
+    <label>Hero Text</label>
+    <div style="display:flex;gap:6px">
+      <button onclick="setHero(0)" class="btn btn-secondary btn-sm" style="padding:6px 10px;font-size:.72rem">A</button>
+      <button onclick="setHero(1)" class="btn btn-secondary btn-sm" style="padding:6px 10px;font-size:.72rem">B</button>
+      <button onclick="setHero(2)" class="btn btn-secondary btn-sm" style="padding:6px 10px;font-size:.72rem">C</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="nav.js"></script>
+<script src="cms-core.js"></script>
+<script src="site-data.js"></script>
+<script src="editor.js" defer></script>
+<script>
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "accentColor": "#0096C7",
+  "pageStyle": "warm",
+  "heroVariant": 0
+}/*EDITMODE-END*/;
+
+// Tweaks
+window.addEventListener('message', e => {
+  if (e.data?.type === '__activate_edit_mode') document.getElementById('tweaks-panel').classList.add('visible');
+  if (e.data?.type === '__deactivate_edit_mode') document.getElementById('tweaks-panel').classList.remove('visible');
+});
+window.parent.postMessage({type:'__edit_mode_available'},'*');
+
+const heroLines = [
+  ['You were made', 'to <em>belong</em> here.'],
+  ['Find your people.', '<em>Find your purpose.</em>'],
+  ['A place called', '<em>home.</em>']
+];
+
+function setAccent(el) {
+  document.querySelectorAll('.tweak-swatch').forEach(s => s.classList.remove('active'));
+  el.classList.add('active');
+  document.documentElement.style.setProperty('--blue', el.dataset.color);
+  window.parent.postMessage({type:'__edit_mode_set_keys', edits:{accentColor: el.dataset.color}}, '*');
+}
+function setStyle(s) {
+  if (s === 'warm') {
+    document.documentElement.style.setProperty('--white','#F9F6F1');
+    document.documentElement.style.setProperty('--off-white','#F2EDE6');
+  } else {
+    document.documentElement.style.setProperty('--white','#F5F8FB');
+    document.documentElement.style.setProperty('--off-white','#EEF3F7');
+  }
+  window.parent.postMessage({type:'__edit_mode_set_keys', edits:{pageStyle:s}}, '*');
+}
+function setHero(i) {
+  const h = document.querySelector('.hero-headline');
+  if (h) h.innerHTML = heroLines[i][0] + '<br>' + heroLines[i][1];
+  window.parent.postMessage({type:'__edit_mode_set_keys', edits:{heroVariant:i}}, '*');
+}
+
+// Apply saved defaults
+if (TWEAK_DEFAULTS.pageStyle) setStyle(TWEAK_DEFAULTS.pageStyle);
+if (TWEAK_DEFAULTS.heroVariant !== undefined) setHero(TWEAK_DEFAULTS.heroVariant);
+if (TWEAK_DEFAULTS.accentColor !== '#0096C7') {
+  document.documentElement.style.setProperty('--blue', TWEAK_DEFAULTS.accentColor);
+}
+
+// Circles layout fix on mobile
+function checkMobile() {
+  const cg = document.querySelector('.circles-grid');
+  if (cg) cg.style.gridTemplateColumns = window.innerWidth < 700 ? '1fr' : '';
+}
+window.addEventListener('resize', checkMobile);
+</script>
+</body>
+</html>

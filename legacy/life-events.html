@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Life Events — Oasis Christian Centre</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .life-event-card {
+      background: #fff;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      transition: box-shadow .2s;
+      margin-bottom: var(--sp-5);
+    }
+    .life-event-card:nth-child(even) { direction: rtl; }
+    .life-event-card:nth-child(even) > * { direction: ltr; }
+    .life-event-card:hover { box-shadow: var(--shadow-md); }
+    .life-event-img { min-height: 360px; }
+    .life-event-body {
+      padding: var(--sp-6) var(--sp-5);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .life-event-body h2 { font-family: var(--font-head); font-size: clamp(1.5rem,2.5vw,2rem); font-weight:700; margin-bottom: var(--sp-2); }
+    .life-event-body p { font-size: .95rem; color: var(--gray-1); line-height: 1.75; margin-bottom: var(--sp-3); }
+
+    .req-list { display: flex; flex-direction: column; gap: 0; margin-top: var(--sp-3); margin-bottom: var(--sp-4); }
+    .req-item { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: .88rem; color: var(--charcoal); }
+    .req-item:last-child { border-bottom: none; }
+    .req-num { font-family: var(--font-head); font-size: .75rem; font-weight: 700; color: var(--blue); min-width: 20px; }
+
+    .faq-item { border-bottom: 1px solid var(--border); padding: var(--sp-3) 0; }
+    .faq-q { display:flex; justify-content:space-between; align-items:center; cursor:pointer; font-weight:600; font-size:1rem; gap:var(--sp-3); }
+    .faq-q svg { flex-shrink:0; transition: transform .2s; }
+    .faq-item.open .faq-q svg { transform: rotate(180deg); }
+    .faq-a { display:none; padding-top:var(--sp-2); font-size:.95rem; color:var(--gray-1); line-height:1.7; }
+    .faq-item.open .faq-a { display:block; }
+
+    @media (max-width: 800px) {
+      .life-event-card { grid-template-columns: 1fr; }
+      .life-event-card:nth-child(even) { direction: ltr; }
+      .life-event-img { min-height: 240px; }
+      .life-event-body { padding: var(--sp-4) var(--sp-4); }
+    }
+  </style>
+</head>
+<body>
+<div id="header-mount"></div>
+
+<section class="page-hero" data-screen-label="Page Hero">
+  <div class="container">
+    <p class="t-eyebrow" style="color:var(--amber)">Next Steps</p>
+    <h1 class="t-display text-white mt-2">Life Events</h1>
+    <p style="color:rgba(255,255,255,.7);max-width:520px;margin:var(--sp-3) auto 0;font-size:1.05rem;line-height:1.65;text-align:center">
+      Some moments in life deserve to be marked. We're honored to stand with you for the ones that matter most.
+    </p>
+  </div>
+</section>
+
+<!-- INTRO -->
+<section class="section" data-screen-label="Intro">
+  <div class="container-narrow text-center">
+    <p class="t-eyebrow">Sacred Milestones</p>
+    <h2 class="t-h1 mt-2">We're here for every chapter.</h2>
+    <p class="t-body t-muted mt-3">Whether you're celebrating new life, declaring your faith, or bringing your family before God — Oasis is a place where these moments are treated with the care and reverence they deserve.</p>
+  </div>
+</section>
+
+<!-- BAPTISM -->
+<section class="section bg-off" data-screen-label="Baptism">
+  <div class="container">
+    <div class="life-event-card">
+      <div class="life-event-img img-placeholder">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none"><path d="M8 36c2-8 8-14 16-14s14 6 16 14" stroke="#9BABB6" stroke-width="1.5" stroke-linecap="round"/><circle cx="24" cy="14" r="8" stroke="#9BABB6" stroke-width="1.5"/><path d="M24 28v8" stroke="#9BABB6" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <span>Baptism photo<br>Pool / baptism moment</span>
+      </div>
+      <div class="life-event-body">
+        <p class="t-eyebrow">Water Baptism</p>
+        <h2 class="mt-2">Take the step of baptism.</h2>
+        <p>Baptism is a public declaration of your faith in Jesus Christ — a powerful, personal moment that says to the world: I'm all in. We hold Baptism Sundays throughout the year and would love for you to be part of one.</p>
+        <div class="req-list">
+          <div class="req-item"><span class="req-num">01</span> You've made a personal decision to follow Jesus</div>
+          <div class="req-item"><span class="req-num">02</span> Attend a short baptism info meeting (1 hour)</div>
+          <div class="req-item"><span class="req-num">03</span> Register below — we handle the rest</div>
+        </div>
+        <a href="#baptism-form" class="btn btn-primary" style="align-self:flex-start">Register for Baptism</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BABY DEDICATION -->
+<section class="section" data-screen-label="Baby Dedication">
+  <div class="container">
+    <div class="life-event-card">
+      <div class="life-event-img img-placeholder">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none"><circle cx="24" cy="14" r="8" stroke="#9BABB6" stroke-width="1.5"/><path d="M10 40c0-7.732 6.268-14 14-14s14 6.268 14 14" stroke="#9BABB6" stroke-width="1.5" stroke-linecap="round"/><circle cx="36" cy="20" r="5" stroke="#9BABB6" stroke-width="1.5"/></svg>
+        <span>Baby dedication photo<br>Pastor, parents, baby</span>
+      </div>
+      <div class="life-event-body">
+        <p class="t-eyebrow">Baby Dedication</p>
+        <h2 class="mt-2">Dedicate your child to God.</h2>
+        <p>A baby dedication is a beautiful moment where parents publicly commit to raise their child in faith, and the church family pledges to walk alongside them. It's not a salvation ceremony — it's a covenant of intention before God and community.</p>
+        <div class="req-list">
+          <div class="req-item"><span class="req-num">01</span> At least one parent or guardian is a follower of Jesus</div>
+          <div class="req-item"><span class="req-num">02</span> Brief meeting with a pastor prior to the service</div>
+          <div class="req-item"><span class="req-num">03</span> Takes place during a regular Sunday service</div>
+        </div>
+        <a href="#dedication-form" class="btn btn-primary" style="align-self:flex-start">Request a Dedication</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MARRIAGE -->
+<section class="section bg-off" data-screen-label="Marriage">
+  <div class="container">
+    <div class="life-event-card">
+      <div class="life-event-img img-placeholder">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none"><path d="M24 40s-18-10-18-22a10 10 0 0 1 18-6 10 10 0 0 1 18 6c0 12-18 22-18 22z" stroke="#9BABB6" stroke-width="1.5" stroke-linejoin="round"/></svg>
+        <span>Wedding / couple photo</span>
+      </div>
+      <div class="life-event-body">
+        <p class="t-eyebrow">Marriage</p>
+        <h2 class="mt-2">Get married at Oasis.</h2>
+        <p>We believe marriage is a sacred covenant, and we'd be honored to be part of yours. Our pastoral team offers pre-marital counseling and can officiate wedding ceremonies for couples connected to Oasis.</p>
+        <div class="req-list">
+          <div class="req-item"><span class="req-num">01</span> At least one partner is an active Oasis member</div>
+          <div class="req-item"><span class="req-num">02</span> Minimum 6 sessions of pre-marital counseling</div>
+          <div class="req-item"><span class="req-num">03</span> Contact us at least 6 months in advance</div>
+        </div>
+        <a href="contact.html" class="btn btn-primary" style="align-self:flex-start">Get in Touch</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MEMORIAL -->
+<section class="section" data-screen-label="Memorial">
+  <div class="container">
+    <div class="life-event-card">
+      <div class="life-event-img img-placeholder">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none"><path d="M24 6v36M12 18h24" stroke="#9BABB6" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <span>Memorial / pastoral care photo</span>
+      </div>
+      <div class="life-event-body">
+        <p class="t-eyebrow">Memorial Services</p>
+        <h2 class="mt-2">Grief deserves a safe place.</h2>
+        <p>When you've lost someone dear, Oasis is here. Our pastoral team is available to walk with you through grief, officiate memorial services, and surround your family with care and prayer during the hardest of seasons.</p>
+        <p style="font-style:italic;color:var(--charcoal);font-family:var(--font-head);font-size:1rem">"He heals the brokenhearted and binds up their wounds." — Psalm 147:3</p>
+        <a href="contact.html" class="btn btn-primary mt-3" style="align-self:flex-start">Contact Our Care Team</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FORMS -->
+<section class="section bg-blue-light" id="baptism-form" data-screen-label="Forms">
+  <div class="container">
+    <div class="split-2" style="align-items:start">
+
+      <div style="background:#fff;border-radius:var(--radius-lg);padding:var(--sp-5);box-shadow:var(--shadow-md)" id="baptism-form">
+        <p class="t-eyebrow" style="color:var(--blue)">Water Baptism</p>
+        <h3 class="t-h2 mt-2" style="margin-bottom:var(--sp-4)">Register for Baptism</h3>
+        <div class="form-group"><label class="form-label">Full Name *</label><input type="text" class="form-input" placeholder="Your full name"></div>
+        <div class="form-group"><label class="form-label">Email *</label><input type="email" class="form-input" placeholder="your@email.com"></div>
+        <div class="form-group"><label class="form-label">Phone</label><input type="tel" class="form-input" placeholder="(732) 555-0000"></div>
+        <div class="form-group"><label class="form-label">Preferred Baptism Date</label>
+          <select class="form-input">
+            <option>April 27, 2026</option>
+            <option>June 28, 2026</option>
+            <option>September 2026</option>
+            <option>Open to any date</option>
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">Share your story (optional)</label><textarea class="form-textarea" placeholder="What led you to this decision?" style="min-height:80px"></textarea></div>
+        <button class="btn btn-primary full-w" style="justify-content:center">Submit Registration</button>
+      </div>
+
+      <div style="background:#fff;border-radius:var(--radius-lg);padding:var(--sp-5);box-shadow:var(--shadow-md)" id="dedication-form">
+        <p class="t-eyebrow" style="color:var(--amber)">Baby Dedication</p>
+        <h3 class="t-h2 mt-2" style="margin-bottom:var(--sp-4)">Request a Dedication</h3>
+        <div class="form-row-2">
+          <div class="form-group"><label class="form-label">Parent / Guardian Name *</label><input type="text" class="form-input" placeholder="Your name"></div>
+          <div class="form-group"><label class="form-label">Partner's Name</label><input type="text" class="form-input" placeholder="Partner's name"></div>
+        </div>
+        <div class="form-group"><label class="form-label">Child's Name *</label><input type="text" class="form-input" placeholder="Child's full name"></div>
+        <div class="form-group"><label class="form-label">Child's Date of Birth</label><input type="date" class="form-input"></div>
+        <div class="form-group"><label class="form-label">Email *</label><input type="email" class="form-input" placeholder="your@email.com"></div>
+        <div class="form-group"><label class="form-label">Phone</label><input type="tel" class="form-input" placeholder="(732) 555-0000"></div>
+        <div class="form-group"><label class="form-label">Preferred Sunday</label><input type="text" class="form-input" placeholder="e.g. May or June 2026"></div>
+        <button class="btn btn-amber full-w" style="justify-content:center">Submit Request</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="section bg-off" data-screen-label="FAQ">
+  <div class="container-narrow">
+    <h2 class="t-h2 text-center" style="margin-bottom:var(--sp-5)">Common Questions</h2>
+    <div class="faq-item open">
+      <div class="faq-q" onclick="toggleFaq(this)">Do I need to be a member to have a life event at Oasis?<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div>
+      <div class="faq-a">For baptism, no — anyone who has made a personal faith decision is welcome. For weddings and baby dedications, at least one person should have an established connection to Oasis. Contact us if you're unsure.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">Is baptism required to be a member?<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div>
+      <div class="faq-a">We encourage baptism as an important step of faith, but it's not a requirement for belonging to the Oasis community. We believe it's a personal decision made in your own time.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">What happens at the baptism info meeting?<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div>
+      <div class="faq-a">It's a relaxed, one-hour conversation with a pastor to talk through what baptism means, what to expect on the day, and answer any questions you have. No pressure, just preparation.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">Can family and friends come to watch?<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div>
+      <div class="faq-a">Absolutely — and we encourage it. Baptisms, dedications, and milestone moments are always better shared. Invite your people and celebrate together.</div>
+    </div>
+  </div>
+</section>
+
+<div id="footer-mount"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="nav.js"></script>
+<script src="cms-core.js"></script>
+<script src="site-data.js"></script>
+<script src="editor.js" defer></script>
+<script>
+function toggleFaq(el) {
+  const item = el.closest('.faq-item');
+  const isOpen = item.classList.contains('open');
+  document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+  if (!isOpen) item.classList.add('open');
+}
+</script>
+</body>
+</html>

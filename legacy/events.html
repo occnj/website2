@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Events — Oasis Christian Centre</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .events-layout {
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      gap: var(--sp-6);
+      align-items: start;
+    }
+    .filter-bar {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: var(--sp-5);
+    }
+    .filter-chip {
+      padding: 7px 18px;
+      border-radius: 100px;
+      font-size: .82rem;
+      font-weight: 600;
+      border: 1.5px solid var(--border);
+      color: var(--gray-1);
+      cursor: pointer;
+      transition: all .15s;
+      background: #fff;
+    }
+    .filter-chip.active, .filter-chip:hover {
+      background: var(--charcoal);
+      color: #fff;
+      border-color: var(--charcoal);
+    }
+
+    .event-full {
+      background: #fff;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+      display: grid;
+      grid-template-columns: 100px 1fr auto;
+      align-items: stretch;
+      transition: box-shadow .2s, transform .2s;
+      margin-bottom: var(--sp-2);
+    }
+    .event-full:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+    .event-date-col {
+      background: var(--charcoal);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: var(--sp-3) var(--sp-2);
+      text-align: center;
+    }
+    .event-date-col .month { font-size: .65rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--blue); }
+    .event-date-col .day { font-family: var(--font-head); font-size: 2rem; font-weight: 700; color: #fff; line-height: 1; }
+    .event-date-col .dow { font-size: .65rem; color: rgba(255,255,255,.4); text-transform: uppercase; letter-spacing: .1em; margin-top: 2px; }
+    .event-body { padding: var(--sp-3) var(--sp-4); display: flex; flex-direction: column; justify-content: center; }
+    .event-cat { font-size: .7rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--amber); margin-bottom: 4px; }
+    .event-title { font-family: var(--font-head); font-size: 1.05rem; font-weight: 700; color: var(--charcoal); margin-bottom: 4px; }
+    .event-meta-row { display: flex; gap: 16px; font-size: .8rem; color: var(--gray-1); flex-wrap: wrap; }
+    .event-desc { font-size: .85rem; color: var(--gray-1); margin-top: 6px; line-height: 1.55; }
+    .event-action { display: flex; align-items: center; padding: var(--sp-3); }
+
+    .featured-event {
+      background: var(--charcoal);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      margin-bottom: var(--sp-5);
+    }
+    .featured-event-img { aspect-ratio: 21/9; }
+    .featured-event-body { padding: var(--sp-5); display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-4); align-items: center; }
+
+    .sidebar-widget {
+      background: #fff;
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
+      padding: var(--sp-4);
+      margin-bottom: var(--sp-3);
+    }
+    .sidebar-widget h4 { font-size: .75rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--gray-1); margin-bottom: var(--sp-2); }
+
+    .mini-cal {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: .82rem;
+    }
+    .mini-cal th { text-align: center; padding: 4px; font-size: .68rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--gray-1); }
+    .mini-cal td { text-align: center; padding: 6px 4px; border-radius: 6px; cursor: pointer; color: var(--charcoal); }
+    .mini-cal td:hover { background: var(--blue-light); color: var(--blue); }
+    .mini-cal td.has-event { font-weight: 700; color: var(--blue); }
+    .mini-cal td.today { background: var(--blue); color: #fff; border-radius: 50%; }
+    .mini-cal td.other-month { color: var(--gray-1); opacity: .4; }
+    .cal-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--sp-2); }
+    .cal-nav button { background: none; border: none; cursor: pointer; padding: 4px 8px; border-radius: 4px; font-size: 1rem; color: var(--gray-1); }
+    .cal-nav button:hover { background: var(--off-white); }
+    .cal-month { font-size: .85rem; font-weight: 700; color: var(--charcoal); }
+
+    @media (max-width: 900px) {
+      .events-layout { grid-template-columns: 1fr; }
+      .featured-event-body { grid-template-columns: 1fr; }
+      .event-full { grid-template-columns: 80px 1fr; }
+      .event-action { display: none; }
+    }
+    @media (max-width: 600px) {
+      .event-full { grid-template-columns: 70px 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div id="header-mount"></div>
+
+<section class="page-hero" data-screen-label="Page Hero">
+  <div class="container">
+    <p class="t-eyebrow" style="color:var(--amber)">What's Happening</p>
+    <h1 class="t-display text-white mt-2">Events</h1>
+    <p style="color:rgba(255,255,255,.7);max-width:480px;margin:var(--sp-3) auto 0;font-size:1.05rem;line-height:1.65;text-align:center">
+      From Sunday services to community gatherings — there's always something happening at Oasis.
+    </p>
+  </div>
+</section>
+
+<section class="section" data-screen-label="Events List">
+  <div class="container">
+
+    <!-- Featured Event -->
+    <div class="featured-event">
+      <div class="featured-event-img img-placeholder img-placeholder-dark">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none"><rect x="6" y="8" width="36" height="32" rx="4" stroke="rgba(255,255,255,.3)" stroke-width="1.5"/><rect x="6" y="8" width="36" height="10" rx="4" fill="rgba(255,255,255,.07)"/><path d="M16 4v8M32 4v8" stroke="rgba(255,255,255,.3)" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <span>Featured event banner photo</span>
+      </div>
+      <div class="featured-event-body">
+        <div>
+          <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(200,136,58,.2);border-radius:100px;padding:4px 14px;font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--amber);margin-bottom:var(--sp-2)">Featured Event</div>
+          <h2 style="font-family:var(--font-head);font-size:clamp(1.4rem,3vw,2rem);font-weight:700;color:#fff;line-height:1.1;margin-bottom:var(--sp-2)">Baptism Sunday</h2>
+          <p style="color:rgba(255,255,255,.6);font-size:.9rem;line-height:1.65">An unforgettable morning of celebration as members of our community take the step of baptism. Open to all — bring your family.</p>
+          <div style="display:flex;gap:var(--sp-3);margin-top:var(--sp-3);font-size:.82rem;color:rgba(255,255,255,.55);flex-wrap:wrap">
+            <span>April 27, 2026</span>
+            <span>·</span>
+            <span>10:00 AM</span>
+            <span>·</span>
+            <span>Main Sanctuary</span>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:var(--sp-2);align-items:flex-start">
+          <a href="#" class="btn btn-primary">Learn More</a>
+          <a href="#" class="btn btn-ghost btn-sm">Add to Calendar</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="events-layout">
+      <!-- Main list (replaced by Admin → Events data when available) -->
+      <div data-events-list>
+        <!-- Filter -->
+        <div class="filter-bar">
+          <div class="filter-chip active" onclick="filterEvents(this,'all')">All Events</div>
+          <div class="filter-chip" onclick="filterEvents(this,'worship')">Worship</div>
+          <div class="filter-chip" onclick="filterEvents(this,'women')">Women</div>
+          <div class="filter-chip" onclick="filterEvents(this,'youth')">Youth</div>
+          <div class="filter-chip" onclick="filterEvents(this,'community')">Community</div>
+          <div class="filter-chip" onclick="filterEvents(this,'family')">Family</div>
+        </div>
+
+        <!-- APRIL -->
+        <div style="font-family:var(--font-head);font-size:.75rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--gray-1);margin-bottom:var(--sp-2)">April 2026</div>
+
+        <div class="event-full" data-cat="worship">
+          <div class="event-date-col">
+            <div class="month">Apr</div>
+            <div class="day">27</div>
+            <div class="dow">Sun</div>
+          </div>
+          <div class="event-body">
+            <div class="event-cat">Worship</div>
+            <div class="event-title">Baptism Sunday</div>
+            <div class="event-meta-row"><span>10:00 AM</span><span>Main Sanctuary</span><span>Open to all</span></div>
+            <div class="event-desc">Join us as members of our community publicly declare their faith through baptism.</div>
+          </div>
+          <div class="event-action"><a href="#" class="btn btn-secondary btn-sm">Details</a></div>
+        </div>
+
+        <!-- MAY -->
+        <div style="font-family:var(--font-head);font-size:.75rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--gray-1);margin-bottom:var(--sp-2);margin-top:var(--sp-4)">May 2026</div>
+
+        <div class="event-full" data-cat="women">
+          <div class="event-date-col">
+            <div class="month">May</div>
+            <div class="day">03</div>
+            <div class="dow">Sun</div>
+          </div>
+          <div class="event-body">
+            <div class="event-cat">Women</div>
+            <div class="event-title">WOW Women's Brunch</div>
+            <div class="event-meta-row"><span>11:00 AM</span><span>Fellowship Hall</span><span>Women's Ministry</span></div>
+            <div class="event-desc">A morning of food, fellowship, and encouragement for the women of Oasis.</div>
+          </div>
+          <div class="event-action"><a href="#" class="btn btn-secondary btn-sm">Details</a></div>
+        </div>
+
+        <div class="event-full" data-cat="youth">
+          <div class="event-date-col">
+            <div class="month">May</div>
+            <div class="day">10</div>
+            <div class="dow">Sat</div>
+          </div>
+          <div class="event-body">
+            <div class="event-cat">Youth</div>
+            <div class="event-title">Youth Night — The Collective</div>
+            <div class="event-meta-row"><span>6:00 PM</span><span>Youth Wing</span><span>High School & Young Adults</span></div>
+            <div class="event-desc">A high-energy night of worship, community, and real conversation for the next generation.</div>
+          </div>
+          <div class="event-action"><a href="#" class="btn btn-secondary btn-sm">Details</a></div>
+        </div>
+
+        <div class="event-full" data-cat="community">
+          <div class="event-date-col">
+            <div class="month">May</div>
+            <div class="day">17</div>
+            <div class="dow">Sat</div>
+          </div>
+          <div class="event-body">
+            <div class="event-cat">Community</div>
+            <div class="event-title">Serve Day — Community Outreach</div>
+            <div class="event-meta-row"><span>9:00 AM</span><span>Rahway Community</span><span>All Welcome</span></div>
+            <div class="event-desc">Roll up your sleeves and love our city. Multiple service projects across Rahway.</div>
+          </div>
+          <div class="event-action"><a href="#" class="btn btn-secondary btn-sm">Details</a></div>
+        </div>
+
+        <div class="event-full" data-cat="family">
+          <div class="event-date-col">
+            <div class="month">May</div>
+            <div class="day">24</div>
+            <div class="dow">Sat</div>
+          </div>
+          <div class="event-body">
+            <div class="event-cat">Family</div>
+            <div class="event-title">Family Fun Day</div>
+            <div class="event-meta-row"><span>12:00 PM</span><span>Church Grounds</span><span>All Ages</span></div>
+            <div class="event-desc">Games, food, and community for the whole family. Bring a blanket and an empty stomach.</div>
+          </div>
+          <div class="event-action"><a href="#" class="btn btn-secondary btn-sm">Details</a></div>
+        </div>
+
+        <!-- JUNE -->
+        <div style="font-family:var(--font-head);font-size:.75rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--gray-1);margin-bottom:var(--sp-2);margin-top:var(--sp-4)">June 2026</div>
+
+        <div class="event-full" data-cat="worship">
+          <div class="event-date-col">
+            <div class="month">Jun</div>
+            <div class="day">07</div>
+            <div class="dow">Sun</div>
+          </div>
+          <div class="event-body">
+            <div class="event-cat">Worship</div>
+            <div class="event-title">Night of Worship</div>
+            <div class="event-meta-row"><span>7:00 PM</span><span>Main Sanctuary</span><span>Open to all</span></div>
+            <div class="event-desc">An extended evening of worship, prayer, and encounter. No message — just time with God.</div>
+          </div>
+          <div class="event-action"><a href="#" class="btn btn-secondary btn-sm">Details</a></div>
+        </div>
+
+        <div style="text-align:center;margin-top:var(--sp-5)">
+          <a href="#" class="btn btn-secondary">Load More Events</a>
+        </div>
+      </div>
+
+      <!-- Sidebar -->
+      <div>
+        <!-- Mini Calendar -->
+        <div class="sidebar-widget">
+          <div class="cal-nav">
+            <button onclick="prevMonth()">‹</button>
+            <span class="cal-month" id="cal-month">May 2026</span>
+            <button onclick="nextMonth()">›</button>
+          </div>
+          <table class="mini-cal" id="mini-cal">
+            <thead>
+              <tr>
+                <th>Su</th><th>Mo</th><th>Tu</th><th>We</th><th>Th</th><th>Fr</th><th>Sa</th>
+              </tr>
+            </thead>
+            <tbody id="cal-body"></tbody>
+          </table>
+        </div>
+
+        <!-- Google Calendar embed note -->
+        <div class="sidebar-widget" style="background:var(--blue-light);border:1px solid rgba(0,150,199,.15)">
+          <h4 style="color:var(--blue-dark)">Sync with Google Calendar</h4>
+          <p style="font-size:.82rem;color:var(--charcoal);line-height:1.6;margin-bottom:var(--sp-2)">Subscribe to the Oasis calendar to get events automatically in your phone.</p>
+          <a href="#" class="btn btn-primary btn-sm full-w" style="justify-content:center">Subscribe to Calendar</a>
+        </div>
+
+        <!-- Submit an Event -->
+        <div class="sidebar-widget">
+          <h4>Ministry Leaders</h4>
+          <p style="font-size:.82rem;color:var(--gray-1);line-height:1.6;margin-bottom:var(--sp-2)">Need to add an event? Submit it for approval and we'll get it posted.</p>
+          <a href="contact.html" class="btn btn-secondary btn-sm full-w" style="justify-content:center">Submit an Event</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div id="footer-mount"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="nav.js"></script>
+<script src="cms-core.js"></script>
+<script src="site-data.js"></script>
+<script src="editor.js" defer></script>
+<script>
+// Filter
+function filterEvents(el, cat) {
+  document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.event-full').forEach(ev => {
+    ev.style.display = (cat === 'all' || ev.dataset.cat === cat) ? 'grid' : 'none';
+  });
+}
+
+// Mini calendar
+let calDate = new Date(2026, 4, 1); // May 2026
+const eventDays = [3, 10, 17, 24]; // May event days
+
+function renderCal() {
+  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('cal-month').textContent = months[calDate.getMonth()] + ' ' + calDate.getFullYear();
+  const tbody = document.getElementById('cal-body');
+  tbody.innerHTML = '';
+
+  const year = calDate.getFullYear();
+  const month = calDate.getMonth();
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const today = new Date();
+
+  let day = 1;
+  for (let r = 0; r < 6; r++) {
+    const tr = document.createElement('tr');
+    for (let c = 0; c < 7; c++) {
+      const td = document.createElement('td');
+      const cellIndex = r * 7 + c;
+      if (cellIndex < firstDay || day > daysInMonth) {
+        td.textContent = '';
+        td.className = 'other-month';
+      } else {
+        td.textContent = day;
+        if (today.getDate() === day && today.getMonth() === month && today.getFullYear() === year) td.className = 'today';
+        else if (eventDays.includes(day)) td.className = 'has-event';
+        day++;
+      }
+      tr.appendChild(td);
+    }
+    tbody.appendChild(tr);
+    if (day > daysInMonth) break;
+  }
+}
+function prevMonth() { calDate.setMonth(calDate.getMonth() - 1); renderCal(); }
+function nextMonth() { calDate.setMonth(calDate.getMonth() + 1); renderCal(); }
+renderCal();
+</script>
+</body>
+</html>

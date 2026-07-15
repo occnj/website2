@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Leadership — Oasis Christian Centre</title>
+  <meta name="description" content="Meet the pastoral team and leaders of Oasis Christian Centre in Rahway, NJ.">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .leader-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--sp-4);
+    }
+    .leader-card {
+      background: #fff;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+      transition: transform .2s, box-shadow .2s;
+    }
+    .leader-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
+    .leader-photo {
+      aspect-ratio: 3/4;
+      position: relative;
+      overflow: hidden;
+    }
+    .leader-photo-overlay {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 50%;
+      background: linear-gradient(to top, rgba(26,40,53,.7), transparent);
+    }
+    .leader-info {
+      padding: var(--sp-3);
+    }
+    .leader-name {
+      font-family: var(--font-head);
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--charcoal);
+    }
+    .leader-role {
+      font-size: .78rem;
+      font-weight: 600;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+      color: var(--blue);
+      margin-top: 3px;
+    }
+    .leader-bio {
+      font-size: .85rem;
+      color: var(--gray-1);
+      line-height: 1.65;
+      margin-top: var(--sp-2);
+    }
+    .leader-featured {
+      display: grid;
+      grid-template-columns: 1fr 1.5fr;
+      gap: var(--sp-6);
+      align-items: center;
+      padding: var(--sp-6);
+      background: #fff;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-md);
+      margin-bottom: var(--sp-6);
+    }
+    .leader-featured-photo {
+      aspect-ratio: 3/4;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+    }
+    .leader-featured-content {}
+    .leader-featured-content h2 { font-family: var(--font-head); font-size: clamp(1.6rem,3vw,2.2rem); font-weight: 700; }
+    .leader-featured-content .role { font-size: .8rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--blue); margin-bottom: var(--sp-2); }
+    .leader-featured-content p { font-size: .95rem; color: var(--gray-1); line-height: 1.75; margin-top: var(--sp-2); }
+
+    .team-section-label {
+      font-family: var(--font-head);
+      font-size: clamp(1.3rem, 2.5vw, 1.8rem);
+      font-weight: 700;
+      color: var(--charcoal);
+      margin-bottom: var(--sp-4);
+      padding-bottom: var(--sp-2);
+      border-bottom: 2px solid var(--blue-light);
+    }
+
+    @media (max-width: 900px) {
+      .leader-grid { grid-template-columns: repeat(2, 1fr); }
+      .leader-featured { grid-template-columns: 1fr; }
+      .leader-featured-photo { aspect-ratio: 4/3; }
+    }
+    @media (max-width: 600px) {
+      .leader-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 400px) {
+      .leader-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div id="header-mount"></div>
+
+<!-- PAGE HERO -->
+<section class="page-hero" data-screen-label="Page Hero">
+  <div class="container">
+    <p class="t-eyebrow" style="color:var(--amber)">Our Team</p>
+    <h1 class="t-display text-white mt-2">Leadership</h1>
+    <p style="color:rgba(255,255,255,.7);max-width:500px;margin:var(--sp-3) auto 0;font-size:1.05rem;line-height:1.65;text-align:center">
+      Oasis is led by people who love God, love people, and are committed to serving the Rahway community with integrity and joy.
+    </p>
+  </div>
+</section>
+
+<!-- TEAM (managed in Admin → Team) -->
+<section class="section bg-off" data-screen-label="Leadership Team">
+  <div class="container">
+    <div class="leader-grid" data-team-list>
+      <p style="grid-column:1/-1;color:var(--gray-1);text-align:center;padding:60px 0">Our leadership team page is being updated. Check back soon!</p>
+    </div>
+  </div>
+</section>
+
+<!-- SERVE CTA -->
+<section class="section bg-charcoal" data-screen-label="Join the Team CTA">
+  <div class="container text-center">
+    <p class="t-eyebrow" style="color:var(--amber)">Get Involved</p>
+    <h2 class="t-h2 text-white mt-2" style="margin-bottom:var(--sp-2)">Interested in serving?</h2>
+    <p style="color:rgba(255,255,255,.65);max-width:460px;margin:0 auto var(--sp-4);font-size:.95rem;line-height:1.7">
+      Every team at Oasis is led by someone who started where you are. If you feel called to serve, we'd love to connect with you.
+    </p>
+    <div style="display:flex;gap:var(--sp-2);justify-content:center;flex-wrap:wrap">
+      <a href="about.html#ministries" class="btn btn-primary">Explore Teams</a>
+      <a href="contact.html" class="btn btn-ghost">Contact Us</a>
+    </div>
+  </div>
+</section>
+
+<div id="footer-mount"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="nav.js"></script>
+<script src="cms-core.js"></script>
+<script src="site-data.js"></script>
+<script src="editor.js" defer></script>
+</body>
+</html>
