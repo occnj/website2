@@ -1,0 +1,110 @@
+.about-subnav {
+  background: #fff;
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: var(--header-h);
+  z-index: 50;
+}
+.about-subnav-inner {
+  display: flex;
+  gap: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+  max-width: var(--max-w);
+  margin: 0 auto;
+  padding: 0 var(--sp-3);
+}
+.about-subnav-inner::-webkit-scrollbar { display: none; }
+.subnav-link {
+  padding: 16px 20px;
+  font-size: .85rem;
+  font-weight: 600;
+  color: var(--gray-1);
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+  transition: all .15s;
+  flex-shrink: 0;
+  display: block;
+}
+.subnav-link:hover { color: var(--charcoal); }
+.subnav-link.active { color: var(--blue); border-bottom-color: var(--blue); }
+
+.values-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: var(--sp-3);
+}
+.value-card {
+  padding: var(--sp-4);
+  background: #fff;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  border-top: 3px solid var(--blue);
+  transition: transform .2s, box-shadow .2s;
+}
+.value-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+.value-card:nth-child(2) { border-top-color: var(--amber); }
+.value-card:nth-child(3) { border-top-color: #8B6BAE; }
+.value-card:nth-child(4) { border-top-color: #4A8C6A; }
+.value-card:nth-child(5) { border-top-color: #C45E4A; }
+.value-card:nth-child(6) { border-top-color: #3D7EC8; }
+.value-card:nth-child(7) { border-top-color: #4A8C6A; }
+.value-card:nth-child(8) { border-top-color: var(--amber); }
+.value-card:nth-child(9) { border-top-color: #8B6BAE; }
+.value-card:nth-child(10) { border-top-color: var(--charcoal); }
+.value-num {
+  font-family: var(--font-head);
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--off-white);
+  line-height: 1;
+  margin-bottom: 8px;
+}
+.value-title { font-family: var(--font-head); font-size: .95rem; font-weight: 700; margin-bottom: 6px; text-transform: uppercase; letter-spacing: .05em; }
+.value-desc { font-size: .8rem; color: var(--gray-1); line-height: 1.6; }
+
+.belief-item {
+  padding: var(--sp-5) 0;
+  border-bottom: 1px solid var(--border);
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: var(--sp-5);
+  align-items: start;
+}
+.belief-item:last-child { border-bottom: none; }
+.belief-label { font-family: var(--font-head); font-size: 1.1rem; font-weight: 700; color: var(--charcoal); padding-top: 4px; }
+.belief-scripture { font-size: .72rem; font-weight: 600; letter-spacing: .06em; color: var(--blue); margin-top: 4px; }
+.belief-text { font-size: .95rem; color: var(--gray-1); line-height: 1.8; }
+
+.hub-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--sp-3);
+}
+.hub-card {
+  background: var(--charcoal);
+  border-radius: var(--radius-md);
+  padding: var(--sp-4);
+  color: #fff;
+  transition: transform .2s, background .2s;
+  cursor: pointer;
+  display: block;
+}
+.hub-card:hover { transform: translateY(-3px); background: #243748; }
+.hub-card-num { font-family: var(--font-head); font-size: .75rem; font-weight: 700; color: var(--blue); margin-bottom: var(--sp-2); letter-spacing: .08em; }
+.hub-card-title { font-family: var(--font-head); font-size: 1.05rem; font-weight: 700; color: #fff; margin-bottom: 6px; }
+.hub-card-desc { font-size: .8rem; color: rgba(255,255,255,.55); line-height: 1.55; }
+
+@media (max-width: 1024px) {
+  .values-grid { grid-template-columns: repeat(3, 1fr); }
+  .hub-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 768px) {
+  .values-grid { grid-template-columns: repeat(2, 1fr); }
+  .belief-item { grid-template-columns: 1fr; gap: var(--sp-2); }
+  .hub-grid { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 480px) {
+  .values-grid { grid-template-columns: 1fr 1fr; }
+  .hub-grid { grid-template-columns: 1fr; }
+}
