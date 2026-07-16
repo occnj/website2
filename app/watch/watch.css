@@ -100,12 +100,13 @@
   letter-spacing: .08em;
   text-transform: uppercase;
 }
-.live-badge .live-dot {
+.live-dot {
   width: 6px; height: 6px;
   border-radius: 50%;
-  background: #fff;
+  background: #E05252;
   animation: pulse 1s infinite;
 }
+.live-badge .live-dot { background: #fff; }
 @keyframes pulse {
   0%,100% { opacity: 1; transform: scale(1); }
   50% { opacity: .5; transform: scale(1.3); }
