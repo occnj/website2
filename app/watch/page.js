@@ -4,6 +4,7 @@ import SermonGrid from '@/components/SermonGrid';
 import { getPageHero, getSermons } from '@/lib/data';
 import { getChannelVideos, YT_CHANNEL_URL } from '@/lib/youtube';
 import TwitchEmbed, { TWITCH_CHANNEL_URL } from '@/components/TwitchEmbed';
+import LiveBanner from '@/components/LiveBanner';
 
 export const metadata = {
   title: 'Watch — Oasis Christian Centre',
@@ -30,17 +31,7 @@ export default async function WatchPage() {
         image={hero && hero.image}
       />
 
-      <div style={{ background: 'linear-gradient(90deg,#8B0000,#C53030)', padding: 'var(--sp-2) 0' }} data-screen-label="Live Banner">
-        <div className="container">
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 'var(--sp-3)', flexWrap: 'wrap' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-2)', color: '#fff' }}>
-              <span className="live-badge"><span className="live-dot"></span>Live Now</span>
-              <span style={{ fontSize: '.9rem', fontWeight: 500 }}>Sunday Service is streaming live right now</span>
-            </div>
-            <a href={TWITCH_CHANNEL_URL} target="_blank" rel="noopener" className="btn btn-ghost btn-sm">Join the Stream →</a>
-          </div>
-        </div>
-      </div>
+      <LiveBanner />
 
       <section className="section" data-screen-label="Watch Now Live">
         <div className="container">
