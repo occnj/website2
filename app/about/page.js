@@ -142,16 +142,24 @@ export default async function AboutPage() {
       {/* OUR BELIEFS */}
       <section className="section bg-off" id="our-beliefs" data-screen-label="Our Beliefs">
         <div className="container">
-          <div style={{ maxWidth: 640, margin: '0 auto var(--sp-6)' }}>
-            <p className="t-eyebrow">Our Beliefs</p>
-            <h2 className="t-h1 mt-2">What we believe.</h2>
-            <p className="t-body t-muted mt-3">We believe the Bible — composed of the sixty-six books of the Old and New Testaments — to be the inspired Word of God and the final authority for all matters of faith and practice.</p>
-            <div style={{ background: '#fff', borderRadius: 'var(--radius-md)', padding: 'var(--sp-4)', marginTop: 'var(--sp-4)', boxShadow: 'var(--shadow-sm)' }}>
-              <p style={{ fontSize: '.9rem', color: 'var(--charcoal)', lineHeight: 1.7 }}>
-                <strong>In essential beliefs</strong> — we have unity <span style={{ color: 'var(--gray-1)' }}>(Ephesians 4:4-6)</span><br />
-                <strong>In nonessential beliefs</strong> — we have liberty <span style={{ color: 'var(--gray-1)' }}>(Romans 14:1,4,12,22)</span><br />
-                <strong>In all our beliefs</strong> — we exhibit charity <span style={{ color: 'var(--gray-1)' }}>(1 Corinthians 13:2; Ephesians 4:15)</span>
-              </p>
+          <div className="split-2" style={{ gap: 'var(--sp-7)', alignItems: 'center', marginBottom: 'var(--sp-6)' }}>
+            <div>
+              <p className="t-eyebrow">Our Beliefs</p>
+              <h2 className="t-h1 mt-2">What we believe.</h2>
+              <p className="t-body t-muted mt-3">We believe the Bible — composed of the sixty-six books of the Old and New Testaments — to be the inspired Word of God and the final authority for all matters of faith and practice.</p>
+              <div style={{ background: '#fff', borderRadius: 'var(--radius-md)', padding: 'var(--sp-4)', marginTop: 'var(--sp-4)', boxShadow: 'var(--shadow-sm)' }}>
+                <p style={{ fontSize: '.9rem', color: 'var(--charcoal)', lineHeight: 1.7 }}>
+                  <strong>In essential beliefs</strong> — we have unity <span style={{ color: 'var(--gray-1)' }}>(Ephesians 4:4-6)</span><br />
+                  <strong>In nonessential beliefs</strong> — we have liberty <span style={{ color: 'var(--gray-1)' }}>(Romans 14:1,4,12,22)</span><br />
+                  <strong>In all our beliefs</strong> — we exhibit charity <span style={{ color: 'var(--gray-1)' }}>(1 Corinthians 13:2; Ephesians 4:15)</span>
+                </p>
+              </div>
+            </div>
+            <div>
+              <div className="img-placeholder" style={{ aspectRatio: '4/5', borderRadius: 'var(--radius-lg)', minHeight: 420 }}>
+                <svg width="48" height="48" viewBox="0 0 48 48" fill="none"><path d="M24 6v36M10 14c4-3 9-3 14 0 5-3 10-3 14 0v26c-4-3-9-3-14 0-5-3-10-3-14 0z" stroke="#9BABB6" strokeWidth="1.5" strokeLinejoin="round" /></svg>
+                <span>Beliefs / Bible photo<br />Upload via Visual Edit</span>
+              </div>
             </div>
           </div>
 

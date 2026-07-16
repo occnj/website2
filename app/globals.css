@@ -299,11 +299,25 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
   transform: translateX(-50%) translateY(-8px);
   transition: all .18s ease;
 }
-.nav-item:hover .nav-dropdown {
+/* Invisible bridge covering the gap between the trigger and the panel,
+   so moving the mouse down doesn't close the menu */
+.nav-dropdown::before {
+  content: '';
+  position: absolute;
+  top: -12px;
+  left: -12px;
+  right: -12px;
+  height: 24px;
+}
+.nav-item:hover .nav-dropdown,
+.nav-item:focus-within .nav-dropdown {
   opacity: 1;
   pointer-events: auto;
   transform: translateX(-50%) translateY(0);
+  transition-delay: 0s;
 }
+/* small close delay so brief mouse slips don't dismiss the menu */
+.nav-dropdown { transition-delay: .12s; }
 .nav-dropdown a {
   display: flex;
   align-items: center;
@@ -456,12 +470,24 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
   padding: var(--sp-7) 0 var(--sp-4);
 }
 .footer-grid {
-  display: grid;
-  grid-template-columns: 2fr 1fr 1fr 1fr;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
   gap: var(--sp-5);
   margin-bottom: var(--sp-6);
 }
-.footer-brand { }
+.footer-brand { flex: 2 1 280px; min-width: 240px; }
+.footer-col { flex: 1 1 150px; min-width: 140px; }
+.footer-col ul { margin: 0; padding: 0; }
+.footer-social { display: flex; gap: 10px; margin-top: 20px; }
+.footer-social a {
+  width: 36px; height: 36px; border-radius: 8px;
+  background: rgba(255,255,255,.1);
+  display: grid; place-items: center;
+  color: rgba(255,255,255,.75);
+  transition: background .15s, color .15s;
+}
+.footer-social a:hover { background: var(--blue); color: #fff; }
 .footer-logo {
   display: flex;
   align-items: center;
@@ -608,7 +634,6 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
 /* --- RESPONSIVE --- */
 @media (max-width: 1024px) {
   .grid-4 { grid-template-columns: repeat(2, 1fr); }
-  .footer-grid { grid-template-columns: 1fr 1fr; }
 }
 @media (max-width: 768px) {
   :root { --sp-7: 64px; --sp-8: 80px; }
@@ -617,7 +642,8 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
   .nav-toggle { display: flex; }
   .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
   .info-strip-inner { flex-direction: column; gap: var(--sp-2); align-items: flex-start; padding: 0 var(--sp-3); }
-  .footer-grid { grid-template-columns: 1fr; gap: var(--sp-4); }
+  .footer-grid { flex-direction: column; gap: var(--sp-4); }
+  .footer-brand, .footer-col { flex: none; width: 100%; }
   .footer-bottom { flex-direction: column; text-align: center; }
 }
 @media (max-width: 480px) {

@@ -181,9 +181,9 @@
     hoverEl = el;
     var t = typeOf(el);
     var btns = '';
-    if (t === 'img') btns += '<button data-a="replace">⤢ Replace image</button>';
-    if (t === 'link') btns += '<button data-a="link">🔗 Edit link</button>';
-    if (t === 'text' || t === 'link') btns += '<button data-a="edit">✎ Edit text</button>';
+    if (sets.img.has(el)) btns += '<button data-a="replace">⤢ Replace image</button>';
+    if (sets.link.has(el)) btns += '<button data-a="link">🔗 Edit link</button>';
+    if (sets.text.has(el) || sets.link.has(el)) btns += '<button data-a="edit">✎ Edit text</button>';
     btns += '<button data-a="section">▤ Section ▾</button>';
     elHover.innerHTML = btns;
     Array.prototype.forEach.call(elHover.querySelectorAll('button'), function (b) {

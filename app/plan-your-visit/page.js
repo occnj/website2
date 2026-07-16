@@ -31,31 +31,10 @@ export default async function PlanYourVisitPage() {
         image={hero && hero.image}
       >
         <div style={{ marginTop: 'var(--sp-4)', display: 'flex', gap: 'var(--sp-2)', flexWrap: 'wrap' }}>
-          <Link href="/contact" className="btn btn-primary">Have a Question?</Link>
+          <a href="https://maps.google.com/?q=Oasis+Christian+Centre+Rahway+NJ" target="_blank" rel="noopener" className="btn btn-primary">Get Directions →</a>
           <a href="#what-to-expect" className="btn btn-ghost">What to Expect ↓</a>
         </div>
       </PageHero>
-
-      <div style={{ background: 'var(--amber)', padding: 'var(--sp-3) 0' }}>
-        <div className="container">
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 'var(--sp-5)', flexWrap: 'wrap' }}>
-            <div className="info-item">
-              <div className="info-item-text">
-                <strong>Sundays at 10:00 AM</strong>
-                <span>15 Main St, Rahway, NJ 07065</span>
-              </div>
-            </div>
-            <div style={{ color: 'rgba(255,255,255,.6)' }}>·</div>
-            <div className="info-item">
-              <div className="info-item-text">
-                <strong>15 Main St, Rahway, NJ 07065</strong>
-              </div>
-            </div>
-            <div style={{ color: 'rgba(255,255,255,.6)' }}>·</div>
-            <a href="https://maps.google.com/?q=Oasis+Christian+Centre+Rahway+NJ" target="_blank" rel="noopener" style={{ color: '#fff', fontWeight: 600, fontSize: '.9rem', textDecoration: 'underline', textUnderlineOffset: '3px' }}>Get Directions →</a>
-          </div>
-        </div>
-      </div>
 
       <section className="section" id="what-to-expect" data-screen-label="What to Expect">
         <div className="container">

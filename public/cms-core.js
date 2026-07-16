@@ -33,13 +33,17 @@
   }
 
   // ---- which elements are editable ----
-  var TEXT_SEL = 'h1,h2,h3,h4,h5,h6,p,li,blockquote,button,' +
-    '.t-eyebrow,.hero-eyebrow,.involve-title,.involve-desc,.involve-num,' +
-    '.sermon-series,.sermon-date,.info-item-text strong,.info-item-text span,' +
-    '.stat-value,.stat-label,.circle-card h4,.circle-card p,.event-info h4,.event-info p,' +
-    '.event-date-block .month,.event-date-block .day,td,th,figcaption,label,dt,dd';
+  // Instead of a hand-maintained selector whitelist (which missed most
+  // span/div-based text), detect text blocks generically: any element that
+  // either contains its own text directly, or whose children are all simple
+  // inline elements — meaning its innerHTML is safe to edit as one unit.
+  // This makes EVERY piece of visible text on every page editable.
+  var CLASSIC_TEXT = 'H1,H2,H3,H4,H5,H6,P,LI,BLOCKQUOTE,BUTTON,LABEL,DT,DD,TD,TH,FIGCAPTION';
+  var GENERIC_TEXT = 'DIV,SPAN,A,STRONG,EM,B,I,SMALL';
+  // inline tags that can safely live inside an editable unit
+  var INLINE_SAFE = 'SPAN,STRONG,EM,B,I,U,SMALL,SUP,SUB,MARK,CODE,BR,ABBR,TIME,SVG,PATH,CIRCLE,RECT,POLYGON,LINE';
   var IMG_SEL = 'img,.img-placeholder,.visit-teaser-img,.hero-photo-area';
-  var LINK_SEL = 'a.btn,a.nav-link,a.involve-row';
+  var LINK_SEL = 'a[href]';
   var SECTION_SEL = 'section,[data-screen-label],.info-strip,footer';
 
   function hasEditableAncestor(el, list) {
@@ -53,17 +57,43 @@
   function visibleText(el) {
     return (el.textContent || '').replace(/\s+/g, ' ').trim();
   }
+  function hasDirectText(el) {
+    for (var n = el.firstChild; n; n = n.nextSibling) {
+      if (n.nodeType === 3 && /\S/.test(n.nodeValue)) return true;
+    }
+    return false;
+  }
+  function onlyInlineChildren(el) {
+    for (var c = el.firstElementChild; c; c = c.nextElementSibling) {
+      if (INLINE_SAFE.indexOf(c.tagName.toUpperCase()) === -1) return false;
+    }
+    return true;
+  }
+  function isTextBlock(el) {
+    var tag = el.tagName.toUpperCase();
+    if (ROOT_SKIP.indexOf(tag) !== -1) return false;
+    if (!visibleText(el)) return false;
+    if (el.closest('#cms-bar,#cms-pop,#cms-hover,.cms-ctrl')) return false;
+    // classic text tags: always editable as a unit (same as before)
+    if (CLASSIC_TEXT.indexOf(tag) !== -1) return true;
+    // generic containers: editable only when their contents are plain
+    // inline text — so wrappers holding buttons/headings are left alone
+    if (GENERIC_TEXT.indexOf(tag) !== -1) {
+      if (hasDirectText(el) && onlyInlineChildren(el)) return true;
+      if (!el.firstElementChild && hasDirectText(el)) return true;
+      if (onlyInlineChildren(el) && el.firstElementChild) return true;
+      return false;
+    }
+    return false;
+  }
 
   function collect() {
     var texts = [], images = [], links = [], sections = [];
 
     // text blocks — outermost only, so innerHTML (incl. <em>,<br>) is edited as one unit
-    var tCands = Array.prototype.slice.call(document.querySelectorAll(TEXT_SEL));
-    tCands = tCands.filter(function (el) {
-      if (ROOT_SKIP.indexOf(el.tagName) !== -1) return false;
-      if (el.closest('#cms-bar,#cms-pop,.cms-ctrl')) return false;
-      if (!visibleText(el)) return false;
-      return true;
+    var tCands = [];
+    Array.prototype.slice.call(document.body.getElementsByTagName('*')).forEach(function (el) {
+      if (isTextBlock(el)) tCands.push(el);
     });
     tCands.forEach(function (el) {
       if (!hasEditableAncestor(el, tCands)) texts.push(el);

@@ -2,6 +2,7 @@ import './watch.css';
 import PageHero from '@/components/PageHero';
 import SermonGrid from '@/components/SermonGrid';
 import { getPageHero, getSermons } from '@/lib/data';
+import { getChannelVideos, YT_CHANNEL_URL, YT_LIVE_URL } from '@/lib/youtube';
 
 export const metadata = {
   title: 'Watch — Oasis Christian Centre',
@@ -10,7 +11,14 @@ export const metadata = {
 export const dynamic = 'force-dynamic';
 
 export default async function WatchPage() {
-  const [hero, sermons] = await Promise.all([getPageHero('watch'), getSermons()]);
+  // Everything on this page comes from the Oasis YouTube channel (@OCCNJ).
+  // If the feed is unreachable, fall back to sermons added in the Admin.
+  const [hero, ytVideos, dbSermons] = await Promise.all([
+    getPageHero('watch'),
+    getChannelVideos(),
+    getSermons(),
+  ]);
+  const sermons = ytVideos.length ? ytVideos : dbSermons;
   const featured = sermons.find((s) => s.featured) || sermons[0];
 
   return (
@@ -29,7 +37,7 @@ export default async function WatchPage() {
               <span className="live-badge"><span className="live-dot"></span>Live Now</span>
               <span style={{ fontSize: '.9rem', fontWeight: 500 }}>Sunday Service is streaming live right now</span>
             </div>
-            <a href="#" className="btn btn-ghost btn-sm">Join the Stream →</a>
+            <a href={YT_LIVE_URL} target="_blank" rel="noopener" className="btn btn-ghost btn-sm">Join the Stream →</a>
           </div>
         </div>
       </div>
@@ -73,7 +81,7 @@ export default async function WatchPage() {
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="rgba(255,255,255,.3)" strokeWidth="1.5" /><path d="M4 20c0-4.418 3.582-8 8-8s8 3.582 8 8" stroke="rgba(255,255,255,.3)" strokeWidth="1.5" strokeLinecap="round" /></svg>
                 </div>
                 <div>
-                  <div style={{ fontSize: '.85rem', fontWeight: 600, color: '#fff' }}>{(featured && featured.speaker) || 'Pastor Name'}</div>
+                  <div style={{ fontSize: '.85rem', fontWeight: 600, color: '#fff' }}>{(featured && featured.speaker) || 'Oasis Christian Centre'}</div>
                   <div style={{ fontSize: '.75rem', color: 'rgba(255,255,255,.5)' }}>
                     {featured && featured.published_at ? new Date(featured.published_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'April 20, 2026'}
                   </div>
@@ -81,7 +89,7 @@ export default async function WatchPage() {
               </div>
               <div style={{ display: 'flex', gap: 'var(--sp-2)', marginTop: 'var(--sp-4)', flexWrap: 'wrap' }}>
                 <a href={featured ? `https://www.youtube.com/watch?v=${featured.youtube_id}` : '#'} target="_blank" rel="noopener" className="btn btn-primary">Watch Message</a>
-                <a href="#" className="btn btn-ghost btn-sm">Share</a>
+                <a href={YT_CHANNEL_URL} target="_blank" rel="noopener" className="btn btn-ghost btn-sm">More on YouTube →</a>
               </div>
             </div>
           </div>
@@ -112,7 +120,7 @@ export default async function WatchPage() {
           <div style={{ display: 'flex', gap: 'var(--sp-2)', justifyContent: 'center', flexWrap: 'wrap' }}>
             <a href="#" className="btn btn-secondary text-white" style={{ borderColor: 'rgba(255,255,255,.2)', color: '#fff' }}>Apple Podcasts</a>
             <a href="#" className="btn btn-secondary text-white" style={{ borderColor: 'rgba(255,255,255,.2)', color: '#fff' }}>Spotify</a>
-            <a href="#" className="btn btn-secondary text-white" style={{ borderColor: 'rgba(255,255,255,.2)', color: '#fff' }}>YouTube</a>
+            <a href={YT_CHANNEL_URL} target="_blank" rel="noopener" className="btn btn-secondary text-white" style={{ borderColor: 'rgba(255,255,255,.2)', color: '#fff' }}>YouTube</a>
           </div>
         </div>
       </section>

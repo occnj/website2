@@ -1,16 +1,19 @@
 import Link from 'next/link';
 import './home.css';
 import { getPageHero, getUpcomingEvents, getSermons } from '@/lib/data';
+import { getChannelVideos } from '@/lib/youtube';
 import { asset } from '@/lib/basePath';
 
 export const dynamic = 'force-dynamic';
 
 export default async function HomePage() {
-  const [hero, events, sermons] = await Promise.all([
+  const [hero, events, ytVideos, dbSermons] = await Promise.all([
     getPageHero('index'),
     getUpcomingEvents(),
+    getChannelVideos(),
     getSermons(),
   ]);
+  const sermons = ytVideos.length ? ytVideos : dbSermons;
   const heroImage = (hero && hero.image) || asset('/images/hero-placeholder.svg');
   const heroTitle = (hero && hero.title) || 'You were made to belong here.';
   const heroIntro = (hero && hero.intro) ||
@@ -243,7 +246,10 @@ export default async function HomePage() {
             <Link href="/events" className="btn btn-secondary btn-sm">View All Events</Link>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-2)' }}>
-            {(upcoming.length ? upcoming : FALLBACK_EVENTS).map((e, i) => {
+            {upcoming.length === 0 && (
+              <p className="t-body t-muted">No upcoming events right now — check back soon.</p>
+            )}
+            {upcoming.map((e, i) => {
               const d = e.starts_at ? new Date(e.starts_at + 'T12:00:00') : null;
               return (
                 <div className="event-card-row" key={e.id || i}>
@@ -391,10 +397,3 @@ export default async function HomePage() {
     </>
   );
 }
-
-const FALLBACK_EVENTS = [
-  { month: 'Apr', day: '27', title: 'Baptism Sunday', time_label: '10:00 AM', location: 'Main Sanctuary', category: 'Open to all' },
-  { month: 'May', day: '03', title: "WOW Women's Brunch", time_label: '11:00 AM', location: 'Fellowship Hall', category: "Women's Ministry" },
-  { month: 'May', day: '10', title: 'Youth Night — The Collective', time_label: '6:00 PM', location: 'Youth Wing', category: 'Young Adults & High School' },
-  { month: 'May', day: '17', title: 'Serve Day — Community Outreach', time_label: '9:00 AM', location: 'Rahway Community', category: 'All Welcome' },
-];
