@@ -277,6 +277,20 @@ navigation: () => safe(async function () {
     '<div class="form-group" style="margin-bottom:0;display:flex;align-items:center;gap:10px;margin-top:8px">' +
     '<label class="toggle" title="Show/hide podcast section on Watch page"><input type="checkbox" id="si-podcast"' + (s.podcast_enabled ? ' checked' : '') + '><span class="track"></span></label>' +
     '<label class="form-label" style="margin:0">Show &ldquo;Subscribe to the Oasis Podcast&rdquo; section on the Watch page</label>' +
+    '</div>' +
+    '</div></div>' +
+    '<div class="panel" style="margin-top:16px"><div class="panel-head"><div><h3>Live player</h3><div class="sub">Restream pushes to all — set which tab is shown by default</div></div>' +
+    '<button class="btn btn-sm btn-primary" onclick="saveSiteInfo()">Save</button></div><div class="panel-body">' +
+    '<div class="form-group"><label class="form-label">Default tab</label>' +
+    '<select class="form-input" id="si-live-tab">' +
+    '<option value="twitch"'   + (s.live_default_tab === 'twitch'   || !s.live_default_tab ? ' selected' : '') + '>Twitch</option>' +
+    '<option value="youtube"'  + (s.live_default_tab === 'youtube'  ? ' selected' : '') + '>YouTube Live</option>' +
+    '<option value="facebook"' + (s.live_default_tab === 'facebook' ? ' selected' : '') + '>Facebook Live</option>' +
+    '</select></div>' +
+    '<div class="form-grid-2">' +
+    '<div class="form-group"><label class="form-label">Twitch channel</label><input class="form-input" id="si-twitch" placeholder="occnj" value="' + esc(s.twitch_channel || '') + '"></div>' +
+    '<div class="form-group"><label class="form-label">YouTube channel ID</label><input class="form-input" id="si-yt-channel" placeholder="UCR4FqPSfjQAGy6jZB7OJ76w" value="' + esc(s.youtube_channel || '') + '"><div class="sub" style="margin-top:4px">Channel ID or a specific live video ID (11 chars)</div></div>' +
+    '<div class="form-group"><label class="form-label">Facebook page username / ID</label><input class="form-input" id="si-fb-page" placeholder="OasisChristianCentreNJ" value="' + esc(s.facebook_page_id || '') + '"></div>' +
     '</div></div></div>';
 }),
 

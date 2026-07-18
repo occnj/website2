@@ -23,7 +23,11 @@ alter table site_settings
   add column if not exists twitch_channel text default '';
 
 -- ----------------------------------------------------------------------------
--- 3. Events ordering sanity (no schema change — informational)
+-- 3. Live player — tabbed Twitch / YouTube / Facebook embed
+-- ----------------------------------------------------------------------------
+alter table site_settings add column if not exists facebook_page_id text default '';
+alter table site_settings add column if not exists youtube_channel text default '';
+alter table site_settings add column if not exists live_default_tab text default 'twitch';
 --    Public upcoming-events now sort by starts_at, then sort_order. New events
 --    added in Admin may have a null sort_order; that's fine, Postgres sorts
 --    nulls last for the secondary key. Nothing to run here.

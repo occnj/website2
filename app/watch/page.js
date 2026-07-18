@@ -2,8 +2,8 @@ import './watch.css';
 import PageHero from '@/components/PageHero';
 import SermonGrid from '@/components/SermonGrid';
 import { getPageHero, getSermons, getSiteSettings } from '@/lib/data';
-import { getChannelVideos, YT_CHANNEL_URL } from '@/lib/youtube';
-import TwitchEmbed, { TWITCH_CHANNEL_URL } from '@/components/TwitchEmbed';
+import { getChannelVideos } from '@/lib/youtube';
+import LivePlayer from '@/components/LivePlayer';
 import LiveBanner from '@/components/LiveBanner';
 import LiveInfoPanel from '@/components/LiveInfoPanel';
 
@@ -45,7 +45,12 @@ export default async function WatchPage() {
           </div>
           <div className="featured-sermon">
             <div className="featured-sermon-video" data-live-player>
-              <TwitchEmbed />
+              <LivePlayer
+                twitch_channel={(settings && settings.twitch_channel) || 'occnj'}
+                youtube_channel={(settings && settings.youtube_channel) || ''}
+                facebook_page_id={(settings && settings.facebook_page_id) || ''}
+                live_default_tab={(settings && settings.live_default_tab) || 'twitch'}
+              />
             </div>
             <LiveInfoPanel />
           </div>

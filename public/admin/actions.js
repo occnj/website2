@@ -175,6 +175,10 @@ async function saveSiteInfo() {
       facebook: document.getElementById('si-facebook').value,
       youtube: document.getElementById('si-youtube').value,
       podcast_enabled: document.getElementById('si-podcast').checked,
+      twitch_channel: document.getElementById('si-twitch').value,
+      youtube_channel: document.getElementById('si-yt-channel').value,
+      facebook_page_id: document.getElementById('si-fb-page').value,
+      live_default_tab: document.getElementById('si-live-tab').value,
     }, 'settings.site_info');
     toast('Site info saved');
   } catch (e) { fail(e); }

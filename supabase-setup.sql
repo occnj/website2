@@ -28,7 +28,10 @@ create table site_settings (
   donate_new_tab boolean default true,
   youtube_channel text default '',
   twitch_channel text default '',
-  podcast_enabled boolean default false
+  podcast_enabled boolean default false,
+  facebook_page_id text default '',
+  youtube_channel text default '',
+  live_default_tab text default 'twitch' check (live_default_tab in ('twitch','youtube','facebook'))
 );
 insert into site_settings (id, tagline, service_time, email)
 values (1, 'Know God. Find Hope. Make a Difference.', 'Sundays at 10:00 AM', 'info@oasisnj.net');
