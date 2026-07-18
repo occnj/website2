@@ -14,13 +14,7 @@
 
   // ---------- store ----------
   function makeStore() {
-    // Public pages don't load admin/config.js, so fall back to the same
-    // project the public site uses (matches site-data.js). Auth session is
-    // shared via localStorage once a staff member signs in at /admin.
-    var cfg = window.OASIS_CONFIG || {
-      SUPABASE_URL: 'https://twdyeqnlxzvanylhqnjf.supabase.co',
-      SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR3ZHllcW5seHp2YW55bGhxbmpmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM5NzUxNjMsImV4cCI6MjA5OTU1MTE2M30.OHzwlusEyT1CMeyTG3RWR45UutTD7IgRhJXEWWHUYyU'
-    };
+    var cfg = window.OASIS_CONFIG || {};
     var sb = (cfg.SUPABASE_URL && cfg.SUPABASE_ANON_KEY && window.supabase)
       ? window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY) : null;
     return {

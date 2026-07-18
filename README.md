@@ -42,7 +42,9 @@ Full details + troubleshooting in `SERVER-COMMANDS.md`.
    ```
    RESEND_API_KEY=re_xxxxxxxx
    RESEND_FROM=Oasis Website <noreply@hub.oasisnj.net>
-   SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+   NEXT_PUBLIC_SUPABASE_URL=https://YOUR_PROJECT.supabase.co
+   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_xxxxx
+   SUPABASE_SECRET_KEY=sb_secret_xxxxx
    NEXT_PUBLIC_SITE_URL=https://oasisnj.net
    ```
 3. Build + restart (above).
@@ -69,3 +71,5 @@ Full details + troubleshooting in `SERVER-COMMANDS.md`.
 - Resend (transactional email)
 - Restream (live stream distribution to Twitch/YouTube/Facebook)
 - Deployed on the church's own server (port 5900, `/website` base path)
+
+Credential handling and incident-response steps are documented in `SECURITY.md`.

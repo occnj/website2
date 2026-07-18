@@ -6,7 +6,8 @@
     "dev": "next dev -p 5900",
     "build": "next build",
     "start": "next start -p 5900",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "security:scan": "node scripts/check-secrets.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.4",

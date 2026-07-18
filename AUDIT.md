@@ -84,13 +84,18 @@ Implemented in the application:
 
 Required deployment checks:
 
-- [ ] Rotate the previously committed Resend API key and update `.env.local`.
+- [ ] Revoke the previously committed Resend API key, create a replacement, and
+      update only the server `.env.local`.
 - [ ] Confirm Supabase public email signup is disabled.
 - [ ] Confirm every staff member has an individual login; do not share passwords.
-- [ ] Confirm `RESEND_API_KEY` and `RESEND_FROM` exist only in server `.env.local`.
+- [ ] Confirm `RESEND_API_KEY`, `RESEND_FROM`, and `SUPABASE_SECRET_KEY` exist
+      only in server `.env.local`.
 - [ ] Confirm HTTPS is enforced by the public reverse proxy.
 - [ ] Enable host firewall and unattended security updates; verify backups.
 - [ ] Test role boundaries using one admin, one editor, and one events-only account.
+- [ ] Enable GitHub secret scanning and push protection in repository settings.
+- [ ] Review Resend, Supabase Auth, and database logs for activity during the
+      credential-exposure window.
 
 ---
 

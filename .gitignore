@@ -5,8 +5,9 @@
 /.next/
 /out/
 
-# local env files
-.env*.local
+# environment files (never commit credentials)
+.env*
+!.env.example
 
 # logs
 npm-debug.log*

@@ -244,7 +244,7 @@ table in use. Route: `app/api/contact/route.js`.
 - **All other forms** → addresses in private `form_settings.form_recipients` (editable by Owner/Admin in Admin → Settings)
 - From: `noreply@hub.oasisnj.net`; submitter email set as reply-to.
 - Config via env on the server (`.env.local`, gitignored):
-  `RESEND_API_KEY`, `RESEND_FROM`, and `SUPABASE_SERVICE_ROLE_KEY`. There is no
+  `RESEND_API_KEY`, `RESEND_FROM`, and `SUPABASE_SECRET_KEY`. There is no
   hardcoded secret or recipient fallback.
 - Honeypot, validation, field limits, and per-IP rate limiting reduce abuse.
 
@@ -274,7 +274,11 @@ select cron.schedule('youtube-sync', '0 * * * *',
 2. Insert their row in `profiles` with the right role.
 3. Disable public signups (Auth → Providers → Email → turn off signup).
 
-**Connect the admin panel:** copy Project URL + anon key from Settings → API into `admin/config.js`. The anon key is public-safe; RLS enforces permissions.
+**Connect the site and admin:** set `NEXT_PUBLIC_SUPABASE_URL` and
+`NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` in deployment `.env.local`. The publishable
+key is public by design; RLS—not secrecy of that key—enforces permissions. Put
+`SUPABASE_SECRET_KEY` only in the server environment. Never put a secret or legacy
+service-role key in `public/`, a `NEXT_PUBLIC_` variable, or a browser script.
 
 ---
 
@@ -345,4 +349,5 @@ design/code changes.)
 ### Droplet maintenance
 - Enable DigitalOcean automated backups ($1.20/mo) on the droplet
 - `apt upgrade` monthly; certbot renews SSL automatically
-- Supabase keys: only the **anon** key ever ships in site files — never the service_role key
+- Supabase keys: only the **publishable** key is included in browser bundles;
+  `SUPABASE_SECRET_KEY` remains server-only in `.env.local`

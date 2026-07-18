@@ -184,13 +184,24 @@ Service window (auto live/offline switching): edit the two numbers in
 - Simplified giving to one validated external HTTPS provider; no payment or giving
   processing remains on the website.
 - Moved form recipients to private, Admin-only `form_settings`; server API reads
-  them with `SUPABASE_SERVICE_ROLE_KEY`. Removed hardcoded recipient fallbacks.
+  them with a server-only Supabase secret key. Removed hardcoded recipient fallbacks.
 - Added form rate limits/field bounds, safe URL handling, Visual Edit sanitization,
   CSP/HSTS headers, authoritative audit identity, password recovery, and 5-minute
   inactivity sign-out.
 - Added Prayer to Admin Pages/Visual Edit, safe idempotent migration SQL, destructive
   warnings on fresh-install SQL, branded 404/icon, robots, sitemap, metadata, and ESLint.
 - Removed fake contact values and dead links; pages now use shared Admin settings.
+
+## Credential hardening
+
+- Removed hardcoded Supabase project URL/anon JWT from current and legacy tracked
+  browser files; deployment now injects `NEXT_PUBLIC_SUPABASE_URL` and
+  `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`.
+- Expanded `.gitignore` to block every `.env*` file except an empty template.
+- Added `SECURITY.md`, a tracked-file credential scanner, and an installable GitHub
+  Actions template for secret scan, dependency audit, lint, and production build.
+- The historically exposed Resend key must be revoked and replaced; source cleanup
+  and Git-history rewriting cannot make an exposed credential trustworthy again.
 
 ---
 

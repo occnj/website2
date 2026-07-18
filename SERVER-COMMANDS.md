@@ -153,8 +153,9 @@ Supabase SQL Editor. Do **not** run `supabase-setup.sql` on an existing site; th
 file is a destructive fresh-install script.
 
 Afterward, open Admin → Settings and save Prayer and Regular form recipients.
-The server `.env.local` must also contain `SUPABASE_SERVICE_ROLE_KEY` so the email
-API can read that private table.
+The server `.env.local` must also contain `SUPABASE_SECRET_KEY` so the email API
+can read that private table. The legacy `SUPABASE_SERVICE_ROLE_KEY` name remains
+accepted temporarily while migrating.
 
 ---
 

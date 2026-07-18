@@ -4,7 +4,7 @@ import { useEffect, useRef } from 'react';
 import * as supabase from '@supabase/supabase-js';
 import { usePathname } from 'next/navigation';
 import { asset } from '@/lib/basePath';
-import { getSupabaseBrowserClient } from '@/lib/supabase';
+import { getSupabaseBrowserClient, SUPABASE_ANON_KEY, SUPABASE_URL } from '@/lib/supabase';
 import { loadScriptSequence } from '@/lib/scriptLoader';
 
 // Matches the `pages.slug` values in supabase-setup.sql — usePathname()
@@ -27,6 +27,11 @@ export default function CmsBridge() {
   useEffect(() => {
     if (pathname.startsWith('/admin')) return;
     let cancelled = false;
+    window.OASIS_CONFIG = {
+      ...(window.OASIS_CONFIG || {}),
+      SUPABASE_URL,
+      SUPABASE_ANON_KEY,
+    };
 
     loadScriptSequence([asset('/cms-core.js')]).then(async () => {
       if (cancelled || !window.OASIS) return;
@@ -42,6 +47,7 @@ export default function CmsBridge() {
 
       const slug = slugFromPathname(pathname);
       const sb = getSupabaseBrowserClient();
+      if (!sb) return;
       const { data } = await sb.from('page_overrides').select('edits').eq('slug', slug).single();
       if (!cancelled && data && data.edits) window.OASIS.applyEdits(data.edits);
     });

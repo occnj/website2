@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import * as supabase from '@supabase/supabase-js';
 import { loadScriptSequence } from '@/lib/scriptLoader';
 import { asset } from '@/lib/basePath';
+import { SUPABASE_ANON_KEY, SUPABASE_URL } from '@/lib/supabase';
 
 const TITLES = {
   dashboard: 'Dashboard', pages: 'Pages', sermons: 'Sermons', events: 'Events',
@@ -15,6 +16,7 @@ export default function AdminPage() {
   useEffect(() => {
     let cancelled = false;
     window.supabase = supabase;
+    window.OASIS_RUNTIME_CONFIG = { SUPABASE_URL, SUPABASE_ANON_KEY };
 
     loadScriptSequence([
       asset('/admin/config.js'),

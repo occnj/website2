@@ -2,11 +2,8 @@
 // Loads content managed in the admin panel. Falls back silently to the
 // static HTML if Supabase is unreachable or a table is empty.
 (function () {
-  var CFG = window.OASIS_CONFIG || {
-    SUPABASE_URL: 'https://twdyeqnlxzvanylhqnjf.supabase.co',
-    SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR3ZHllcW5seHp2YW55bGhxbmpmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM5NzUxNjMsImV4cCI6MjA5OTU1MTE2M30.OHzwlusEyT1CMeyTG3RWR45UutTD7IgRhJXEWWHUYyU',
-  };
-  if (!window.supabase) return;
+  var CFG = window.OASIS_CONFIG || {};
+  if (!window.supabase || !CFG.SUPABASE_URL || !CFG.SUPABASE_ANON_KEY) return;
   var sb = window.supabase.createClient(CFG.SUPABASE_URL, CFG.SUPABASE_ANON_KEY);
   var slug = (location.pathname.split('/').pop() || 'index.html').replace('.html', '') || 'index';
 
