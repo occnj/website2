@@ -3,27 +3,6 @@
 import { useEffect, useState } from 'react';
 import { TWITCH_CHANNEL_URL } from './TwitchEmbed';
 import { isServiceWindowNow } from '@/lib/serviceWindow';
-// Shows the red "Live Now" banner only during the Sunday service window
-// (9:45 AM – 12:00 PM Eastern). The rest of the week it switches to a neutral
-// "We stream live Sundays at 10 AM" strip, so the site never claims to be
-// live when it isn't.
-function isServiceWindowNow() {
-  try {
-    const parts = new Intl.DateTimeFormat('en-US', {
-      timeZone: 'America/New_York',
-      weekday: 'short',
-      hour: 'numeric',
-      minute: 'numeric',
-      hour12: false,
-    }).formatToParts(new Date());
-    const get = (type) => (parts.find((p) => p.type === type) || {}).value;
-    if (get('weekday') !== 'Sun') return false;
-    const minutes = parseInt(get('hour'), 10) * 60 + parseInt(get('minute'), 10);
-    return minutes >= 9 * 60 + 45 && minutes < 12 * 60; // 9:45 AM – 12:00 PM ET
-  } catch {
-    return false;
-  }
-}
 
 export default function LiveBanner() {
   const [live, setLive] = useState(false);
