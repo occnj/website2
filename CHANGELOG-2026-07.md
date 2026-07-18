@@ -4,6 +4,14 @@ Master reference for future work. Covers everything changed after the Next.js
 migration (`19efecc`): what was done, the SQL to run, env vars needed, and where
 key logic lives. For plain deploy/restart commands see `SERVER-COMMANDS.md`.
 
+## Latest UI fixes — July 18, 2026
+
+- Admin now hides the public site header and footer so the content manager has
+  a dedicated workspace.
+- Prayer messaging consistently uses **“We’re Standing With You.”**
+- Visual Edit now detects direct visible text inside mixed layout containers,
+  so text is editable across all site pages instead of only selected elements.
+
 ---
 
 ## Quick deploy (server)

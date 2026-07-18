@@ -31,7 +31,7 @@ export default function AdminPage() {
   return (
     <>
       <link rel="stylesheet" href={asset('/admin/admin.css')} />
-      <style>{`a { color: var(--blue); } a:hover { color: var(--blue-dark); }`}</style>
+      <style>{`.site-header, .site-footer { display: none !important; } a { color: var(--blue); } a:hover { color: var(--blue-dark); }`}</style>
 
       <div className="login-screen" id="login-screen">
         <div className="login-card">

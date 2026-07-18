@@ -76,11 +76,11 @@
     if (el.closest('#cms-bar,#cms-pop,#cms-hover,.cms-ctrl')) return false;
     // classic text tags: always editable as a unit (same as before)
     if (CLASSIC_TEXT.indexOf(tag) !== -1) return true;
-    // generic containers: editable only when their contents are plain
-    // inline text — so wrappers holding buttons/headings are left alone
+    // generic containers: any direct visible text is editable. This includes
+    // mixed wrappers, so text is never silently skipped because a layout
+    // container also contains another element.
     if (GENERIC_TEXT.indexOf(tag) !== -1) {
-      if (hasDirectText(el) && onlyInlineChildren(el)) return true;
-      if (!el.firstElementChild && hasDirectText(el)) return true;
+      if (hasDirectText(el)) return true;
       if (onlyInlineChildren(el) && el.firstElementChild) return true;
       return false;
     }

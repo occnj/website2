@@ -241,7 +241,7 @@ export default async function HomePage() {
           <div className="prayer-section">
             <div>
               <p className="t-eyebrow">Care & Prayer</p>
-              <h2 className="t-h1 mt-2">We&rsquo;re standing<br />with you.</h2>
+              <h2 className="t-h1 mt-2">We&rsquo;re Standing<br />With You</h2>
               <p className="t-body t-muted mt-3">Whatever you&rsquo;re walking through — our prayer team is here. Submit a request and someone will personally pray over your situation.</p>
               <div style={{ marginTop: 'var(--sp-4)', display: 'flex', flexDirection: 'column', gap: 0 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 16, fontSize: '.95rem', padding: '14px 0', borderBottom: '1px solid rgba(26,40,53,.08)' }}>

@@ -15,9 +15,13 @@ becomes editable in place.
 
 - In the admin (`/admin` → **Pages**), click **“Visual edit ↗”** on any page.
   It opens the real page with `?edit=1`.
+- Admin has its own workspace chrome; the public header and footer are hidden
+  while managing content.
 - Or add `?edit=1` to any page URL while signed in.
 - Then:
-  - **Click any text** → type to edit in place (inline formatting kept).
+  - **Click any visible text** → type to edit in place (inline formatting kept).
+    Detection includes direct text inside mixed layout containers on every page;
+    it is not limited to headings, paragraphs, or a selector whitelist.
   - **Click any image / placeholder**, or **drag a file onto it** → uploads &
     replaces it (this is what the old hero upload failed to do).
   - **🔗 Edit link** on any button → change where it points.

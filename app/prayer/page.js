@@ -16,7 +16,7 @@ export default async function PrayerPage() {
     <>
       <PageHero
         eyebrow="Care & Prayer"
-        title={(hero && hero.title) || 'We&rsquo;re Standing With You'}
+        title={(hero && hero.title) || 'We’re Standing With You'}
         description={(hero && hero.intro) || 'Whatever you\u2019re walking through, you don\u2019t have to carry it alone. Submit a request and our prayer team will personally lift you up.'}
         image={hero && hero.image}
       />
