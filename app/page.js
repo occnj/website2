@@ -3,6 +3,7 @@ import './home.css';
 import { getPageHero, getSermons } from '@/lib/data';
 import { getChannelVideos } from '@/lib/youtube';
 import { asset } from '@/lib/basePath';
+import PrayerForm from '@/components/PrayerForm';
 
 export const dynamic = 'force-dynamic';
 
@@ -150,12 +151,12 @@ export default async function HomePage() {
                 </div>
               </div>
             </Link>
-            <Link href="/contact" className="involve-row">
+            <Link href="/prayer" className="involve-row">
               <div className="involve-row-inner">
                 <div className="involve-left">
                   <span className="involve-num">03</span>
                   <div>
-                    <div className="involve-title">Prayer</div>
+                    <div className="involve-title">Prayer Request</div>
                     <div className="involve-desc">You don&rsquo;t have to carry it alone. Our care team will personally stand with you in faith.</div>
                   </div>
                 </div>
@@ -256,28 +257,9 @@ export default async function HomePage() {
                   No request is too big or too small
                 </div>
               </div>
-              <Link href="/contact" className="btn btn-primary mt-4">Submit a Prayer Request</Link>
+              <Link href="/prayer" className="btn btn-primary mt-4">Submit a Prayer Request</Link>
             </div>
-            <div style={{ background: '#fff', borderRadius: 'var(--radius-lg)', padding: 'var(--sp-5)', boxShadow: 'var(--shadow-md)' }}>
-              <h3 className="t-h3" style={{ marginBottom: 'var(--sp-3)' }}>Send Us Your Request</h3>
-              <div className="form-group">
-                <label className="form-label">Your Name</label>
-                <input type="text" className="form-input" placeholder="First name is fine" />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Email (optional)</label>
-                <input type="email" className="form-input" placeholder="For a follow-up from our team" />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Your Prayer Request</label>
-                <textarea className="form-textarea" placeholder="Share what's on your heart..." style={{ minHeight: 100 }}></textarea>
-              </div>
-              <label style={{ display: 'flex', alignItems: 'flex-start', gap: 10, fontSize: '.82rem', color: 'var(--gray-1)', cursor: 'pointer', marginBottom: 'var(--sp-3)' }}>
-                <input type="checkbox" style={{ marginTop: 3, accentColor: 'var(--blue)' }} />
-                Keep my request confidential (only seen by the prayer team)
-              </label>
-              <button className="btn btn-primary full-w" style={{ justifyContent: 'center' }}>Submit Request</button>
-            </div>
+            <PrayerForm />
           </div>
         </div>
       </section>

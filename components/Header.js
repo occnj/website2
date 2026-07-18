@@ -42,10 +42,17 @@ export default function Header() {
   const { navItems } = useSiteData();
 
   useEffect(() => {
+    let ticking = false;
     function onScroll() {
-      setScrolled(window.scrollY > 20);
+      if (ticking) return;
+      ticking = true;
+      window.requestAnimationFrame(() => {
+        ticking = false;
+        const next = window.scrollY > 20;
+        setScrolled((prev) => (prev === next ? prev : next));
+      });
     }
-    window.addEventListener('scroll', onScroll);
+    window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 

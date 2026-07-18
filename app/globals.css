@@ -239,6 +239,11 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
   -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border);
   transition: box-shadow .2s;
+  /* Promote to its own compositor layer so the blur doesn't re-rasterize
+     the page behind it on every scroll frame (fixes the scroll flicker). */
+  transform: translateZ(0);
+  will-change: transform;
+  backface-visibility: hidden;
 }
 .site-header.scrolled { box-shadow: var(--shadow-md); }
 .header-inner {

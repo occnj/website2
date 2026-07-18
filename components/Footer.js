@@ -50,7 +50,7 @@ export default function Footer() {
             <ul>
               <li><Link href="/about#ministries">Teams</Link></li>
               <li><Link href="/#circles">Circles</Link></li>
-              <li><Link href="/contact">Prayer Request</Link></li>
+              <li><Link href="/prayer">Prayer Request</Link></li>
               <li><Link href="/life-events">Life Events</Link></li>
             </ul>
           </div>

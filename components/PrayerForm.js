@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 
-export default function ContactForm() {
+export default function PrayerForm() {
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState('');
@@ -12,16 +12,17 @@ export default function ContactForm() {
     setError('');
     const f = e.target;
     const payload = {
-      formType: 'contact',
+      formType: 'prayer',
       name: [f.firstName.value, f.lastName.value].filter(Boolean).join(' ').trim(),
       email: f.email.value,
       phone: f.phone.value,
-      reason: f.reason.value,
-      message: f.message.value,
+      'Prayer Request': f.request.value,
+      'Keep confidential': f.confidential.checked ? 'Yes — prayer team only' : 'No',
+      'OK to contact me': f.contactOk.checked ? 'Yes' : 'No',
       company: f.company.value, // honeypot
     };
-    if (!payload.name || !payload.email) {
-      setError('Please fill in your name and email.');
+    if (!payload.name || !payload['Prayer Request']) {
+      setError('Please share your name and prayer request.');
       return;
     }
     setSending(true);
@@ -41,13 +42,24 @@ export default function ContactForm() {
     }
   }
 
+  if (sent) {
+    return (
+      <div className="form-card" style={{ textAlign: 'center' }}>
+        <div style={{ fontSize: '2.5rem', marginBottom: 'var(--sp-2)' }}>🙏</div>
+        <h2 style={{ fontFamily: 'var(--font-head)', fontSize: '1.5rem', fontWeight: 700, marginBottom: 'var(--sp-2)' }}>Your request has been received.</h2>
+        <p className="t-body t-muted">Our prayer team will stand with you. You are not alone — we&rsquo;re praying.</p>
+      </div>
+    );
+  }
+
   return (
     <div className="form-card">
-      <h2 style={{ fontFamily: 'var(--font-head)', fontSize: '1.5rem', fontWeight: 700, marginBottom: 'var(--sp-1)' }}>Send Us a Message</h2>
-      <p className="t-small t-muted" style={{ marginBottom: 'var(--sp-4)' }}>We typically respond within one business day.</p>
+      <h2 style={{ fontFamily: 'var(--font-head)', fontSize: '1.5rem', fontWeight: 700, marginBottom: 'var(--sp-1)' }}>Prayer Request</h2>
+      <p className="t-small t-muted" style={{ marginBottom: 'var(--sp-4)' }}>
+        Share what&rsquo;s on your heart. Our dedicated prayer team reads every request and will personally pray over your situation.
+      </p>
 
       <form onSubmit={handleSubmit}>
-        {/* honeypot — hidden from users, catches bots */}
         <input type="text" name="company" tabIndex={-1} autoComplete="off" style={{ position: 'absolute', left: '-9999px', width: 1, height: 1 }} aria-hidden="true" />
         <div className="form-row-2">
           <div className="form-group">
@@ -60,45 +72,34 @@ export default function ContactForm() {
           </div>
         </div>
         <div className="form-group">
-          <label className="form-label">Email Address *</label>
-          <input name="email" type="email" className="form-input" placeholder="you@email.com" required />
+          <label className="form-label">Email</label>
+          <input name="email" type="email" className="form-input" placeholder="you@email.com" />
         </div>
         <div className="form-group">
           <label className="form-label">Phone (optional)</label>
           <input name="phone" type="tel" className="form-input" placeholder="(732) 555-0000" />
         </div>
         <div className="form-group">
-          <label className="form-label">What is this about?</label>
-          <select name="reason" className="form-input reason-select" defaultValue="">
-            <option value="">Select a reason</option>
-            <option>General Inquiry</option>
-            <option>Planning a Visit</option>
-            <option>Prayer Request</option>
-            <option>Join a Team</option>
-            <option>Baptism / Life Event</option>
-            <option>Giving / Finances</option>
-            <option>Pastoral Care</option>
-            <option>Media / Press</option>
-            <option>Other</option>
-          </select>
-        </div>
-        <div className="form-group">
-          <label className="form-label">Message *</label>
-          <textarea name="message" className="form-textarea" placeholder="How can we help you?" required></textarea>
+          <label className="form-label">Your Prayer Request *</label>
+          <textarea name="request" className="form-textarea" style={{ minHeight: 140 }} placeholder="Share what you'd like us to pray for..." required></textarea>
         </div>
 
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 'var(--sp-2)', fontSize: '.82rem', color: 'var(--gray-1)' }}>
+          <input type="checkbox" name="confidential" style={{ marginTop: 3, accentColor: 'var(--blue)' }} id="confidential" defaultChecked />
+          <label htmlFor="confidential">Keep my request confidential (seen only by the prayer team).</label>
+        </div>
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 'var(--sp-3)', fontSize: '.82rem', color: 'var(--gray-1)' }}>
-          <input type="checkbox" style={{ marginTop: 3, accentColor: 'var(--blue)' }} id="consent" required />
-          <label htmlFor="consent">I agree to be contacted by Oasis Christian Centre. We respect your privacy and will never share your information.</label>
+          <input type="checkbox" name="contactOk" style={{ marginTop: 3, accentColor: 'var(--blue)' }} id="contactOk" />
+          <label htmlFor="contactOk">It&rsquo;s okay for someone from the care team to follow up with me.</label>
         </div>
 
         <button
           type="submit"
           className="btn btn-primary full-w"
-          style={{ justifyContent: 'center', padding: 16, background: sent ? '#4A8C6A' : undefined }}
-          disabled={sending || sent}
+          style={{ justifyContent: 'center', padding: 16 }}
+          disabled={sending}
         >
-          {sending ? 'Sending...' : sent ? 'Message Sent!' : 'Send Message'}
+          {sending ? 'Sending...' : 'Submit Prayer Request'}
         </button>
 
         {error && (
@@ -106,16 +107,6 @@ export default function ContactForm() {
             {error}
           </div>
         )}
-
-        {sent && (
-          <div className="success-msg" style={{ display: 'block' }}>
-            Your message was sent! We&rsquo;ll be in touch within one business day.
-          </div>
-        )}
-
-        <p style={{ textAlign: 'center', fontSize: '.78rem', color: 'var(--gray-1)', marginTop: 'var(--sp-3)' }}>
-          Need prayer? <a href="/website/prayer" style={{ color: 'var(--blue)', fontWeight: 600 }}>Submit a prayer request →</a>
-        </p>
       </form>
     </div>
   );
