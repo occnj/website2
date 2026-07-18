@@ -228,13 +228,13 @@ team: () => safe(async function () {
     '</div></div>';
 }),
 
-// ---------------- GIVING ----------------
+// ---------------- EXTERNAL GIVING LINK ----------------
 give: () => safe(async function () {
   const s = await DB.getSettings();
-  return '<div class="panel"><div class="panel-head"><div><h3>Donation page</h3><div class="sub">Every "Give" button on the site sends people to this link</div></div>' +
+  return '<div class="panel"><div class="panel-head"><div><h3>External giving link</h3><div class="sub">The website does not process gifts; every “Give” button opens this external provider</div></div>' +
     '<button class="btn btn-sm btn-primary" onclick="saveGive()">Save</button></div>' +
     '<div class="panel-body">' +
-    '<div class="form-group"><label class="form-label">Donation link <span class="form-hint">— The Kingdom Ledger</span></label>' +
+    '<div class="form-group"><label class="form-label">External provider URL</label>' +
     '<input class="form-input" id="give-url" value="' + esc(s.donate_url || '') + '"></div>' +
     '<div class="form-group" style="flex-direction:row;align-items:center;gap:10px;margin-bottom:0">' +
     '<label class="toggle"><input type="checkbox" id="give-newtab"' + (s.donate_new_tab ? ' checked' : '') + '><span class="track"></span></label>' +
@@ -270,12 +270,13 @@ navigation: () => safe(async function () {
     '<div class="form-group"><label class="form-label">Address</label><input class="form-input" id="si-address" value="' + esc(s.address || '') + '"></div>' +
     '<div class="form-group"><label class="form-label">Phone</label><input class="form-input" id="si-phone" value="' + esc(s.phone || '') + '"></div>' +
     '<div class="form-group"><label class="form-label">Email</label><input class="form-input" id="si-email" value="' + esc(s.email || '') + '"></div>' +
-    '<div class="form-group"><label class="form-label">Prayer request recipients</label><input class="form-input" id="si-prayer-recipients" value="' + esc(s.prayer_recipients || '') + '" placeholder="pastor@example.com, prayer@example.com"><div class="sub" style="margin-top:4px">Comma-, space-, or line-separated addresses</div></div>' +
-    '<div class="form-group"><label class="form-label">Regular form recipients</label><input class="form-input" id="si-form-recipients" value="' + esc(s.form_recipients || '') + '" placeholder="office@example.com"><div class="sub" style="margin-top:4px">Used for contact and other non-prayer forms</div></div>' +
     '<div class="form-group"><label class="form-label">Service time</label><input class="form-input" id="si-service" value="' + esc(s.service_time || '') + '"></div>' +
     '<div class="form-group"><label class="form-label">Instagram URL</label><input class="form-input" id="si-instagram" value="' + esc(s.instagram || '') + '"></div>' +
     '<div class="form-group"><label class="form-label">Facebook URL</label><input class="form-input" id="si-facebook" value="' + esc(s.facebook || '') + '"></div>' +
     '<div class="form-group"><label class="form-label">YouTube URL</label><input class="form-input" id="si-youtube" value="' + esc(s.youtube || '') + '"></div>' +
+    '<div class="form-group"><label class="form-label">Public calendar URL</label><input class="form-input" id="si-calendar" value="' + esc(s.calendar_url || '') + '"></div>' +
+    '<div class="form-group"><label class="form-label">Apple Podcasts URL</label><input class="form-input" id="si-podcast-apple" value="' + esc(s.podcast_apple_url || '') + '"></div>' +
+    '<div class="form-group"><label class="form-label">Spotify Podcast URL</label><input class="form-input" id="si-podcast-spotify" value="' + esc(s.podcast_spotify_url || '') + '"></div>' +
     '</div>' +
     '<div class="form-group" style="margin-bottom:0;display:flex;align-items:center;gap:10px;margin-top:8px">' +
     '<label class="toggle" title="Show/hide podcast section on Watch page"><input type="checkbox" id="si-podcast"' + (s.podcast_enabled ? ' checked' : '') + '><span class="track"></span></label>' +
@@ -299,7 +300,15 @@ navigation: () => safe(async function () {
 
 // Settings keeps the site-info and live-player controls available from a
 // clearly named admin destination; navigation remains available separately.
-settings: () => VIEWS.navigation(),
+settings: () => safe(async function () {
+  if (!DB.canManageUsers()) return needSetup('Only administrators can manage form delivery settings.');
+  const s = await DB.getFormSettings();
+  return '<div class="panel"><div class="panel-head"><div><h3>Form email delivery</h3><div class="sub">Admin-only · controls where confidential submissions are delivered</div></div>' +
+    '<button class="btn btn-sm btn-primary" onclick="saveFormRecipients()">Save</button></div><div class="panel-body">' +
+    '<div class="form-group"><label class="form-label">Prayer request recipients</label><textarea class="form-textarea" id="form-prayer-recipients" placeholder="pastor@example.com, prayer@example.com">' + esc(s.prayer_recipients || '') + '</textarea><div class="sub" style="margin-top:4px">Comma-, space-, or line-separated addresses</div></div>' +
+    '<div class="form-group"><label class="form-label">Regular form recipients</label><textarea class="form-textarea" id="form-regular-recipients" placeholder="office@example.com">' + esc(s.form_recipients || '') + '</textarea><div class="sub" style="margin-top:4px">Contact, baptism, dedication, and other non-prayer forms</div></div>' +
+    '</div></div>';
+}),
 
 // ---------------- MEDIA ----------------
 media: () => safe(async function () {

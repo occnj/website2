@@ -10,20 +10,29 @@ export default function SermonGrid({ sermons }) {
   }, [sermons]);
 
   const [active, setActive] = useState('all');
-  const filtered = active === 'all' ? sermons : sermons.filter((s) => s.series === active);
+  const [query, setQuery] = useState('');
+  const filtered = sermons.filter((s) => {
+    const inSeries = active === 'all' || s.series === active;
+    const haystack = [s.title, s.series, s.speaker, s.description].filter(Boolean).join(' ').toLowerCase();
+    return inSeries && haystack.includes(query.trim().toLowerCase());
+  });
 
   return (
     <>
-      <div className="series-tabs">
-        <div className={'series-tab' + (active === 'all' ? ' active' : '')} onClick={() => setActive('all')}>All</div>
+      <label className="sermon-search">
+        <span className="sr-only">Search messages</span>
+        <input value={query} onChange={(event) => setQuery(event.target.value)} type="search" className="form-input" placeholder="Search messages..." />
+      </label>
+      <div className="series-tabs" aria-label="Filter messages by series">
+        <button type="button" className={'series-tab' + (active === 'all' ? ' active' : '')} aria-pressed={active === 'all'} onClick={() => setActive('all')}>All</button>
         {series.map((s) => (
-          <div key={s} className={'series-tab' + (active === s ? ' active' : '')} onClick={() => setActive(s)}>{s}</div>
+          <button type="button" key={s} className={'series-tab' + (active === s ? ' active' : '')} aria-pressed={active === s} onClick={() => setActive(s)}>{s}</button>
         ))}
       </div>
 
       <div className="sermon-grid">
         {filtered.length === 0 && (
-          <p style={{ color: 'var(--gray-1)', gridColumn: '1/-1' }}>No messages yet — check back soon.</p>
+          <p style={{ color: 'var(--gray-1)', gridColumn: '1/-1' }}>No messages match this search.</p>
         )}
         {filtered.map((s) => (
           <a

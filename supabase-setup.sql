@@ -1,9 +1,10 @@
 -- ============================================================
 -- OASIS CHRISTIAN CENTRE — Supabase setup (run once, SQL Editor)
--- Safe to re-run: drops and recreates content tables.
+-- DESTRUCTIVE FRESH INSTALL ONLY. This drops and recreates content tables.
+-- For an existing website, run db/migrations-2026-07.sql instead.
 -- ============================================================
 
-drop table if exists audit_log, page_blocks, pages, sermons, events, team_members, nav_items, give_settings, site_settings, messages, give_links cascade;
+drop table if exists audit_log, page_blocks, pages, sermons, events, team_members, nav_items, form_settings, give_settings, site_settings, messages, give_links cascade;
 drop function if exists my_role() cascade;
 
 -- ===== USER PROFILES / ROLES =====
@@ -23,20 +24,28 @@ $$ select role from profiles where id = auth.uid() and active $$;
 create table site_settings (
   id int primary key default 1 check (id = 1),
   tagline text, address text, phone text, email text, service_time text,
-  prayer_recipients text default 'oasis@oasisnj.net, PHegel@oasisnj.net, pjhegel@verizon.net',
-  form_recipients text default 'oasis@oasisnj.net',
   instagram text, youtube text, facebook text,
   donate_url text default 'https://thekingdomledger.com/donate?code=2335',
   donate_new_tab boolean default true,
   youtube_channel text default '',
   twitch_channel text default '',
   podcast_enabled boolean default false,
+  podcast_apple_url text default '',
+  podcast_spotify_url text default '',
+  calendar_url text default '',
   facebook_page_id text default '',
-  youtube_channel text default '',
   live_default_tab text default 'twitch' check (live_default_tab in ('twitch','youtube','facebook'))
 );
 insert into site_settings (id, tagline, service_time, email)
 values (1, 'Know God. Find Hope. Make a Difference.', 'Sundays at 10:00 AM', 'info@oasisnj.net');
+
+create table form_settings (
+  id int primary key default 1 check (id = 1),
+  prayer_recipients text not null default '',
+  form_recipients text not null default '',
+  updated_at timestamptz default now()
+);
+insert into form_settings (id) values (1);
 
 -- ===== NAVIGATION =====
 create table nav_items (
@@ -71,7 +80,8 @@ create table page_blocks (
 insert into pages (slug, title) values
  ('index','Home'),('about','About'),('plan-your-visit','Plan Your Visit'),
  ('watch','Watch'),('events','Events'),('leadership','Leadership'),
- ('life-events','Life Events'),('give','Give'),('contact','Contact');
+ ('life-events','Life Events'),('give','Give'),('contact','Contact'),
+ ('prayer','Prayer Request');
 
 -- Hero copy seeded from the current site
 insert into page_blocks (page_id, block_key, sort_order, content)
@@ -84,8 +94,9 @@ join (values
  ('events',      '{"eyebrow":"What''s Happening","title":"Events","intro":"From Sunday services to community gatherings — there''s always something happening at Oasis."}'),
  ('leadership',  '{"eyebrow":"Our Team","title":"Leadership","intro":"Oasis is led by people who love God, love people, and are committed to serving the Rahway community with integrity and joy."}'),
  ('life-events', '{"eyebrow":"Next Steps","title":"Life Events","intro":"Some moments in life deserve to be marked. We''re honored to stand with you for the ones that matter most."}'),
- ('give',        '{"eyebrow":"Generosity","title":"Your generosity builds the house.","intro":"Every gift you give funds local outreach, global missions, and the work of building a church that feels like home."}'),
- ('contact',     '{"eyebrow":"We''d Love to Hear From You","title":"Get in Touch","intro":"Whether you have a question, need prayer, or just want to say hello — our team is here and glad to connect."}')
+ ('give',        '{"eyebrow":"External Giving","title":"Continue to our secure giving partner.","intro":"Giving is handled entirely by an external service."}'),
+ ('contact',     '{"eyebrow":"We''d Love to Hear From You","title":"Get in Touch","intro":"Whether you have a question, need prayer, or just want to say hello — our team is here and glad to connect."}'),
+ ('prayer',      '{"eyebrow":"We’re Standing With You","title":"Prayer Request","intro":"Share your request with our prayer team. Contact information is optional."}')
 ) as x(slug, content) on p.slug = x.slug;
 
 -- ===== LEADERSHIP TEAM (starts EMPTY — old members removed) =====
@@ -147,6 +158,7 @@ create table audit_log (
 -- ============================================================
 alter table profiles enable row level security;
 alter table site_settings enable row level security;
+alter table form_settings enable row level security;
 alter table nav_items enable row level security;
 alter table pages enable row level security;
 alter table page_blocks enable row level security;
@@ -166,6 +178,9 @@ create policy "public read" on sermons for select using (not hidden);
 
 -- Staff writes (owner/admin/editor)
 create policy "staff write" on site_settings for all using (my_role() in ('owner','admin','editor'));
+create policy "admin form settings read" on form_settings for select using (my_role() in ('owner','admin'));
+create policy "admin form settings write" on form_settings for all
+  using (my_role() in ('owner','admin')) with check (my_role() in ('owner','admin'));
 create policy "staff write" on nav_items for all using (my_role() in ('owner','admin','editor'));
 create policy "staff write" on pages for all using (my_role() in ('owner','admin','editor'));
 create policy "staff write" on page_blocks for all using (my_role() in ('owner','admin','editor'));
@@ -185,7 +200,16 @@ create policy "admin delete" on profiles for delete
   using (my_role() in ('owner','admin') and role <> 'owner');
 
 -- Audit log: staff can write, owner/admin can read; nobody can edit/delete
-create policy "staff insert" on audit_log for insert with check (my_role() is not null);
+create or replace function secure_audit_identity() returns trigger
+language plpgsql security definer set search_path = public as $$
+begin
+  new.actor := auth.uid();
+  select coalesce(full_name, 'Staff') into new.actor_name from profiles where id = auth.uid();
+  return new;
+end $$;
+create trigger secure_audit_identity_before_insert before insert on audit_log
+for each row execute function secure_audit_identity();
+create policy "staff insert" on audit_log for insert with check (my_role() is not null and actor = auth.uid());
 create policy "admin read" on audit_log for select using (my_role() in ('owner','admin'));
 
 -- ============================================================

@@ -63,25 +63,25 @@ export default function PrayerForm() {
         <input type="text" name="company" tabIndex={-1} autoComplete="off" style={{ position: 'absolute', left: '-9999px', width: 1, height: 1 }} aria-hidden="true" />
         <div className="form-row-2">
           <div className="form-group">
-            <label className="form-label">First Name *</label>
-            <input name="firstName" type="text" className="form-input" placeholder="Your first name" required />
+            <label className="form-label" htmlFor="prayer-first-name">First Name *</label>
+            <input id="prayer-first-name" name="firstName" type="text" autoComplete="given-name" className="form-input" placeholder="Your first name" required />
           </div>
           <div className="form-group">
-            <label className="form-label">Last Name</label>
-            <input name="lastName" type="text" className="form-input" placeholder="Your last name" />
+            <label className="form-label" htmlFor="prayer-last-name">Last Name</label>
+            <input id="prayer-last-name" name="lastName" type="text" autoComplete="family-name" className="form-input" placeholder="Your last name" />
           </div>
         </div>
         <div className="form-group">
-          <label className="form-label">Email</label>
-          <input name="email" type="email" className="form-input" placeholder="you@email.com" />
+          <label className="form-label" htmlFor="prayer-email">Email (optional)</label>
+          <input id="prayer-email" name="email" type="email" autoComplete="email" className="form-input" placeholder="you@email.com" />
         </div>
         <div className="form-group">
-          <label className="form-label">Phone (optional)</label>
-          <input name="phone" type="tel" className="form-input" placeholder="(732) 555-0000" />
+          <label className="form-label" htmlFor="prayer-phone">Phone (optional)</label>
+          <input id="prayer-phone" name="phone" type="tel" autoComplete="tel" className="form-input" placeholder="Phone number" />
         </div>
         <div className="form-group">
-          <label className="form-label">Your Prayer Request *</label>
-          <textarea name="request" className="form-textarea" style={{ minHeight: 140 }} placeholder="Share what you'd like us to pray for..." required></textarea>
+          <label className="form-label" htmlFor="prayer-request">Your Prayer Request *</label>
+          <textarea id="prayer-request" name="request" className="form-textarea" style={{ minHeight: 140 }} placeholder="Share what you'd like us to pray for..." required></textarea>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 'var(--sp-2)', fontSize: '.82rem', color: 'var(--gray-1)' }}>
@@ -103,7 +103,7 @@ export default function PrayerForm() {
         </button>
 
         {error && (
-          <div style={{ display: 'block', marginTop: 'var(--sp-3)', color: '#C45E4A', fontSize: '.85rem' }}>
+          <div role="alert" style={{ display: 'block', marginTop: 'var(--sp-3)', color: '#C45E4A', fontSize: '.85rem' }}>
             {error}
           </div>
         )}

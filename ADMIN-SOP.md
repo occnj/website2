@@ -10,6 +10,11 @@ Plain-language guide for the team. Technical setup lives in `SUPABASE-GUIDE.md`.
 2. Enter your church email + password
 3. Forgot password? Click "Forgot password" — a reset link is emailed to you (Supabase Auth handles this automatically)
 
+Admin and Visual Edit automatically sign you out after **5 minutes without keyboard,
+mouse, touch, or scroll activity** across either workspace. Use **Sign Out** in the
+top bar or beside your account in the sidebar whenever you finish working,
+especially on a shared device.
+
 **Never share logins.** Each of the 6 team members has their own account so every change is tracked by name.
 
 ---
@@ -30,7 +35,7 @@ Behind the scenes (for whoever administers Supabase):
 
 | Role | Can do |
 |---|---|
-| **Admin** | Everything — pages, users, payment links, all content |
+| **Admin** | Everything — pages, users, external giving link, form delivery, all content |
 | **Editor** | Pages, media, events, sermons, team profiles, nav/footer, inbox |
 | **Events only** | Add/edit events, nothing else |
 
@@ -85,9 +90,9 @@ shows all three as tabs. To change the default tab or the channel handles:
 - Enter multiple addresses separated by commas, spaces, or new lines.
 - These go out by email (Resend) — check those inboxes, not the admin panel.
 
-### Update the donation link (Admins only)
-1. **Giving** → paste the new Kingdom Ledger link → Save
-2. Click **Test Link** and complete a $1 gift before announcing
+### Update the external giving link (Admins only)
+1. **External Giving Link** → paste the provider&apos;s HTTPS URL → Save
+2. Click **Test Link**. The Oasis website never accepts or stores payment details.
 
 ### Navigation & footer
 **Navigation** tab → **↑↓ arrows** to reorder menu items, toggle to hide, edit
@@ -129,7 +134,7 @@ Do these in order (developer + one admin):
 4. **Host** — set up the DigitalOcean droplet (Nginx + SSL, see SUPABASE-GUIDE.md); point oasisnj.net DNS
 5. **Wire data** — connect pages to Supabase reads; verify every page renders from the DB
 6. **Edge Function** — YouTube sync cron (optional; sermons can be added manually)
-7. **Giving** — verify the Kingdom Ledger donation link, test a $1 gift
+7. **External giving** — verify the provider URL opens correctly
 8. **Users** — invite all 6, set roles, **disable public signup**, everyone logs in once
 9. **Mobile check** — walk every page on a phone
 10. **Backups** — Supabase daily backups are on by default (verify in dashboard)

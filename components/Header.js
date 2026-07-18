@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import GiveLink from './GiveLink';
 import { useSiteData } from './SiteDataContext';
 import { asset } from '@/lib/basePath';
+import SocialLinks from './SocialLinks';
 
 function normalizeHref(href) {
   if (!href) return '/';
@@ -38,7 +39,7 @@ export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
-  const { navItems } = useSiteData();
+  const { navItems, settings } = useSiteData();
 
   useEffect(() => {
     let ticking = false;
@@ -76,10 +77,10 @@ export default function Header() {
               <div className="nav-item" key={link.label}>
                 {link.dropdown ? (
                   <>
-                    <span className="nav-link">
+                    <button type="button" className="nav-link" aria-haspopup="true">
                       {link.label}
                       <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 10L3 5h10z" /></svg>
-                    </span>
+                    </button>
                     <div className="nav-dropdown">
                       {link.dropdown.map((d) => (
                         <Link href={d.href} key={d.label}>
@@ -97,10 +98,10 @@ export default function Header() {
             ))}
             {navItems && navItems.length && dropdownItem ? (
               <div className="nav-item">
-                <span className="nav-link">
+                <button type="button" className="nav-link" aria-haspopup="true">
                   {dropdownItem.label}
                   <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 10L3 5h10z" /></svg>
-                </span>
+                </button>
                 <div className="nav-dropdown">
                   {dropdownItem.dropdown.map((d) => (
                     <Link href={d.href} key={d.label}>
@@ -112,10 +113,13 @@ export default function Header() {
             ) : null}
           </nav>
           <div className="header-cta">
+            <SocialLinks settings={settings} className="header-social" />
             <GiveLink className="btn btn-amber btn-sm">Give</GiveLink>
             <button
               className={'nav-toggle' + (mobileOpen ? ' active' : '')}
               aria-label="Menu"
+              aria-expanded={mobileOpen}
+              aria-controls="mobile-navigation"
               onClick={() => setMobileOpen((v) => !v)}
             >
               <span></span><span></span><span></span>
@@ -123,22 +127,23 @@ export default function Header() {
           </div>
         </div>
       </header>
-      <nav className={'mobile-nav' + (mobileOpen ? ' open' : '')}>
+      <nav id="mobile-navigation" aria-label="Mobile navigation" className={'mobile-nav' + (mobileOpen ? ' open' : '')}>
         {links.map((link) => (
           link.dropdown ? (
             <span key={link.label}>
-              <Link href="#">{link.label}</Link>
+              <span className="mobile-section-label">{link.label}</span>
               {link.dropdown.map((d) => (
-                <Link href={d.href} key={d.label} className="mobile-sub">{d.label}</Link>
+                <Link href={d.href} key={d.label} className="mobile-sub" onClick={() => setMobileOpen(false)}>{d.label}</Link>
               ))}
             </span>
           ) : (
-            <Link href={link.href} key={link.label} className={pathname === link.href ? 'active' : ''}>
+            <Link href={link.href} key={link.label} className={pathname === link.href ? 'active' : ''} onClick={() => setMobileOpen(false)}>
               {link.label}
             </Link>
           )
         ))}
         <div className="mobile-cta flex" style={{ gap: 12, flexWrap: 'wrap' }}>
+          <SocialLinks settings={settings} className="mobile-social" />
           <GiveLink className="btn btn-amber full-w">Give</GiveLink>
           <Link href="/plan-your-visit" className="btn btn-secondary full-w">Plan Your Visit</Link>
         </div>

@@ -13,6 +13,9 @@ key logic lives. For plain deploy/restart commands see `SERVER-COMMANDS.md`.
   so text is editable across all site pages instead of only selected elements.
 - Admin Settings now controls the recipient addresses for prayer requests and
   regular contact forms; addresses are comma-, space-, or line-separated.
+- Admin security now includes a five-minute inactivity sign-out, manual sign-out
+  in both the top bar and account sidebar, no-store/no-index admin headers, and
+  baseline browser security headers. The committed Resend-key fallback was removed.
 
 ---
 
@@ -166,12 +169,28 @@ Service window (auto live/offline switching): edit the two numbers in
 - **Rotate the Resend key.** It was committed as a fallback in an earlier version;
   since the repo is public, generate a fresh key in Resend and put it only in
   `.env.local`.
-- **Placeholder contact info.** Some pages show a `555` phone / mismatched address
-  (see `AUDIT.md`). Fix in Admin → Settings.
+- **Contact details.** Public pages now use one Admin-controlled address, phone,
+  email, and service time, and hide values until configured.
 - **YouTube feed limit.** RSS exposes only ~15 recent videos. Full back-catalog
   needs a YouTube Data API key — not wired.
-- **Podcast links.** When the podcast section is enabled, the Apple/Spotify
-  buttons are still `#` placeholders — set real URLs first.
+- **Podcast links.** Apple/Spotify URLs are controlled in Admin and their buttons
+  stay hidden until configured.
+
+## July 18 full-site remediation
+
+- Upgraded to Next.js 15.5.18 / React 19.1 and pinned patched PostCSS; npm audit: 0.
+- Added working life-event forms, prayer-with-optional-contact handling, message
+  search, configurable calendar/podcast links, and social icons in desktop/mobile nav.
+- Simplified giving to one validated external HTTPS provider; no payment or giving
+  processing remains on the website.
+- Moved form recipients to private, Admin-only `form_settings`; server API reads
+  them with `SUPABASE_SERVICE_ROLE_KEY`. Removed hardcoded recipient fallbacks.
+- Added form rate limits/field bounds, safe URL handling, Visual Edit sanitization,
+  CSP/HSTS headers, authoritative audit identity, password recovery, and 5-minute
+  inactivity sign-out.
+- Added Prayer to Admin Pages/Visual Edit, safe idempotent migration SQL, destructive
+  warnings on fresh-install SQL, branded 404/icon, robots, sitemap, metadata, and ESLint.
+- Removed fake contact values and dead links; pages now use shared Admin settings.
 
 ---
 

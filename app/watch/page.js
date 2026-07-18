@@ -2,7 +2,7 @@ import './watch.css';
 import PageHero from '@/components/PageHero';
 import SermonGrid from '@/components/SermonGrid';
 import { getPageHero, getSermons, getSiteSettings } from '@/lib/data';
-import { getChannelVideos } from '@/lib/youtube';
+import { getChannelVideos, YT_CHANNEL_URL } from '@/lib/youtube';
 import LivePlayer from '@/components/LivePlayer';
 import LiveBanner from '@/components/LiveBanner';
 import LiveInfoPanel from '@/components/LiveInfoPanel';
@@ -64,9 +64,6 @@ export default async function WatchPage() {
               <p className="t-eyebrow">Library</p>
               <h2 className="t-h2 mt-1">All Messages</h2>
             </div>
-            <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-              <input type="text" className="form-input" placeholder="Search messages..." style={{ maxWidth: 220, padding: '10px 16px' }} />
-            </div>
           </div>
 
           <SermonGrid sermons={sermons} />
@@ -80,8 +77,8 @@ export default async function WatchPage() {
           <h2 className="t-h2 text-white mt-2" style={{ marginBottom: 'var(--sp-2)' }}>Subscribe to the Oasis Podcast</h2>
           <p style={{ color: 'rgba(255,255,255,.6)', maxWidth: 440, margin: '0 auto var(--sp-4)', fontSize: '.95rem' }}>Take the message with you. Available on Spotify, Apple Podcasts, and wherever you listen.</p>
           <div style={{ display: 'flex', gap: 'var(--sp-2)', justifyContent: 'center', flexWrap: 'wrap' }}>
-            <a href="#" className="btn btn-secondary text-white" style={{ borderColor: 'rgba(255,255,255,.2)', color: '#fff' }}>Apple Podcasts</a>
-            <a href="#" className="btn btn-secondary text-white" style={{ borderColor: 'rgba(255,255,255,.2)', color: '#fff' }}>Spotify</a>
+            {settings && settings.podcast_apple_url ? <a href={settings.podcast_apple_url} target="_blank" rel="noopener noreferrer" className="btn btn-secondary text-white" style={{ borderColor: 'rgba(255,255,255,.2)', color: '#fff' }}>Apple Podcasts</a> : null}
+            {settings && settings.podcast_spotify_url ? <a href={settings.podcast_spotify_url} target="_blank" rel="noopener noreferrer" className="btn btn-secondary text-white" style={{ borderColor: 'rgba(255,255,255,.2)', color: '#fff' }}>Spotify</a> : null}
             <a href={YT_CHANNEL_URL} target="_blank" rel="noopener" className="btn btn-secondary text-white" style={{ borderColor: 'rgba(255,255,255,.2)', color: '#fff' }}>YouTube</a>
           </div>
         </div>

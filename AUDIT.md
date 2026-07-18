@@ -9,8 +9,9 @@ see `CHANGELOG-2026-07.md`.*
 
 The site is now a **Next.js app** (server-rendered, `basePath: /website`, port 5900)
 backed by **Supabase**, deployed on the church's own server behind a Tailscale/proxy
-setup. Most original blockers are **resolved**. Remaining work is mostly real content
-(photos, bios) and a couple of settings values.
+setup. All code-level findings from the July 18 full audit are resolved. Remaining
+launch work is deployment configuration and real church content (addresses, photos,
+bios, social URLs, and recipient addresses).
 
 ---
 
@@ -21,36 +22,36 @@ setup. Most original blockers are **resolved**. Remaining work is mostly real co
 2. ~~Contact/prayer forms don't submit~~ → **RESOLVED.** Forms send real email via
    Resend (`app/api/contact/route.js`). Prayer → pastoral team; all else → oasis@.
    See CHANGELOG "Forms & email".
-3. **Placeholder phone numbers** — still `(732) 555-01xx` in places. **Fix in
-   Admin → Settings** (no code change needed).
-4. **Address inconsistency** — verify the correct address and set it once in
-   Admin → Settings; footer + pages read from there.
-5. **Give page** — uses the Kingdom Ledger donate link
-   (`thekingdomledger.com/donate?code=2335`), wired in nav + Give button. Confirm
-   it's the correct destination.
+3. ~~Placeholder phone numbers~~ → **RESOLVED.** Public pages read Admin site
+   settings and hide missing values; no fake address or phone is shown.
+4. ~~Address inconsistency~~ → **RESOLVED.** Home, Contact, Visit, Footer, and
+   directions links use the same Admin-controlled address.
+5. ~~On-site giving UI~~ → **RESOLVED.** The website processes no giving. Give
+   controls open one validated HTTPS external-provider URL.
 6. **Photo placeholders** — heroes, leadership headshots, events still use
    placeholder frames. Upload real images via Admin → Media / Visual Edit.
    Leadership names/bios also need real content.
 
 ## 🟠 Should fix — status
 
-7. ~~Footer social links go nowhere~~ → **PARTLY RESOLVED.** YouTube is wired
-   (`@OCCNJ`); Facebook/Instagram read from Admin settings — set the URLs there.
-8. **Meta descriptions** — most pages have them via Next.js `metadata`; verify
-   events/life-events/give.
+7. ~~Footer social links go nowhere~~ → **RESOLVED.** Header, mobile navigation,
+   and footer use Admin-controlled Facebook, Instagram, and YouTube URLs and hide
+   links that are not configured.
+8. ~~Meta descriptions~~ → **RESOLVED.** Route metadata and Open Graph defaults added.
 9. ~~Watch page sermons are static~~ → **RESOLVED.** Watch pulls live from the
    YouTube channel RSS feed; live stream via tabbed Twitch/YouTube/Facebook player.
-10. **Favicon** — confirm one is set from the logo.
-11. **404 page** — Next.js has a default `not-found`; a branded one can be added
-    at `app/not-found.js` if desired.
+10. ~~Favicon~~ → **RESOLVED.** App icon metadata and SVG icon added.
+11. ~~404 page~~ → **RESOLVED.** Branded `app/not-found.js` added.
 
 ## 🟡 Nice to have
 
 12. `loading="lazy"` — already applied on sermon thumbnails; extend to other
     below-the-fold images once real photos land.
-13. `robots.txt` + `sitemap.xml` for SEO.
-14. Open Graph tags (`og:image`, `og:title`) for social/WhatsApp link previews.
-15. Rotate the Resend API key (was committed as a fallback; repo is public).
+13. ~~`robots.txt` + `sitemap.xml`~~ → **RESOLVED.** Metadata routes added.
+14. ~~Open Graph defaults~~ → **RESOLVED.** Site metadata added; a final real
+    social-share image remains a content task.
+15. **Rotate the Resend API key** — deployment action still required because an
+    old key appeared in repository history. No key fallback remains in current code.
 
 ## ✅ Passing
 
@@ -60,6 +61,36 @@ setup. Most original blockers are **resolved**. Remaining work is mostly real co
 - Shared header/footer components — one place to edit.
 - Live streaming auto-switches live/offline on the service schedule.
 - Inline Visual Editor covers all text + images + links.
+- Contact, prayer, baptism, and dedication forms submit through one validated,
+  rate-limited API; recipient settings are private and Admin-only.
+- Search, podcast, calendar, social, and life-event controls are functional or
+  hidden until configured; dead placeholder links were removed.
+- Next.js 15.5.18 + React 19.1; `npm audit` reports zero vulnerabilities.
+- Branded 404, icon, robots, sitemap, CSP/HSTS, safe external-URL handling, and
+  keyboard-accessible filters/accordions/navigation are present.
+
+## Production security audit — July 18, 2026
+
+Implemented in the application:
+
+- Supabase Auth with individual accounts, role checks, and Row-Level Security.
+- Admin and Visual Edit sessions share an automatic sign-out after 5 minutes
+  without activity across either workspace.
+- Manual Sign Out is available in both the top bar and account sidebar.
+- Admin responses use `Cache-Control: no-store` and `X-Robots-Tag: noindex, nofollow`.
+- Site-wide `nosniff`, same-origin framing, referrer, and permissions headers.
+- Resend credentials are read only from server environment variables; no API-key
+  fallback remains in source code.
+
+Required deployment checks:
+
+- [ ] Rotate the previously committed Resend API key and update `.env.local`.
+- [ ] Confirm Supabase public email signup is disabled.
+- [ ] Confirm every staff member has an individual login; do not share passwords.
+- [ ] Confirm `RESEND_API_KEY` and `RESEND_FROM` exist only in server `.env.local`.
+- [ ] Confirm HTTPS is enforced by the public reverse proxy.
+- [ ] Enable host firewall and unattended security updates; verify backups.
+- [ ] Test role boundaries using one admin, one editor, and one events-only account.
 
 ---
 

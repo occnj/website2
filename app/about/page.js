@@ -192,7 +192,7 @@ export default async function AboutPage() {
               <div key={title} style={{ background: '#fff', borderRadius: 'var(--radius-md)', padding: 'var(--sp-4)', boxShadow: 'var(--shadow-sm)', borderTop: `3px solid ${color}` }}>
                 <h3 className="t-h3">{title}</h3>
                 <p className="t-small t-muted mt-2">{desc}</p>
-                <a href="#" className="btn btn-secondary btn-sm mt-3">Learn More</a>
+                <Link href="/contact" className="btn btn-secondary btn-sm mt-3">Learn More</Link>
               </div>
             ))}
           </div>

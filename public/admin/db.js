@@ -80,6 +80,16 @@
     if (error) throw error;
     audit(auditAction || 'settings.update', Object.keys(patch).join(', '));
   }
+  async function getFormSettings() {
+    const { data, error } = await client.from('form_settings').select('*').eq('id', 1).single();
+    if (error) throw error;
+    return data;
+  }
+  async function saveFormSettings(patch) {
+    const { error } = await client.from('form_settings').update(patch).eq('id', 1);
+    if (error) throw error;
+    audit('settings.form_recipients', Object.keys(patch).join(', '));
+  }
 
   function canManageUsers() { return me && ['owner', 'admin'].indexOf(me.role) >= 0; }
   function isEventsOnly() { return me && me.role === 'events_only'; }
@@ -90,6 +100,7 @@
     list: list, save: save, del: del, audit: audit,
     upload: upload, pickAndUpload: pickAndUpload,
     getSettings: getSettings, saveSettings: saveSettings,
+    getFormSettings: getFormSettings, saveFormSettings: saveFormSettings,
     canManageUsers: canManageUsers, isEventsOnly: isEventsOnly,
   };
 })();

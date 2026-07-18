@@ -85,9 +85,11 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
 .sidebar-foot { padding: 14px 20px; border-top: 1px solid rgba(255,255,255,.08); display: flex; align-items: center; gap: 10px; }
 .avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--blue); color: #fff; display: grid; place-items: center; font-size: .75rem; font-weight: 700; flex-shrink: 0; }
 .avatar.amber { background: var(--amber); }
-.sidebar-foot-text { line-height: 1.2; }
+.sidebar-foot-text { line-height: 1.2; min-width: 0; flex: 1; }
 .sidebar-foot-text strong { display: block; font-size: .8rem; color: #fff; }
 .sidebar-foot-text span { font-size: .68rem; color: rgba(255,255,255,.45); }
+.sidebar-signout { color: rgba(255,255,255,.65); font-size: .7rem; font-weight: 600; padding: 6px 7px; border-radius: var(--radius-sm); }
+.sidebar-signout:hover { color: #fff; background: rgba(255,255,255,.08); }
 
 /* --- MAIN --- */
 .admin-main { flex: 1; margin-left: var(--sidebar-w); display: flex; flex-direction: column; min-width: 0; }
@@ -283,3 +285,5 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
   .stat-row { grid-template-columns: 1fr 1fr; gap: 10px; }
   .row-thumb { display: none; }
 }
+.login-help { display:block; margin:12px auto 0; border:0; background:transparent; color:var(--blue); cursor:pointer; font:inherit; font-size:.82rem; }
+.login-help:hover { text-decoration:underline; }

@@ -1,21 +1,22 @@
 'use client';
 
 import { useEffect } from 'react';
+import * as supabase from '@supabase/supabase-js';
 import { loadScriptSequence } from '@/lib/scriptLoader';
 import { asset } from '@/lib/basePath';
 
 const TITLES = {
   dashboard: 'Dashboard', pages: 'Pages', sermons: 'Sermons', events: 'Events',
-  team: 'Leadership Team', give: 'Giving', navigation: 'Navigation & Site Info', settings: 'Settings',
+  team: 'Leadership Team', give: 'External Giving Link', navigation: 'Navigation & Site Info', settings: 'Settings',
   media: 'Media Library', users: 'Users & Roles',
 };
 
 export default function AdminPage() {
   useEffect(() => {
     let cancelled = false;
+    window.supabase = supabase;
 
     loadScriptSequence([
-      'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2',
       asset('/admin/config.js'),
       asset('/admin/db.js'),
       asset('/admin/views.js'),
@@ -52,6 +53,14 @@ export default function AdminPage() {
           </div>
           <div id="login-error" style={{ display: 'none', color: 'var(--red)', fontSize: '.8rem', marginBottom: 10 }}></div>
           <button className="btn btn-primary" style={{ width: '100%', justifyContent: 'center', padding: 12 }} id="login-btn" onClick={() => window.__adminLogin && window.__adminLogin()}>Sign In</button>
+          <button className="login-help" type="button" id="forgot-btn" onClick={() => window.__adminForgotPassword && window.__adminForgotPassword()}>Forgot password?</button>
+          <div id="recovery-fields" style={{ display: 'none' }}>
+            <div className="form-group" style={{ marginTop: 12 }}>
+              <label className="form-label" htmlFor="recovery-pass">New password</label>
+              <input className="form-input" type="password" id="recovery-pass" minLength="12" autoComplete="new-password" />
+            </div>
+            <button className="btn btn-primary" type="button" style={{ width: '100%', justifyContent: 'center' }} onClick={() => window.__adminUpdatePassword && window.__adminUpdatePassword()}>Set New Password</button>
+          </div>
           <div className="supabase-note" id="supabase-note">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="#3ECF8E"><path d="M13 2 3 14h8l-1 8L21 10h-8z"></path></svg>
             Secured by Supabase Auth
@@ -74,7 +83,7 @@ export default function AdminPage() {
             <button className="side-link" data-view="sermons" data-role="content">Sermons</button>
             <button className="side-link" data-view="events">Events</button>
             <button className="side-link" data-view="team" data-role="content">Team</button>
-            <button className="side-link" data-view="give" data-role="content">Giving</button>
+            <button className="side-link" data-view="give" data-role="content">External Giving Link</button>
             <div className="sidebar-heading" data-role="content">Site</div>
             <button className="side-link" data-view="navigation" data-role="content">Navigation</button>
             <button className="side-link" data-view="media" data-role="content">Media</button>
@@ -85,6 +94,7 @@ export default function AdminPage() {
           <div className="sidebar-foot">
             <div className="avatar" id="me-avatar">·</div>
             <div className="sidebar-foot-text"><strong id="me-name">—</strong><span id="me-role"></span></div>
+            <button className="sidebar-signout" onClick={() => window.__adminLogout && window.__adminLogout()} aria-label="Sign out" title="Sign out">Sign Out</button>
           </div>
         </aside>
 
@@ -145,6 +155,40 @@ function initAdminController() {
   window.__adminInitDone = true;
 
   const container = document.getElementById('view-container');
+  const INACTIVITY_LIMIT_MS = 5 * 60 * 1000;
+  const ACTIVITY_KEY = 'oasis-admin-last-activity';
+  const ACTIVITY_EVENTS = ['pointerdown', 'pointermove', 'keydown', 'touchstart', 'scroll'];
+  let inactivityTimer = null;
+  let lastActivityReset = 0;
+
+  function stopInactivityTimer() {
+    clearTimeout(inactivityTimer);
+    inactivityTimer = null;
+  }
+
+  function scheduleInactivityTimer() {
+    if (document.getElementById('admin-shell').style.display === 'none') return;
+    stopInactivityTimer();
+    const lastActivity = Number(localStorage.getItem(ACTIVITY_KEY)) || Date.now();
+    const remaining = Math.max(0, INACTIVITY_LIMIT_MS - (Date.now() - lastActivity));
+    inactivityTimer = setTimeout(() => logout('inactive'), remaining);
+  }
+
+  function resetInactivityTimer() {
+    if (document.getElementById('admin-shell').style.display === 'none') return;
+    const now = Date.now();
+    if (now - lastActivityReset < 1000) return;
+    lastActivityReset = now;
+    localStorage.setItem(ACTIVITY_KEY, String(now));
+    scheduleInactivityTimer();
+  }
+
+  ACTIVITY_EVENTS.forEach((eventName) => {
+    window.addEventListener(eventName, resetInactivityTimer, { passive: true });
+  });
+  window.addEventListener('storage', (event) => {
+    if (event.key === ACTIVITY_KEY) scheduleInactivityTimer();
+  });
 
   async function go(name) {
     document.querySelectorAll('.side-link').forEach((b) => {
@@ -199,6 +243,7 @@ function initAdminController() {
     document.getElementById('me-avatar').textContent = (me.full_name || me.email || '?').split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase();
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('admin-shell').style.display = 'flex';
+    resetInactivityTimer();
     const last = localStorage.getItem('oasis-admin-view') || 'dashboard';
     go((isEditor || last === 'events') ? last : 'dashboard');
   }
@@ -220,7 +265,37 @@ function initAdminController() {
   }
   window.__adminLogin = login;
 
-  async function logout() {
+  async function forgotPassword() {
+    const user = document.getElementById('login-user').value.trim();
+    if (!user) { loginError('Enter your email address first.'); return; }
+    if (!DB.connected) { loginError('Supabase is not configured.'); return; }
+    const CFG = window.OASIS_CONFIG;
+    const email = (user.toLowerCase() === (CFG.ADMIN_USERNAME || '').toLowerCase()) ? CFG.ADMIN_EMAIL : user;
+    const { error } = await DB.client.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin + '/website/admin' });
+    loginError(error ? 'Password reset failed: ' + error.message : 'If that account exists, a password reset email has been sent.');
+  }
+  window.__adminForgotPassword = forgotPassword;
+
+  function showRecovery() {
+    document.getElementById('recovery-fields').style.display = 'block';
+    document.getElementById('login-btn').style.display = 'none';
+    document.getElementById('forgot-btn').style.display = 'none';
+    loginError('Choose a new password with at least 12 characters.');
+  }
+
+  async function updatePassword() {
+    const password = document.getElementById('recovery-pass').value;
+    if (password.length < 12) { loginError('Password must be at least 12 characters.'); return; }
+    const { error } = await DB.client.auth.updateUser({ password });
+    if (error) { loginError('Could not update password: ' + error.message); return; }
+    await DB.client.auth.signOut();
+    window.location.href = window.location.pathname;
+  }
+  window.__adminUpdatePassword = updatePassword;
+
+  async function logout(reason) {
+    stopInactivityTimer();
+    if (reason === 'inactive') sessionStorage.setItem('oasis-signout-reason', 'inactive');
     if (DB.connected) await DB.client.auth.signOut();
     location.reload();
   }
@@ -236,11 +311,21 @@ function initAdminController() {
   }
   window.toast = toast;
 
+  if (sessionStorage.getItem('oasis-signout-reason') === 'inactive') {
+    sessionStorage.removeItem('oasis-signout-reason');
+    loginError('For your security, you were signed out after 5 minutes of inactivity.');
+  }
+
   document.getElementById('login-pass').addEventListener('keydown', (e) => { if (e.key === 'Enter') login(); });
 
   if (window.DB && window.DB.connected) {
+    window.DB.client.auth.onAuthStateChange((event) => {
+      if (event === 'PASSWORD_RECOVERY') showRecovery();
+    });
     window.DB.client.auth.getSession().then((res) => {
-      if (res.data.session) showShell();
+      const recoveryLink = window.location.hash.includes('type=recovery') || window.location.search.includes('type=recovery');
+      if (res.data.session && recoveryLink) showRecovery();
+      else if (res.data.session) showShell();
     });
   } else {
     const note = document.getElementById('supabase-note');

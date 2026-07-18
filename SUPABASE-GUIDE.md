@@ -240,12 +240,13 @@ cron every few minutes). Start with client-side fetching; upgrade later if neede
 Forms now send **real email via Resend** — there is no admin inbox / `messages`
 table in use. Route: `app/api/contact/route.js`.
 
-- **Prayer requests** → addresses in `site_settings.prayer_recipients` (editable in Admin → Settings)
-- **All other forms** → addresses in `site_settings.form_recipients` (editable in Admin → Settings)
+- **Prayer requests** → addresses in private `form_settings.prayer_recipients` (editable by Owner/Admin in Admin → Settings)
+- **All other forms** → addresses in private `form_settings.form_recipients` (editable by Owner/Admin in Admin → Settings)
 - From: `noreply@hub.oasisnj.net`; submitter email set as reply-to.
 - Config via env on the server (`.env.local`, gitignored):
-  `RESEND_API_KEY`, `RESEND_FROM`. A hardcoded fallback exists but env is preferred.
-- Honeypot field blocks bots.
+  `RESEND_API_KEY`, `RESEND_FROM`, and `SUPABASE_SERVICE_ROLE_KEY`. There is no
+  hardcoded secret or recipient fallback.
+- Honeypot, validation, field limits, and per-IP rate limiting reduce abuse.
 
 The `messages` table can still be added back later if a stored inbox is ever wanted.
 

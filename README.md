@@ -42,6 +42,8 @@ Full details + troubleshooting in `SERVER-COMMANDS.md`.
    ```
    RESEND_API_KEY=re_xxxxxxxx
    RESEND_FROM=Oasis Website <noreply@hub.oasisnj.net>
+   SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+   NEXT_PUBLIC_SITE_URL=https://oasisnj.net
    ```
 3. Build + restart (above).
 
@@ -55,13 +57,14 @@ Full details + troubleshooting in `SERVER-COMMANDS.md`.
   **Twitch / YouTube / Facebook** tabbed player. Live/offline switches automatically
   on the Sunday service schedule (9:55–11:20 AM ET, `lib/serviceWindow.js`).
 - **Forms** send email via **Resend**: prayer → pastoral team, all else → oasis@.
-- **Giving** links to The Kingdom Ledger.
+- **Giving** is never processed by this website; every Give control opens the
+  Admin-configured external provider.
 
 ---
 
 ## Tech stack
 
-- Next.js 14 (App Router, server components)
+- Next.js 15 (App Router, server components)
 - Supabase (Postgres + Auth + Storage)
 - Resend (transactional email)
 - Restream (live stream distribution to Twitch/YouTube/Facebook)

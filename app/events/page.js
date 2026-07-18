@@ -3,14 +3,17 @@ import './events.css';
 import PageHero from '@/components/PageHero';
 import EventsList from '@/components/EventsList';
 import MiniCalendar from '@/components/MiniCalendar';
-import { getPageHero, getUpcomingEvents } from '@/lib/data';
+import { getPageHero, getUpcomingEvents, getSiteSettings } from '@/lib/data';
+import { safeHttpUrl } from '@/lib/safeUrl';
 
-export const metadata = { title: 'Events — Oasis Christian Centre' };
+export const metadata = { title: 'Events — Oasis Christian Centre', description: 'See upcoming services, gatherings, and community events at Oasis Christian Centre.' };
 export const dynamic = 'force-dynamic';
 
 export default async function EventsPage() {
-  const [hero, events] = await Promise.all([getPageHero('events'), getUpcomingEvents()]);
+  const [hero, events, settings] = await Promise.all([getPageHero('events'), getUpcomingEvents(), getSiteSettings()]);
   const featured = events.find((e) => e.featured);
+  const featuredUrl = safeHttpUrl(featured && featured.registration_url);
+  const calendarUrl = safeHttpUrl(settings && settings.calendar_url);
 
   return (
     <>
@@ -46,8 +49,8 @@ export default async function EventsPage() {
                 </div>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-2)', alignItems: 'flex-start' }}>
-                {featured.registration_url ? (
-                  <a href={featured.registration_url} target="_blank" rel="noopener" className="btn btn-primary">Learn More</a>
+                {featuredUrl ? (
+                  <a href={featuredUrl} target="_blank" rel="noopener noreferrer" className="btn btn-primary">Learn More</a>
                 ) : null}
               </div>
             </div>
@@ -63,7 +66,7 @@ export default async function EventsPage() {
               <div className="sidebar-widget" style={{ background: 'var(--blue-light)', border: '1px solid rgba(0,150,199,.15)' }}>
                 <h4 style={{ color: 'var(--blue-dark)' }}>Sync with Google Calendar</h4>
                 <p style={{ fontSize: '.82rem', color: 'var(--charcoal)', lineHeight: 1.6, marginBottom: 'var(--sp-2)' }}>Subscribe to the Oasis calendar to get events automatically in your phone.</p>
-                <a href="#" className="btn btn-primary btn-sm full-w" style={{ justifyContent: 'center' }}>Subscribe to Calendar</a>
+                {calendarUrl ? <a href={calendarUrl} target="_blank" rel="noopener noreferrer" className="btn btn-primary btn-sm full-w" style={{ justifyContent: 'center' }}>Subscribe to Calendar</a> : <p className="t-small t-muted">Calendar subscription will be available soon.</p>}
               </div>
 
               <div className="sidebar-widget">

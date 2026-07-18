@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { safeHttpUrl } from '@/lib/safeUrl';
 
 const CATS = [
   ['all', 'All Events'],
@@ -25,13 +26,14 @@ export default function EventsList({ events }) {
     <div data-events-list>
       <div className="filter-bar">
         {CATS.map(([key, label]) => (
-          <div
+          <button type="button"
             key={key}
             className={'filter-chip' + (filter === key ? ' active' : '')}
             onClick={() => setFilter(key)}
+            aria-pressed={filter === key}
           >
             {label}
-          </div>
+          </button>
         ))}
       </div>
 
@@ -65,9 +67,9 @@ export default function EventsList({ events }) {
                 </div>
                 {e.description ? <div className="event-desc">{e.description}</div> : null}
               </div>
-              {e.registration_url ? (
+              {safeHttpUrl(e.registration_url) ? (
                 <div className="event-action">
-                  <a href={e.registration_url} target="_blank" rel="noopener" className="btn btn-secondary btn-sm">Register</a>
+                  <a href={safeHttpUrl(e.registration_url)} target="_blank" rel="noopener noreferrer" className="btn btn-secondary btn-sm">Register</a>
                 </div>
               ) : null}
             </div>

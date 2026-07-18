@@ -137,6 +137,28 @@
     }
   }
 
+  function sanitizeHtml(html) {
+    var template = document.createElement('template');
+    template.innerHTML = String(html || '');
+    Array.prototype.slice.call(template.content.querySelectorAll('script,style,iframe,object,embed,form,input,textarea,button,meta,link')).forEach(function (node) { node.remove(); });
+    Array.prototype.slice.call(template.content.querySelectorAll('*')).forEach(function (node) {
+      Array.prototype.slice.call(node.attributes).forEach(function (attr) {
+        var name = attr.name.toLowerCase();
+        var value = attr.value.trim().toLowerCase();
+        if (name.indexOf('on') === 0 || name === 'srcdoc' || ((name === 'href' || name === 'src') && value.indexOf('javascript:') === 0)) {
+          node.removeAttribute(attr.name);
+        }
+      });
+    });
+    return template.innerHTML;
+  }
+
+  function safeUrl(url) {
+    var value = String(url || '').trim();
+    if (!value || /^(javascript|data|vbscript):/i.test(value)) return '';
+    return value;
+  }
+
   // ---- apply a whole saved overrides object ----
   function applyEdits(edits) {
     if (!edits) return;
@@ -147,9 +169,9 @@
 
     function each(map, fn) { if (map) Object.keys(map).forEach(function (k) { (byKey[k] || []).forEach(function (el) { fn(el, map[k]); }); }); }
 
-    each(edits.text, function (el, html) { el.innerHTML = html; });
+    each(edits.text, function (el, html) { el.innerHTML = sanitizeHtml(html); });
     each(edits.img, function (el, url) { applyImage(el, url); });
-    each(edits.href, function (el, url) { if (url) el.setAttribute('href', url); });
+    each(edits.href, function (el, url) { var safe = safeUrl(url); if (safe) el.setAttribute('href', safe); });
     each(edits.style, function (el, s) {
       if (s.background) el.style.background = s.background;
       if (s.color) el.style.color = s.color;
@@ -182,7 +204,7 @@
     } else {
       node = document.createElement('p');
       node.className = 't-body cms-added';
-      node.innerHTML = b.html || 'New text block';
+      node.innerHTML = sanitizeHtml(b.html || 'New text block');
     }
     node.setAttribute('data-cms', b.id);
     return node;
@@ -194,4 +216,6 @@
   window.OASIS.applyEdits = applyEdits;
   window.OASIS.applyImage = applyImage;
   window.OASIS.buildBlock = buildBlock;
+  window.OASIS.sanitizeHtml = sanitizeHtml;
+  window.OASIS.safeUrl = safeUrl;
 })();

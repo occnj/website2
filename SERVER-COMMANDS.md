@@ -148,14 +148,13 @@ sleep 8 && tail -5 ~/website2/app.log
 
 ## Supabase SQL (run once in the Supabase SQL editor)
 
-Add columns that the latest code expects:
+Run the full idempotent migration file `db/migrations-2026-07.sql` in the
+Supabase SQL Editor. Do **not** run `supabase-setup.sql` on an existing site; that
+file is a destructive fresh-install script.
 
-```sql
-alter table site_settings add column if not exists podcast_enabled boolean default false;
-alter table site_settings add column if not exists twitch_channel text default '';
-```
-
-Full migration file: `db/migrations-2026-07.sql`
+Afterward, open Admin → Settings and save Prayer and Regular form recipients.
+The server `.env.local` must also contain `SUPABASE_SERVICE_ROLE_KEY` so the email
+API can read that private table.
 
 ---
 
@@ -164,8 +163,8 @@ Full migration file: `db/migrations-2026-07.sql`
 URL: `https://occnj.tail812f78.ts.net/website/admin`
 
 Key things you can do without touching code:
-- **Enable podcast section** — Navigation & Footer → Site info → toggle "Show podcast section"
+- **Enable podcast section** — Navigation → Site info → toggle "Show podcast section"
 - **Reorder nav menu** — Navigation & Footer → Main navigation → ↑↓ arrows
 - **Add/edit/delete events** — Events tab
-- **Change Twitch channel** — Navigation & Footer → Site info → Twitch channel field
+- **Change Twitch channel** — Navigation → Live player → Twitch channel field
   (leave blank to use the default `occnj`)

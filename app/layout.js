@@ -6,8 +6,16 @@ import { SiteDataProvider } from '@/components/SiteDataContext';
 import { getSiteSettings, getNavItems } from '@/lib/data';
 
 export const metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://oasisnj.net'),
   title: 'Oasis Christian Centre — Rahway, NJ',
   description: 'Know God, Find Hope, Make a Difference. Join us Sundays at 10AM in Rahway, NJ.',
+  icons: { icon: '/website/icon.svg' },
+  openGraph: {
+    type: 'website',
+    siteName: 'Oasis Christian Centre',
+    title: 'Oasis Christian Centre — Rahway, NJ',
+    description: 'Know God, Find Hope, Make a Difference.',
+  },
 };
 
 export const dynamic = 'force-dynamic';

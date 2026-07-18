@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import './home.css';
-import { getPageHero, getSermons } from '@/lib/data';
+import { getPageHero, getSermons, getSiteSettings } from '@/lib/data';
 import { getChannelVideos } from '@/lib/youtube';
 import { asset } from '@/lib/basePath';
 import PrayerForm from '@/components/PrayerForm';
@@ -8,10 +8,11 @@ import PrayerForm from '@/components/PrayerForm';
 export const dynamic = 'force-dynamic';
 
 export default async function HomePage() {
-  const [hero, ytVideos, dbSermons] = await Promise.all([
+  const [hero, ytVideos, dbSermons, settings] = await Promise.all([
     getPageHero('index'),
     getChannelVideos(),
     getSermons(),
+    getSiteSettings(),
   ]);
   const sermons = ytVideos.length ? ytVideos : dbSermons;
   const heroImage = (hero && hero.image) || asset('/images/hero-placeholder.svg');
@@ -19,6 +20,8 @@ export default async function HomePage() {
   const heroIntro = (hero && hero.intro) ||
     "Oasis Christian Centre is a warm, Spirit-led community where everyone is welcome. Come as you are — no matter where you've been.";
   const latestSermon = sermons.find((s) => s.featured) || sermons[0];
+  const serviceTime = (settings && settings.service_time) || 'Sundays at 10:00 AM';
+  const address = settings && settings.address;
 
   return (
     <>
@@ -32,8 +35,8 @@ export default async function HomePage() {
         </div>
         <div className="hero-content-wrap">
           <div className="container">
-            <div className="hero-eyebrow"><span className="dot"></span>Sundays · 10:00 AM · Rahway, NJ</div>
-            <h1 className="hero-headline" dangerouslySetInnerHTML={{ __html: heroTitle.includes('<') ? heroTitle : 'You were made<br />to <em>belong</em> here.' }} />
+            <div className="hero-eyebrow"><span className="dot"></span>{serviceTime}{address ? ` · ${address}` : ''}</div>
+            <h1 className="hero-headline">{heroTitle}</h1>
             <p className="hero-sub">{heroIntro}</p>
             <div className="hero-actions">
               <Link href="/plan-your-visit" className="btn btn-primary btn-lg">Plan Your Visit</Link>
@@ -54,16 +57,16 @@ export default async function HomePage() {
             <div className="info-item">
               <div className="info-item-text">
                 <strong>Sunday Service</strong>
-                <span>10:00 AM</span>
+                <span>{serviceTime}</span>
               </div>
             </div>
-            <div style={{ width: 1, height: 36, background: 'rgba(255,255,255,.1)' }}></div>
-            <div className="info-item">
+            {address ? <><div style={{ width: 1, height: 36, background: 'rgba(255,255,255,.1)' }}></div>
+            <a className="info-item" href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`} target="_blank" rel="noopener noreferrer">
               <div className="info-item-text">
-                <strong>15 Main St, Rahway, NJ</strong>
+                <strong>{address}</strong>
                 <span>Get Directions →</span>
               </div>
-            </div>
+            </a></> : null}
             <div style={{ width: 1, height: 36, background: 'rgba(255,255,255,.1)' }}></div>
             <div className="info-item">
               <div className="info-item-text">
@@ -140,13 +143,13 @@ export default async function HomePage() {
                 </div>
               </div>
             </Link>
-            <Link href="/contact" className="involve-row">
+            <Link href="/events" className="involve-row">
               <div className="involve-row-inner">
                 <div className="involve-left">
                   <span className="involve-num">02</span>
                   <div>
-                    <div className="involve-title">Circles</div>
-                    <div className="involve-desc">Small groups built around real community, real faith, and real friendship. Find your people.</div>
+                    <div className="involve-title">Events &amp; Community</div>
+                    <div className="involve-desc">Gather with the Oasis community through services, events, and shared moments.</div>
                   </div>
                 </div>
               </div>

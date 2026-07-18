@@ -2,7 +2,7 @@ import Link from 'next/link';
 import './plan-your-visit.css';
 import PageHero from '@/components/PageHero';
 import FaqAccordion from '@/components/FaqAccordion';
-import { getPageHero } from '@/lib/data';
+import { getPageHero, getSiteSettings } from '@/lib/data';
 
 export const metadata = {
   title: 'Plan Your Visit — Oasis Christian Centre',
@@ -20,7 +20,9 @@ const VISIT_FAQS = [
 ];
 
 export default async function PlanYourVisitPage() {
-  const hero = await getPageHero('plan-your-visit');
+  const [hero, settings] = await Promise.all([getPageHero('plan-your-visit'), getSiteSettings()]);
+  const address = settings && settings.address;
+  const directionsUrl = address ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}` : null;
 
   return (
     <>
@@ -31,7 +33,7 @@ export default async function PlanYourVisitPage() {
         image={hero && hero.image}
       >
         <div style={{ marginTop: 'var(--sp-4)', display: 'flex', gap: 'var(--sp-2)', flexWrap: 'wrap' }}>
-          <a href="https://maps.google.com/?q=Oasis+Christian+Centre+Rahway+NJ" target="_blank" rel="noopener" className="btn btn-primary">Get Directions →</a>
+          {directionsUrl ? <a href={directionsUrl} target="_blank" rel="noopener noreferrer" className="btn btn-primary">Get Directions →</a> : null}
           <a href="#what-to-expect" className="btn btn-ghost">What to Expect ↓</a>
         </div>
       </PageHero>
@@ -142,28 +144,20 @@ export default async function PlanYourVisitPage() {
               <p className="t-eyebrow">Find Us</p>
               <h2 className="t-h2 mt-2">We&rsquo;re in the heart of Rahway</h2>
               <div style={{ marginTop: 'var(--sp-3)', display: 'flex', flexDirection: 'column', gap: 12 }}>
-                <div style={{ fontSize: '.95rem', padding: '12px 0', borderBottom: '1px solid var(--border)' }}>
-                  <strong>15 Main St, Rahway, NJ 07065</strong>
-                </div>
-                <div style={{ fontSize: '.95rem', padding: '12px 0', borderBottom: '1px solid var(--border)' }}>
-                  Sundays at 10:00 AM
-                </div>
-                <div style={{ fontSize: '.95rem', padding: '12px 0', borderBottom: '1px solid var(--border)' }}>
-                  (732) 555-0100
-                </div>
-                <div style={{ fontSize: '.95rem', padding: '12px 0' }}>
-                  info@oasisnj.net
-                </div>
+                {address ? <div style={{ fontSize: '.95rem', padding: '12px 0', borderBottom: '1px solid var(--border)' }}><strong>{address}</strong></div> : null}
+                {settings && settings.service_time ? <div style={{ fontSize: '.95rem', padding: '12px 0', borderBottom: '1px solid var(--border)' }}>{settings.service_time}</div> : null}
+                {settings && settings.phone ? <div style={{ fontSize: '.95rem', padding: '12px 0', borderBottom: '1px solid var(--border)' }}><a href={`tel:${settings.phone}`}>{settings.phone}</a></div> : null}
+                {settings && settings.email ? <div style={{ fontSize: '.95rem', padding: '12px 0' }}><a href={`mailto:${settings.email}`}>{settings.email}</a></div> : null}
               </div>
               <div style={{ marginTop: 'var(--sp-4)', display: 'flex', gap: 'var(--sp-2)', flexWrap: 'wrap' }}>
-                <a href="https://maps.google.com/?q=Oasis+Christian+Centre+Rahway+NJ" target="_blank" rel="noopener" className="btn btn-primary">Get Directions</a>
+                {directionsUrl ? <a href={directionsUrl} target="_blank" rel="noopener noreferrer" className="btn btn-primary">Get Directions</a> : null}
                 <Link href="/contact" className="btn btn-secondary">Contact Us</Link>
               </div>
             </div>
-            <div className="map-placeholder img-placeholder" style={{ minHeight: 300, borderRadius: 'var(--radius-lg)' }}>
+            {directionsUrl ? <a href={directionsUrl} target="_blank" rel="noopener noreferrer" className="map-placeholder img-placeholder" style={{ minHeight: 300, borderRadius: 'var(--radius-lg)' }}>
               <svg width="40" height="40" viewBox="0 0 40 40" fill="none"><rect x="4" y="4" width="32" height="32" rx="4" stroke="#9BABB6" strokeWidth="1.5" /><path d="M12 28l5-10 6 6 4-8" stroke="#9BABB6" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /><circle cx="28" cy="14" r="3" stroke="#9BABB6" strokeWidth="1.5" /></svg>
-              <span>Google Maps embed<br />15 Main St, Rahway, NJ</span>
-            </div>
+              <span>Open directions<br />{address}</span>
+            </a> : null}
           </div>
         </div>
       </section>

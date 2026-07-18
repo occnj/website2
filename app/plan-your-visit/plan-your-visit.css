@@ -3,6 +3,13 @@
   padding: var(--sp-3) 0;
 }
 .faq-q {
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font-family: inherit;
+  text-align: left;
   display: flex;
   justify-content: space-between;
   align-items: center;

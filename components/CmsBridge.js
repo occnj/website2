@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import * as supabase from '@supabase/supabase-js';
 import { usePathname } from 'next/navigation';
 import { asset } from '@/lib/basePath';
 import { getSupabaseBrowserClient } from '@/lib/supabase';
@@ -31,9 +32,9 @@ export default function CmsBridge() {
       if (cancelled || !window.OASIS) return;
 
       if (editMode.current) {
+        window.supabase = supabase;
         // editor.js loads its own overrides and activates the edit UI.
         await loadScriptSequence([
-          'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2',
           asset('/editor.js'),
         ]);
         return;

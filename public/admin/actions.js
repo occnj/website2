@@ -128,8 +128,10 @@ async function delTeamMember(id) {
 // ---------- GIVING ----------
 async function saveGive() {
   try {
+    const donateUrl = document.getElementById('give-url').value.trim();
+    if (!/^https:\/\//i.test(donateUrl)) throw new Error('External giving link must begin with https://');
     await DB.saveSettings({
-      donate_url: document.getElementById('give-url').value.trim(),
+      donate_url: donateUrl,
       donate_new_tab: document.getElementById('give-newtab').checked,
     }, 'settings.donate');
     toast('Donation link saved — live site-wide');
@@ -170,12 +172,13 @@ async function saveSiteInfo() {
       address: document.getElementById('si-address').value,
       phone: document.getElementById('si-phone').value,
       email: document.getElementById('si-email').value,
-      prayer_recipients: document.getElementById('si-prayer-recipients').value,
-      form_recipients: document.getElementById('si-form-recipients').value,
       service_time: document.getElementById('si-service').value,
       instagram: document.getElementById('si-instagram').value,
       facebook: document.getElementById('si-facebook').value,
       youtube: document.getElementById('si-youtube').value,
+      calendar_url: document.getElementById('si-calendar').value,
+      podcast_apple_url: document.getElementById('si-podcast-apple').value,
+      podcast_spotify_url: document.getElementById('si-podcast-spotify').value,
       podcast_enabled: document.getElementById('si-podcast').checked,
       twitch_channel: document.getElementById('si-twitch').value,
       youtube_channel: document.getElementById('si-yt-channel').value,
@@ -183,6 +186,16 @@ async function saveSiteInfo() {
       live_default_tab: document.getElementById('si-live-tab').value,
     }, 'settings.site_info');
     toast('Site info saved');
+  } catch (e) { fail(e); }
+}
+
+async function saveFormRecipients() {
+  try {
+    await DB.saveFormSettings({
+      prayer_recipients: document.getElementById('form-prayer-recipients').value.trim(),
+      form_recipients: document.getElementById('form-regular-recipients').value.trim(),
+    });
+    toast('Form recipients saved');
   } catch (e) { fail(e); }
 }
 

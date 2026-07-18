@@ -4,6 +4,7 @@
   flex-wrap: wrap;
   margin-bottom: var(--sp-4);
 }
+.sermon-search { display: block; max-width: 320px; margin-left: auto; margin-bottom: var(--sp-3); }
 .series-tab {
   padding: 8px 20px;
   border-radius: 100px;

@@ -67,6 +67,42 @@
   var edits = {};
   var dirty = false;
 
+  // Share the same five-minute inactivity window as /admin. Activity in
+  // either tab keeps the authenticated editing session alive.
+  function setupInactivitySecurity() {
+    store.session().then(function (session) {
+      if (!session || !store.sb) return;
+      var limit = 5 * 60 * 1000;
+      var activityKey = 'oasis-admin-last-activity';
+      var timer = null;
+      var lastReset = 0;
+      function signOutInactive() {
+        dirty = false; // drafts are already saved; do not block the redirect
+        sessionStorage.setItem('oasis-signout-reason', 'inactive');
+        localStorage.removeItem('oasis_edit');
+        store.sb.auth.signOut().finally(function () { location.href = BASE_PATH + '/admin'; });
+      }
+      function schedule() {
+        clearTimeout(timer);
+        var last = Number(localStorage.getItem(activityKey)) || Date.now();
+        var remaining = Math.max(0, limit - (Date.now() - last));
+        timer = setTimeout(signOutInactive, remaining);
+      }
+      function record() {
+        var now = Date.now();
+        if (now - lastReset < 1000) return;
+        lastReset = now;
+        localStorage.setItem(activityKey, String(now));
+        schedule();
+      }
+      ['pointerdown', 'pointermove', 'keydown', 'touchstart', 'scroll'].forEach(function (name) {
+        window.addEventListener(name, record, { passive: true });
+      });
+      window.addEventListener('storage', function (event) { if (event.key === activityKey) schedule(); });
+      record();
+    });
+  }
+
   function ensure(k) { edits[k] = edits[k] || {}; return edits[k]; }
   function markDirty() { dirty = true; setStatus('Unsaved changes', 'warn'); localStorage.setItem('oasis_draft:' + slug, JSON.stringify(edits)); }
   var K = window.OASIS.keyFor;
@@ -220,7 +256,9 @@
       el.removeEventListener('blur', finish);
       el.removeEventListener('keydown', onKey);
       editingEl = null;
-      if (el.innerHTML !== before) { ensure('text')[K(el)] = el.innerHTML; markDirty(); }
+      var cleanHtml = window.OASIS.sanitizeHtml(el.innerHTML);
+      el.innerHTML = cleanHtml;
+      if (cleanHtml !== before) { ensure('text')[K(el)] = cleanHtml; markDirty(); }
     }
     function onKey(e) {
       if (e.key === 'Escape') { el.innerHTML = before; el.blur(); }
@@ -252,7 +290,8 @@
         '<input type="text" id="cms-href" value="' + (el.getAttribute('href') || '') + '" placeholder="about.html or https://…">' +
         '<button id="cms-href-save">Save link</button>';
       pop.querySelector('#cms-href-save').onclick = function () {
-        var v = pop.querySelector('#cms-href').value.trim();
+        var v = window.OASIS.safeUrl(pop.querySelector('#cms-href').value);
+        if (!v) { toast('Use a safe website, page, mailto, tel, or anchor link'); return; }
         el.setAttribute('href', v); ensure('href')[K(el)] = v; markDirty(); closePop(); toast('Link saved');
       };
     });
@@ -376,6 +415,7 @@
 
   // ---------- boot ----------
   function boot() {
+    setupInactivitySecurity();
     injectCSS();
     buildChrome();
     reclassify();

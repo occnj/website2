@@ -3,6 +3,7 @@ import './life-events.css';
 import PageHero from '@/components/PageHero';
 import FaqAccordion from '@/components/FaqAccordion';
 import { getPageHero } from '@/lib/data';
+import LifeEventForms from '@/components/LifeEventForms';
 
 export const metadata = { title: 'Life Events — Oasis Christian Centre' };
 export const dynamic = 'force-dynamic';
@@ -118,44 +119,7 @@ export default async function LifeEventsPage() {
         </div>
       </section>
 
-      <section className="section bg-blue-light" id="baptism-form" data-screen-label="Forms">
-        <div className="container">
-          <div className="split-2" style={{ alignItems: 'start' }}>
-            <div style={{ background: '#fff', borderRadius: 'var(--radius-lg)', padding: 'var(--sp-5)', boxShadow: 'var(--shadow-md)' }}>
-              <p className="t-eyebrow" style={{ color: 'var(--blue)' }}>Water Baptism</p>
-              <h3 className="t-h2 mt-2" style={{ marginBottom: 'var(--sp-4)' }}>Register for Baptism</h3>
-              <div className="form-group"><label className="form-label">Full Name *</label><input type="text" className="form-input" placeholder="Your full name" /></div>
-              <div className="form-group"><label className="form-label">Email *</label><input type="email" className="form-input" placeholder="your@email.com" /></div>
-              <div className="form-group"><label className="form-label">Phone</label><input type="tel" className="form-input" placeholder="(732) 555-0000" /></div>
-              <div className="form-group"><label className="form-label">Preferred Baptism Date</label>
-                <select className="form-input">
-                  <option>April 27, 2026</option>
-                  <option>June 28, 2026</option>
-                  <option>September 2026</option>
-                  <option>Open to any date</option>
-                </select>
-              </div>
-              <div className="form-group"><label className="form-label">Share your story (optional)</label><textarea className="form-textarea" placeholder="What led you to this decision?" style={{ minHeight: 80 }}></textarea></div>
-              <button className="btn btn-primary full-w" style={{ justifyContent: 'center' }}>Submit Registration</button>
-            </div>
-
-            <div id="dedication-form" style={{ background: '#fff', borderRadius: 'var(--radius-lg)', padding: 'var(--sp-5)', boxShadow: 'var(--shadow-md)' }}>
-              <p className="t-eyebrow" style={{ color: 'var(--amber)' }}>Baby Dedication</p>
-              <h3 className="t-h2 mt-2" style={{ marginBottom: 'var(--sp-4)' }}>Request a Dedication</h3>
-              <div className="form-row-2">
-                <div className="form-group"><label className="form-label">Parent / Guardian Name *</label><input type="text" className="form-input" placeholder="Your name" /></div>
-                <div className="form-group"><label className="form-label">Partner&rsquo;s Name</label><input type="text" className="form-input" placeholder="Partner's name" /></div>
-              </div>
-              <div className="form-group"><label className="form-label">Child&rsquo;s Name *</label><input type="text" className="form-input" placeholder="Child's full name" /></div>
-              <div className="form-group"><label className="form-label">Child&rsquo;s Date of Birth</label><input type="date" className="form-input" /></div>
-              <div className="form-group"><label className="form-label">Email *</label><input type="email" className="form-input" placeholder="your@email.com" /></div>
-              <div className="form-group"><label className="form-label">Phone</label><input type="tel" className="form-input" placeholder="(732) 555-0000" /></div>
-              <div className="form-group"><label className="form-label">Preferred Sunday</label><input type="text" className="form-input" placeholder="e.g. May or June 2026" /></div>
-              <button className="btn btn-amber full-w" style={{ justifyContent: 'center' }}>Submit Request</button>
-            </div>
-          </div>
-        </div>
-      </section>
+      <LifeEventForms />
 
       <section className="section bg-off" data-screen-label="FAQ">
         <div className="container-narrow">
