@@ -1,11 +1,12 @@
 import { NextResponse } from 'next/server';
+import { getSiteSettings } from '@/lib/data';
 
 export const dynamic = 'force-dynamic';
 
 // ---------------------------------------------------------------------------
 // Email routing via Resend.
-//   - Prayer requests  -> oasis@, PHegel@, pjhegel@verizon.net
-//   - Everything else  -> oasis@oasisnj.net
+//   - Prayer requests  -> site_settings.prayer_recipients
+//   - Everything else  -> site_settings.form_recipients
 // The API key and from-address come from env (RESEND_API_KEY, RESEND_FROM);
 // fallbacks are provided so it works if env isn't wired yet.
 // ---------------------------------------------------------------------------
@@ -13,8 +14,16 @@ export const dynamic = 'force-dynamic';
 const RESEND_API_KEY = process.env.RESEND_API_KEY || 're_ZCuopxc6_NC3GisHSNXWKjH4w8gHhcxh9';
 const FROM = process.env.RESEND_FROM || 'Oasis Website <noreply@hub.oasisnj.net>';
 
-const PRAYER_RECIPIENTS = ['oasis@oasisnj.net', 'PHegel@oasisnj.net', 'pjhegel@verizon.net'];
-const DEFAULT_RECIPIENTS = ['oasis@oasisnj.net'];
+const DEFAULT_PRAYER_RECIPIENTS = ['oasis@oasisnj.net', 'PHegel@oasisnj.net', 'pjhegel@verizon.net'];
+const DEFAULT_FORM_RECIPIENTS = ['oasis@oasisnj.net'];
+
+function parseRecipients(value, fallback) {
+  const recipients = String(value || '')
+    .split(/[\s,;]+/)
+    .map((email) => email.trim())
+    .filter((email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email));
+  return recipients.length ? [...new Set(recipients)] : fallback;
+}
 
 function esc(s) {
   return String(s || '')
@@ -51,7 +60,10 @@ export async function POST(request) {
     }
 
     const isPrayer = formType === 'prayer' || rest.reason === 'Prayer Request';
-    const to = isPrayer ? PRAYER_RECIPIENTS : DEFAULT_RECIPIENTS;
+    const settings = await getSiteSettings();
+    const to = isPrayer
+      ? parseRecipients(settings && settings.prayer_recipients, DEFAULT_PRAYER_RECIPIENTS)
+      : parseRecipients(settings && settings.form_recipients, DEFAULT_FORM_RECIPIENTS);
     const subjectPrefix = isPrayer ? 'Prayer Request' : 'Website Form';
     const subject = `${subjectPrefix} — ${name}`;
 

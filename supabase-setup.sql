@@ -23,6 +23,8 @@ $$ select role from profiles where id = auth.uid() and active $$;
 create table site_settings (
   id int primary key default 1 check (id = 1),
   tagline text, address text, phone text, email text, service_time text,
+  prayer_recipients text default 'oasis@oasisnj.net, PHegel@oasisnj.net, pjhegel@verizon.net',
+  form_recipients text default 'oasis@oasisnj.net',
   instagram text, youtube text, facebook text,
   donate_url text default 'https://thekingdomledger.com/donate?code=2335',
   donate_new_tab boolean default true,

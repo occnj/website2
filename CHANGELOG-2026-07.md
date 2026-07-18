@@ -11,6 +11,8 @@ key logic lives. For plain deploy/restart commands see `SERVER-COMMANDS.md`.
 - Prayer messaging consistently uses **“We’re Standing With You.”**
 - Visual Edit now detects direct visible text inside mixed layout containers,
   so text is editable across all site pages instead of only selected elements.
+- Admin Settings now controls the recipient addresses for prayer requests and
+  regular contact forms; addresses are comma-, space-, or line-separated.
 
 ---
 

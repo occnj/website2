@@ -240,8 +240,8 @@ cron every few minutes). Start with client-side fetching; upgrade later if neede
 Forms now send **real email via Resend** — there is no admin inbox / `messages`
 table in use. Route: `app/api/contact/route.js`.
 
-- **Prayer requests** → oasis@oasisnj.net, PHegel@oasisnj.net, pjhegel@verizon.net
-- **All other forms** → oasis@oasisnj.net
+- **Prayer requests** → addresses in `site_settings.prayer_recipients` (editable in Admin → Settings)
+- **All other forms** → addresses in `site_settings.form_recipients` (editable in Admin → Settings)
 - From: `noreply@hub.oasisnj.net`; submitter email set as reply-to.
 - Config via env on the server (`.env.local`, gitignored):
   `RESEND_API_KEY`, `RESEND_FROM`. A hardcoded fallback exists but env is preferred.

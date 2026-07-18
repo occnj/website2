@@ -170,6 +170,8 @@ async function saveSiteInfo() {
       address: document.getElementById('si-address').value,
       phone: document.getElementById('si-phone').value,
       email: document.getElementById('si-email').value,
+      prayer_recipients: document.getElementById('si-prayer-recipients').value,
+      form_recipients: document.getElementById('si-form-recipients').value,
       service_time: document.getElementById('si-service').value,
       instagram: document.getElementById('si-instagram').value,
       facebook: document.getElementById('si-facebook').value,

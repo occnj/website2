@@ -270,6 +270,8 @@ navigation: () => safe(async function () {
     '<div class="form-group"><label class="form-label">Address</label><input class="form-input" id="si-address" value="' + esc(s.address || '') + '"></div>' +
     '<div class="form-group"><label class="form-label">Phone</label><input class="form-input" id="si-phone" value="' + esc(s.phone || '') + '"></div>' +
     '<div class="form-group"><label class="form-label">Email</label><input class="form-input" id="si-email" value="' + esc(s.email || '') + '"></div>' +
+    '<div class="form-group"><label class="form-label">Prayer request recipients</label><input class="form-input" id="si-prayer-recipients" value="' + esc(s.prayer_recipients || '') + '" placeholder="pastor@example.com, prayer@example.com"><div class="sub" style="margin-top:4px">Comma-, space-, or line-separated addresses</div></div>' +
+    '<div class="form-group"><label class="form-label">Regular form recipients</label><input class="form-input" id="si-form-recipients" value="' + esc(s.form_recipients || '') + '" placeholder="office@example.com"><div class="sub" style="margin-top:4px">Used for contact and other non-prayer forms</div></div>' +
     '<div class="form-group"><label class="form-label">Service time</label><input class="form-input" id="si-service" value="' + esc(s.service_time || '') + '"></div>' +
     '<div class="form-group"><label class="form-label">Instagram URL</label><input class="form-input" id="si-instagram" value="' + esc(s.instagram || '') + '"></div>' +
     '<div class="form-group"><label class="form-label">Facebook URL</label><input class="form-input" id="si-facebook" value="' + esc(s.facebook || '') + '"></div>' +

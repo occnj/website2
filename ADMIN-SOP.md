@@ -80,8 +80,9 @@ shows all three as tabs. To change the default tab or the channel handles:
    Apple/Spotify links first)
 
 ### Prayer requests & form emails
-- Prayer requests submitted on the site email **oasis@, PHegel@, and pjhegel@verizon.net**.
-- All other contact-form messages email **oasis@oasisnj.net**.
+- Admin → Settings → **Prayer request recipients** controls where prayer requests go.
+- Admin → Settings → **Regular form recipients** controls contact and other non-prayer forms.
+- Enter multiple addresses separated by commas, spaces, or new lines.
 - These go out by email (Resend) — check those inboxes, not the admin panel.
 
 ### Update the donation link (Admins only)

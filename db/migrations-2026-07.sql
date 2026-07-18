@@ -28,6 +28,14 @@ alter table site_settings
 alter table site_settings add column if not exists facebook_page_id text default '';
 alter table site_settings add column if not exists youtube_channel text default '';
 alter table site_settings add column if not exists live_default_tab text default 'twitch';
+
+-- ----------------------------------------------------------------------------
+-- 4. Form email recipients — editable from Admin → Settings
+-- ----------------------------------------------------------------------------
+alter table site_settings
+  add column if not exists prayer_recipients text default 'oasis@oasisnj.net, PHegel@oasisnj.net, pjhegel@verizon.net';
+alter table site_settings
+  add column if not exists form_recipients text default 'oasis@oasisnj.net';
 --    Public upcoming-events now sort by starts_at, then sort_order. New events
 --    added in Admin may have a null sort_order; that's fine, Postgres sorts
 --    nulls last for the secondary key. Nothing to run here.
