@@ -29,15 +29,22 @@ becomes editable in place.
 ## How it works
 
 - `cms-core.js` gives every element a **stable key from its DOM path**. The
-  editor records edits under those keys; the public site (`site-data.js`)
-  re-applies them on load. Same algorithm both sides → nothing hand-tagged.
-- `editor.js` is the editing UI. It only activates with `?edit=1`; otherwise
-  it does nothing, so visitors never see it.
+  editor records edits under those keys; the public site re-applies them on load
+  via `CmsBridge` → `OASIS.applyEdits`. Same algorithm both sides → nothing
+  hand-tagged.
+- **Text detection (upgraded July 2026):** instead of a fixed selector whitelist,
+  `cms-core.js` now detects text blocks generically — any element whose contents
+  are plain inline text is editable, and every `<a href>` gets a link editor. This
+  means addresses, phone numbers, stats, and span/div-based text are all editable,
+  not just headings and paragraphs.
+- `editor.js` is the editing UI. It only activates with `?edit=1` (or the
+  `oasis_edit` localStorage flag); otherwise it does nothing, so visitors never
+  see it. `CmsBridge.js` decides which to load per page.
 
-## Why the old hero upload did nothing
+## Note on the old hero upload
 
-`site-data.js` looked for `.hero` / `.page-hero`, but the home hero is
-`.hero-home`, so the update block was skipped entirely — and the hero has no
-`<img>`, only a CSS-background overlay. The new generic override layer targets
-the actual element by path and sets the background correctly. The old
-form-based **Fields** editor still works alongside this for structured content.
+The original static-site `site-data.js` looked for `.hero` / `.page-hero`, but the
+home hero is `.hero-home` with a CSS-background overlay (no `<img>`), so uploads
+were skipped. The generic override layer now targets the actual element by path.
+The form-based **Fields** editor in Admin still works alongside this for structured
+content (events, sermons, team, settings).

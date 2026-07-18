@@ -60,16 +60,37 @@ Pages → pick the page → Edit → change the field → **Publish Changes**
 4. Save — it appears on the Events page and home page automatically
 - Past events drop off the site automatically; no need to delete them
 
-### Sermons
-- Upload the video to YouTube as normal — it appears in the admin within the hour (or press **Sync Now**)
-- Then open it and fill in **Series** and **Speaker**, and set **Featured** for the latest message
+### Sermons & Watch page
+- The Watch page pulls messages automatically from the **YouTube channel (@OCCNJ)** —
+  new uploads appear on their own, no manual entry needed.
+- **Live streaming:** during the Sunday service window (9:55–11:20 AM ET) the Watch
+  page and the site banner automatically switch to "live" mode. Nothing to toggle.
+
+### Live player (which platform shows)
+Restream sends your service to Twitch, YouTube, and Facebook at once. The Watch page
+shows all three as tabs. To change the default tab or the channel handles:
+1. **Navigation & Footer → Live player**
+2. Set **Default tab** (Twitch / YouTube / Facebook) and each platform's channel/page ID
+3. Save
+
+### Show/hide the podcast section
+1. **Navigation & Footer → Site info & footer**
+2. Toggle **"Show Subscribe to the Oasis Podcast section"**
+3. Save — it's hidden by default; turn it on once the podcast is live (and set the
+   Apple/Spotify links first)
+
+### Prayer requests & form emails
+- Prayer requests submitted on the site email **oasis@, PHegel@, and pjhegel@verizon.net**.
+- All other contact-form messages email **oasis@oasisnj.net**.
+- These go out by email (Resend) — check those inboxes, not the admin panel.
 
 ### Update the donation link (Admins only)
 1. **Giving** → paste the new Kingdom Ledger link → Save
 2. Click **Test Link** and complete a $1 gift before announcing
 
 ### Navigation & footer
-**Navigation** tab → drag to reorder menu items, toggle to hide, edit footer/socials → Save
+**Navigation** tab → **↑↓ arrows** to reorder menu items, toggle to hide, edit
+footer/socials → Save
 
 ---
 
@@ -88,8 +109,10 @@ Pages → pick the page → Edit → change the field → **Publish Changes**
 |---|---|
 | Can't log in | Forgot-password link; if still stuck, an Admin re-invites you |
 | Change not showing | Hard-refresh (Ctrl/Cmd+Shift+R); wait 1 min |
-| Sermon missing | Check it's Public on YouTube, then Sync Now |
-| Site down | Check status.supabase.com and your host's status page; contact the developer |
+| Sermon missing | Check it's Public on YouTube; the feed refreshes ~every 30 min |
+| Prayer/contact email not arriving | Check spam; confirm Resend key in server `.env.local`; test-submit the form |
+| Live stream not showing | Confirm Restream is pushing; check the channel IDs in Admin → Live player |
+| Site down / no CSS | Developer: on the server run the deploy steps in `SERVER-COMMANDS.md` (never `next dev`) |
 
 **Developer contact:** _(fill in name / phone / email)_
 

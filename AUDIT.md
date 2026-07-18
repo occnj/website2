@@ -1,48 +1,75 @@
 # Website Audit — Oasis Christian Centre
-*Audited: all 9 public pages + admin panel + nav.js + styles.css · Target: DigitalOcean Droplet*
+*Originally audited as a static site; migrated to Next.js + Supabase July 2026.
+This file now tracks the current status of each item. For the full change history
+see `CHANGELOG-2026-07.md`.*
 
 ---
 
-## Verdict
+## Verdict (updated July 2026)
 
-Structure, navigation, mobile layout, and internal links are **solid — no broken links, every page has viewport meta, all images have alt text.** What blocks go-live is **content placeholders and unwired backend**, plus a few small technical gaps. Details below, ordered by severity.
+The site is now a **Next.js app** (server-rendered, `basePath: /website`, port 5900)
+backed by **Supabase**, deployed on the church's own server behind a Tailscale/proxy
+setup. Most original blockers are **resolved**. Remaining work is mostly real content
+(photos, bios) and a couple of settings values.
 
 ---
 
-## 🔴 Blockers (fix before launch)
+## 🔴 Original blockers — status
 
-1. **Admin login is a prototype, not real security.** `admin.html` "Sign In" is cosmetic — anyone who finds `/admin` gets in. Before deploying: wire real Supabase Auth, and additionally block `/admin` at the Nginx level (see droplet config below) until that's done.
-2. **Contact/prayer forms don't submit anywhere.** They need the Supabase `messages` insert + email Edge Function (per SUPABASE-GUIDE.md), or at minimum a mailto/Formspree stopgap.
-3. **Placeholder phone numbers** — `(732) 555-01xx` appears on Plan Your Visit and Contact. Replace with the real number.
-4. **Address inconsistency** — footer (nav.js) says *15 Main St*; other materials say *1600 Church St*. Pick one, fix everywhere.
-5. **Give page payment links not wired** — Stripe Payment Links must exist and be tested before the Give button goes live.
-6. **Photo placeholders on every page** — heroes, leadership headshots, events, life-events all use placeholder frames. Site will look unfinished without real photography. (Leadership names/bios also need real content.)
+1. ~~Admin login is a prototype~~ → **RESOLVED.** Real Supabase Auth with per-user
+   accounts and role-based access (`profiles.role`). Every change is audit-logged.
+2. ~~Contact/prayer forms don't submit~~ → **RESOLVED.** Forms send real email via
+   Resend (`app/api/contact/route.js`). Prayer → pastoral team; all else → oasis@.
+   See CHANGELOG "Forms & email".
+3. **Placeholder phone numbers** — still `(732) 555-01xx` in places. **Fix in
+   Admin → Settings** (no code change needed).
+4. **Address inconsistency** — verify the correct address and set it once in
+   Admin → Settings; footer + pages read from there.
+5. **Give page** — uses the Kingdom Ledger donate link
+   (`thekingdomledger.com/donate?code=2335`), wired in nav + Give button. Confirm
+   it's the correct destination.
+6. **Photo placeholders** — heroes, leadership headshots, events still use
+   placeholder frames. Upload real images via Admin → Media / Visual Edit.
+   Leadership names/bios also need real content.
 
-## 🟠 Should fix
+## 🟠 Should fix — status
 
-7. **Footer social links go nowhere** (`href="#"` for fb/ig/yt). Add real URLs or remove the icons.
-8. **Missing meta descriptions** on events.html, life-events.html, give.html (others have them). Hurts Google snippets.
-9. **Watch page sermons are static** — fine for launch if they're real videos; the YouTube sync replaces this later.
-10. **No favicon** — browsers will show a blank tab icon. Add one from the logo.
-11. **No 404 page** — add a simple branded 404.html (Nginx serves it, config below).
+7. ~~Footer social links go nowhere~~ → **PARTLY RESOLVED.** YouTube is wired
+   (`@OCCNJ`); Facebook/Instagram read from Admin settings — set the URLs there.
+8. **Meta descriptions** — most pages have them via Next.js `metadata`; verify
+   events/life-events/give.
+9. ~~Watch page sermons are static~~ → **RESOLVED.** Watch pulls live from the
+   YouTube channel RSS feed; live stream via tabbed Twitch/YouTube/Facebook player.
+10. **Favicon** — confirm one is set from the logo.
+11. **404 page** — Next.js has a default `not-found`; a branded one can be added
+    at `app/not-found.js` if desired.
 
 ## 🟡 Nice to have
 
-12. `loading="lazy"` on below-the-fold images (matters once real photos land).
+12. `loading="lazy"` — already applied on sermon thumbnails; extend to other
+    below-the-fold images once real photos land.
 13. `robots.txt` + `sitemap.xml` for SEO.
-14. Header/footer are injected by nav.js at runtime — content still indexes fine, but if SEO becomes a priority, inline them at build time.
-15. Open Graph tags (`og:image`, `og:title`) so links shared on socials/WhatsApp show a preview card.
+14. Open Graph tags (`og:image`, `og:title`) for social/WhatsApp link previews.
+15. Rotate the Resend API key (was committed as a fallback; repo is public).
 
-## ✅ Passed
+## ✅ Passing
 
-- All internal links resolve (checked every href across 10 pages)
-- Every page: viewport meta, unique title, single shared stylesheet
-- All `<img>` tags have alt text
-- Mobile: grids stack, heroes scale, hamburger nav works (from the recent mobile pass)
-- Consistent shared header/footer via nav.js — one place to edit
-- No external JS dependencies on public pages — fast and nothing to break
+- All internal links resolve; nav reads from Supabase (`nav_items`).
+- Server-rendered pages with unique titles/metadata.
+- Mobile: grids stack, heroes scale, nav works.
+- Shared header/footer components — one place to edit.
+- Live streaming auto-switches live/offline on the service schedule.
+- Inline Visual Editor covers all text + images + links.
 
 ---
+
+## Historical note — original static-site deployment
+
+The section below documents the *original* DigitalOcean static-site plan. It is
+**superseded** by the current Next.js deployment (see `SERVER-COMMANDS.md` for the
+live deploy process). Kept for reference only.
+
+
 
 ## DigitalOcean Droplet Deployment
 

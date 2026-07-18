@@ -1,129 +1,184 @@
 # Oasis Website — Change Log & Handoff (July 2026)
 
-Reference for future work. Covers everything changed after the Next.js
-migration (`19efecc`), the SQL to run, and where key logic lives.
+Master reference for future work. Covers everything changed after the Next.js
+migration (`19efecc`): what was done, the SQL to run, env vars needed, and where
+key logic lives. For plain deploy/restart commands see `SERVER-COMMANDS.md`.
 
 ---
 
-## How to deploy an update on the server
+## Quick deploy (server)
+
+Run one at a time:
 
 ```bash
 cd ~/website2
 git pull origin main
-rm -rf .next          # clears stale build (important after CSS changes)
+rm -rf .next
 npm run build
-pkill -f "next start"; nohup npm run start > ~/website2/app.log 2>&1 &
+fuser -k 5900/tcp
+setsid npm run start > ~/website2/app.log 2>&1 < /dev/null &
+sleep 8 && tail -5 ~/website2/app.log
 ```
 
-The app runs `next start` on port **5900** behind a proxy, with `basePath: /website`
-(see `next.config.js`). Do NOT run `next dev` in production — it serves CSS
-differently and was the cause of the "no CSS on the site" issue.
+App: `next start` on port **5900**, `basePath: /website`. Never run `next dev`
+in production (serves CSS differently — was the cause of the "no CSS" issue).
+Always `rm -rf .next` before rebuilding after CSS/layout changes.
 
 ---
 
-## SQL to run (Supabase SQL editor)
+## SQL to run once (Supabase SQL editor)
 
-Full migration file: `db/migrations-2026-07.sql`. The essentials:
+All idempotent. Full file: `db/migrations-2026-07.sql`.
 
 ```sql
--- Podcast section toggle for the Watch page (hidden until true)
+-- Podcast section toggle (Watch page, hidden until true)
 alter table site_settings add column if not exists podcast_enabled boolean default false;
 
--- Optional Twitch channel override (defaults to "occnj" in code)
-alter table site_settings add column if not exists twitch_channel text default '';
+-- Live player: tabbed Twitch / YouTube / Facebook
+alter table site_settings add column if not exists twitch_channel   text default '';
+alter table site_settings add column if not exists youtube_channel  text default '';
+alter table site_settings add column if not exists facebook_page_id text default '';
+alter table site_settings add column if not exists live_default_tab text default 'twitch';
 ```
-
-Both are idempotent. Fresh installs from `supabase-setup.sql` already include
-these columns — the migration is only for the existing production DB.
 
 Verify:
 ```sql
-select podcast_enabled, twitch_channel from site_settings where id = 1;
+select podcast_enabled, twitch_channel, youtube_channel, facebook_page_id, live_default_tab
+from site_settings where id = 1;
 ```
+
+Fresh installs from `supabase-setup.sql` already include these columns.
 
 ---
 
-## What changed, by commit
+## Environment variables (server `.env.local`)
 
-### `0738cd7` — Structure & logic fixes
-- **Visual Edit now covers all text.** `public/cms-core.js` replaced its
-  hardcoded selector whitelist with generic detection: any element whose
-  content is plain inline text is editable. Link editing broadened to every
-  `<a href>`. (`public/cms-core.js`, `public/editor.js`)
-- **Footer rebuilt on flexbox** so the 4 columns stay side-by-side and wrap
-  cleanly; fake "fb ig yt" text replaced with real SVG social icons.
-  (`components/Footer.js`, `.footer-*` rules in `app/globals.css`)
-- **Plan Your Visit:** removed the gold/amber address bar; "Have a Question?"
-  button is now "Get Directions →" → Google Maps. (`app/plan-your-visit/page.js`)
-- **About / Our Beliefs:** text moved to a left column with an image slot on
-  the right. (`app/about/page.js`)
-- **Watch pulls from YouTube** via the channel RSS feed (no API key).
-  (`lib/youtube.js`)
-- **Hardcoded events removed** from Home + Events; both render only
-  admin-managed events with an empty state. Admin add/edit/delete confirmed
-  working. Public ordering fixed to chronological. (`app/page.js`,
-  `app/events/page.js`, `lib/data.js`)
-- **Next Steps dropdown** no longer vanishes when the mouse crosses the gap —
-  added an invisible hover bridge + close delay + `:focus-within`.
-  (`app/globals.css`)
+`.env.local` is gitignored — lives only on the server. Create/append:
 
-### `60c0763` — Watch Now Live (Twitch)
-- Replaced the "Latest Message" YouTube feature block with a **"Watch Now
-  Live"** section embedding the Twitch stream (channel **`occnj`**).
-- `components/TwitchEmbed.js` is a client component because Twitch requires a
-  `parent=` param matching the runtime hostname (works on localhost, staging,
-  and oasisnj.net without edits). Channel override via `settings.twitch_channel`.
+```bash
+echo 'RESEND_API_KEY=re_xxxxxxxxxxxxxxxxxxxx' >> ~/website2/.env.local
+echo 'RESEND_FROM=Oasis Website <noreply@hub.oasisnj.net>' >> ~/website2/.env.local
+```
 
-### `2ee4208` — Smart live banner
-- `components/LiveBanner.js` shows the red "Live Now" banner **only during the
-  Sunday service window (9:45 AM–12:00 PM America/New_York)**; otherwise a
-  neutral "We stream live every Sunday at 10:00 AM EST" strip. Re-checks each
-  minute. Service window is two numbers at the top of the file.
+Takes effect only on a fresh `npm run start`. The email route falls back to a
+hardcoded key if env is missing, but env is preferred (keeps the key out of the
+public GitHub repo).
+
+---
+
+## Forms & email (Resend)
+
+- API route: `app/api/contact/route.js`. Sends via the Resend REST API (no npm
+  dependency — plain `fetch`).
+- **Routing:**
+  - Prayer requests (`formType: 'prayer'` or reason "Prayer Request")
+    → **oasis@oasisnj.net, PHegel@oasisnj.net, pjhegel@verizon.net**
+  - Everything else → **oasis@oasisnj.net**
+- From: `noreply@hub.oasisnj.net`; submitter's email set as reply-to.
+- Honeypot field (`company`) silently drops bots.
+- Forms: `components/ContactForm.js` (contact page), `components/PrayerForm.js`
+  (used on `/prayer` and embedded in the home Care & Prayer section).
+- **Both forms were previously fake** (fake 1.2s "Sent!" with no email) — now
+  they actually deliver.
+
+---
+
+## What changed, by commit (newest first)
+
+### `59cd0d5` — Forms + scroll flicker
+- Real Resend email delivery; prayer routing to pastoral team, all else to oasis@.
+- New `/prayer` page + `PrayerForm`. Renamed Next Steps "Prayer" → "Prayer Request";
+  home CTA, footer, and Next Steps now link `/prayer`.
+- Home Care & Prayer section and Contact form now use the real working form.
+- **Scroll flicker fix (site-wide):** `Header` scroll handler rAF-throttled and
+  only updates state on change; fixed header promoted to its own GPU layer
+  (`transform: translateZ(0)`) so `backdrop-filter: blur()` stops re-rasterizing
+  the page on every scroll frame.
+
+### `de784da` — Tabbed live player
+- `components/LivePlayer.js`: tabs for **Twitch / YouTube Live / Facebook Live**
+  (Restream pushes to all simultaneously). Visitors switch freely.
+- Admin controls default tab + each platform's channel/page ID
+  (Navigation & Footer → Live player panel).
+
+### `e1b6d5b` — Service window corrected
+- Live window is **Sunday 9:55 AM – 11:20 AM ET** (`lib/serviceWindow.js`).
+
+### `9b826c5` / `ee132f4` — Smart Watch info panel
+- `components/LiveInfoPanel.js`: badge, heading, copy, and button all switch to
+  live mode during the service window ("We're Live!" / "▶ Watch Live Now").
+
+### `48eac0c` — Sermon title clamp
+- YouTube titles clamped to 2 lines so long titles don't blow out card height.
 
 ### `dd70964` — Watch / Home / Admin fixes
-- **Twitch embed containment:** the offline widget was overflowing its grid
-  column into the info panel. Video cell now `min-height:340px; overflow:hidden`
-  with the iframe pinned `position:absolute; inset:0`. (`app/watch/watch.css`)
-- **Podcast section is admin-toggleable, hidden by default.** Gated behind
-  `settings.podcast_enabled`; toggle added in Admin → Navigation & Footer →
-  Site info. (`app/watch/page.js`, `public/admin/views.js`,
-  `public/admin/actions.js`)
-- **About scroll flicker fixed.** `components/AboutSubnav.js` scroll handler was
-  calling `setActive` every frame with a stale value. Now `requestAnimationFrame`
-  throttled + functional update (only re-renders when the active section
-  changes). Subnav-link `transition` narrowed from `all` to color-only.
-  (`components/AboutSubnav.js`, `app/about/about.css`)
-- **Nav reorder respects the menu filter.** `moveRow` in `public/admin/views.js`
-  now accepts an `eq` filter so main-nav reordering doesn't clash with footer
-  items. Up/down arrows in Admin → Navigation & Footer → Main navigation.
-- **Home redundancy removed.** Deleted the Upcoming Events, Circles, and Giving
-  sections (duplicated the "Get Involved / Next Steps" row + nav dropdown).
-  Care & Prayer and below untouched. The "Circles" link in Get Involved was
-  repointed to /contact. (`app/page.js`)
+- Twitch embed contained (was overflowing into the info panel).
+- Podcast section admin-toggleable, hidden by default (`podcast_enabled`).
+- About subnav scroll flicker fixed (rAF + functional update).
+- Nav reorder respects `area='main'` filter.
+- Removed redundant Home sections: Upcoming Events, Circles, Giving.
+
+### `2ee4208` — Smart live banner
+- `components/LiveBanner.js`: red "Live Now" only during the service window,
+  neutral strip otherwise. Re-checks each minute.
+
+### `60c0763` — Watch Now Live (Twitch)
+- Replaced "Latest Message" YouTube block with the live Twitch player.
+- `components/TwitchEmbed.js` client component (Twitch needs a `parent=` param
+  matching the runtime hostname).
+
+### `0738cd7` — Structure & logic fixes
+- Visual Edit now covers all text (generic detection replaced the selector
+  whitelist in `public/cms-core.js`; every `<a href>` link-editable).
+- Footer rebuilt on flexbox + real SVG social icons.
+- Plan Your Visit: removed gold address bar; "Have a Question?" → "Get Directions →".
+- About / Our Beliefs: text left, image right.
+- Watch pulls from the YouTube channel RSS feed (`lib/youtube.js`, no API key).
+- Hardcoded events removed; Home + Events render only admin-managed events.
+- Next Steps dropdown no longer vanishes crossing the hover gap.
+
+---
+
+## Live streaming (Restream)
+
+Restream is the distributor — it pushes one OBS/software feed out to Twitch,
+YouTube, and Facebook simultaneously. The website does **not** self-host video;
+it just embeds whichever platform tab the visitor picks. No RTMP ingest on the
+server. To change platforms/handles, use Admin → Navigation & Footer → Live player.
+
+Service window (auto live/offline switching): edit the two numbers in
+`lib/serviceWindow.js`. Currently Sun 9:55–11:20 AM ET.
 
 ---
 
 ## Open items / things to know
 
-- **Placeholder contact info.** Some pages still show a `555` phone and the
-  address differs between pages (see `AUDIT.md`). Fix in Admin → Settings once
-  you have the real values.
-- **YouTube feed limit.** The RSS feed exposes only ~15 recent videos. Full
-  back-catalog would need a YouTube Data API key — not wired yet.
-- **Twitch column width.** At desktop the live column is `1.4fr`; if the offline
-  schedule widget feels cramped, bump it in `app/watch/watch.css`.
-- **Podcast links.** When enabled, the Apple Podcasts / Spotify buttons in the
-  podcast section are still `href="#"` placeholders — set real URLs before
-  turning the section on.
+- **Rotate the Resend key.** It was committed as a fallback in an earlier version;
+  since the repo is public, generate a fresh key in Resend and put it only in
+  `.env.local`.
+- **Placeholder contact info.** Some pages show a `555` phone / mismatched address
+  (see `AUDIT.md`). Fix in Admin → Settings.
+- **YouTube feed limit.** RSS exposes only ~15 recent videos. Full back-catalog
+  needs a YouTube Data API key — not wired.
+- **Podcast links.** When the podcast section is enabled, the Apple/Spotify
+  buttons are still `#` placeholders — set real URLs first.
+
+---
 
 ## Key files map
 
 | Area | File(s) |
 |---|---|
-| Live Twitch player | `components/TwitchEmbed.js` |
+| Live tabbed player | `components/LivePlayer.js` |
 | Live/offline banner | `components/LiveBanner.js` |
+| Live info panel | `components/LiveInfoPanel.js` |
+| Service window logic | `lib/serviceWindow.js` |
 | YouTube feed | `lib/youtube.js` |
+| Contact form | `components/ContactForm.js` |
+| Prayer form + page | `components/PrayerForm.js`, `app/prayer/page.js` |
+| Email API route | `app/api/contact/route.js` |
 | About sticky subnav | `components/AboutSubnav.js` |
+| Header (scroll) | `components/Header.js` |
 | Visual editor | `public/cms-core.js`, `public/editor.js`, `components/CmsBridge.js` |
 | Admin UI | `public/admin/views.js`, `public/admin/actions.js`, `public/admin/db.js` |
 | Data access | `lib/data.js` |

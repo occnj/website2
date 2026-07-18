@@ -112,7 +112,13 @@ create table site_settings (          -- single-row global settings
   id int primary key default 1 check (id = 1),
   tagline text, address text, phone text, email text,
   service_time text,
-  instagram text, youtube text, facebook text
+  instagram text, youtube text, facebook text,
+  -- added July 2026 (see db/migrations-2026-07.sql):
+  podcast_enabled boolean default false,   -- show podcast section on /watch
+  twitch_channel text default '',          -- live player: Twitch handle
+  youtube_channel text default '',         -- live player: YouTube channel/video ID
+  facebook_page_id text default '',        -- live player: Facebook page username/ID
+  live_default_tab text default 'twitch'   -- which live tab loads first
 );
 
 -- ===== GIVING =====
@@ -229,11 +235,19 @@ Alternative (faster + better SEO): a small build script on the droplet that rege
 static HTML on publish (triggered by a Supabase webhook hitting a tiny endpoint, or a
 cron every few minutes). Start with client-side fetching; upgrade later if needed.
 
-## Contact form
+## Contact & prayer forms (implemented — Resend email)
 
-Per the latest decision there is **no admin inbox** — contact-form submissions are not
-stored. Point the form at a mailto/Formspree-style handler, or add the messages table
-back later if an inbox is requested.
+Forms now send **real email via Resend** — there is no admin inbox / `messages`
+table in use. Route: `app/api/contact/route.js`.
+
+- **Prayer requests** → oasis@oasisnj.net, PHegel@oasisnj.net, pjhegel@verizon.net
+- **All other forms** → oasis@oasisnj.net
+- From: `noreply@hub.oasisnj.net`; submitter email set as reply-to.
+- Config via env on the server (`.env.local`, gitignored):
+  `RESEND_API_KEY`, `RESEND_FROM`. A hardcoded fallback exists but env is preferred.
+- Honeypot field blocks bots.
+
+The `messages` table can still be added back later if a stored inbox is ever wanted.
 
 ## YouTube sermon sync
 
