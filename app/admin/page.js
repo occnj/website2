@@ -6,7 +6,7 @@ import { asset } from '@/lib/basePath';
 
 const TITLES = {
   dashboard: 'Dashboard', pages: 'Pages', sermons: 'Sermons', events: 'Events',
-  team: 'Leadership Team', give: 'Giving', navigation: 'Navigation & Site Info',
+  team: 'Leadership Team', give: 'Giving', navigation: 'Navigation & Site Info', settings: 'Settings',
   media: 'Media Library', users: 'Users & Roles',
 };
 
@@ -79,6 +79,7 @@ export default function AdminPage() {
             <button className="side-link" data-view="navigation" data-role="content">Navigation</button>
             <button className="side-link" data-view="media" data-role="content">Media</button>
             <div className="sidebar-heading" data-role="admin">Settings</div>
+            <button className="side-link" data-view="settings" data-role="admin">Settings</button>
             <button className="side-link" data-view="users" data-role="admin">Users &amp; Roles</button>
           </nav>
           <div className="sidebar-foot">

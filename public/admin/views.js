@@ -149,7 +149,8 @@ pages: () => safe(async function () {
       return '<div class="data-row"><div class="row-thumb-sq" style="display:grid;place-items:center;color:var(--gray-2)">' + ICONS.pages + '</div>' +
         '<div class="row-main"><div class="row-title">' + esc(p.title) + '</div><div class="row-sub">/website' + (p.slug === 'index' ? '' : '/' + esc(p.slug)) + '</div></div>' +
         '<span class="tag ' + (p.published ? 'tag-green' : 'tag-gray') + '" style="margin-right:8px">' + (p.published ? 'Published' : 'Hidden') + '</span>' +
-        '<button class="btn btn-sm btn-outline" onclick="editPage(\'' + p.id + '\')">Edit</button></div>';
+        '<button class="btn btn-sm btn-outline" onclick="editPage(\'' + p.id + '\')">Fields</button>' +
+        '<a class="btn btn-sm btn-primary" href="/website' + (p.slug === 'index' ? '' : '/' + encodeURIComponent(p.slug)) + '?edit=1" target="_blank">Visual edit ↗</a></div>';
     }).join('') + '</div></div>';
 }),
 
@@ -293,6 +294,10 @@ navigation: () => safe(async function () {
     '<div class="form-group"><label class="form-label">Facebook page username / ID</label><input class="form-input" id="si-fb-page" placeholder="OasisChristianCentreNJ" value="' + esc(s.facebook_page_id || '') + '"></div>' +
     '</div></div></div>';
 }),
+
+// Settings keeps the site-info and live-player controls available from a
+// clearly named admin destination; navigation remains available separately.
+settings: () => VIEWS.navigation(),
 
 // ---------------- MEDIA ----------------
 media: () => safe(async function () {

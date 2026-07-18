@@ -92,12 +92,12 @@ export default async function ContactPage() {
                 <p className="t-small t-muted mt-2">First time coming? We&rsquo;ve prepared everything you need to feel at home.</p>
               </div>
             </Link>
-            <a href="#" style={{ display: 'block' }}>
+            <Link href="/prayer" style={{ display: 'block' }}>
               <div className="step-card" style={{ borderTopColor: 'var(--amber)', cursor: 'pointer' }}>
                 <h3 className="t-h3">Prayer Request</h3>
                 <p className="t-small t-muted mt-2">Submit a prayer request and our dedicated team will stand with you.</p>
               </div>
-            </a>
+            </Link>
             <a href="#" style={{ display: 'block' }}>
               <div className="step-card" style={{ borderTopColor: '#4A8C6A', cursor: 'pointer' }}>
                 <h3 className="t-h3">Join a Team</h3>

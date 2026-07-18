@@ -25,8 +25,7 @@ const STATIC_LINKS = [
     label: 'Next Steps',
     dropdown: [
       { label: 'Teams', href: '/about#ministries' },
-      { label: 'Circles', href: '/#circles' },
-      { label: 'Prayer', href: '/contact' },
+      { label: 'Prayer Request', href: '/prayer' },
       { label: 'Life Events', href: '/life-events' },
     ],
   },

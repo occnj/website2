@@ -293,6 +293,7 @@ async function editPage(pageId) {
       '<span class="tag tag-blue">' + esc(page.title) + '</span>' +
       '<div style="margin-left:auto;display:flex;gap:8px">' +
       '<a class="btn btn-sm btn-outline" href="/website' + (page.slug === 'index' ? '' : '/' + esc(page.slug)) + '" target="_blank">Preview ↗</a>' +
+      '<a class="btn btn-sm btn-primary" href="/website' + (page.slug === 'index' ? '' : '/' + encodeURIComponent(page.slug)) + '?edit=1" target="_blank">Visual edit ↗</a>' +
       '<button class="btn btn-sm btn-primary" onclick="savePage()">Publish Changes</button></div></div>' +
       blockHtml +
       '<div class="panel"><div class="panel-head"><div><h3>SEO</h3></div></div><div class="panel-body">' +
