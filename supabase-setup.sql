@@ -26,7 +26,9 @@ create table site_settings (
   instagram text, youtube text, facebook text,
   donate_url text default 'https://thekingdomledger.com/donate?code=2335',
   donate_new_tab boolean default true,
-  youtube_channel text default ''
+  youtube_channel text default '',
+  twitch_channel text default '',
+  podcast_enabled boolean default false
 );
 insert into site_settings (id, tagline, service_time, email)
 values (1, 'Know God. Find Hope. Make a Difference.', 'Sundays at 10:00 AM', 'info@oasisnj.net');
