@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { TWITCH_CHANNEL_URL } from './TwitchEmbed';
-
+import { isServiceWindowNow } from '@/lib/serviceWindow';
 // Shows the red "Live Now" banner only during the Sunday service window
 // (9:45 AM – 12:00 PM Eastern). The rest of the week it switches to a neutral
 // "We stream live Sundays at 10 AM" strip, so the site never claims to be

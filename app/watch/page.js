@@ -5,6 +5,7 @@ import { getPageHero, getSermons, getSiteSettings } from '@/lib/data';
 import { getChannelVideos, YT_CHANNEL_URL } from '@/lib/youtube';
 import TwitchEmbed, { TWITCH_CHANNEL_URL } from '@/components/TwitchEmbed';
 import LiveBanner from '@/components/LiveBanner';
+import LiveInfoPanel from '@/components/LiveInfoPanel';
 
 export const metadata = {
   title: 'Watch — Oasis Christian Centre',
@@ -46,22 +47,7 @@ export default async function WatchPage() {
             <div className="featured-sermon-video" data-live-player>
               <TwitchEmbed />
             </div>
-            <div className="featured-sermon-info">
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(197,48,48,.2)', borderRadius: 100, padding: '4px 14px', fontSize: '.7rem', fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: '#E05252', marginBottom: 'var(--sp-2)' }}>
-                <span className="live-dot"></span>Live Stream
-              </div>
-              <h2 className="t-h2 text-white">Watch Now Live</h2>
-              <p style={{ color: 'rgba(255,255,255,.65)', marginTop: 'var(--sp-2)', fontSize: '.9rem', lineHeight: 1.65 }}>
-                Join us for our live stream every Sunday morning at 10:00 AM EST. If the player doesn&rsquo;t load automatically, please refresh the page.
-              </p>
-              <p style={{ color: 'rgba(255,255,255,.5)', marginTop: 'var(--sp-2)', fontSize: '.82rem', lineHeight: 1.6 }}>
-                On mobile devices, press play to begin the stream after 10:00 AM EST.
-              </p>
-              <div style={{ display: 'flex', gap: 'var(--sp-2)', marginTop: 'var(--sp-4)', flexWrap: 'wrap' }}>
-                <a href={TWITCH_CHANNEL_URL} target="_blank" rel="noopener" className="btn btn-primary">Watch on Twitch</a>
-                <a href={YT_CHANNEL_URL} target="_blank" rel="noopener" className="btn btn-ghost btn-sm">Past Messages on YouTube →</a>
-              </div>
-            </div>
+            <LiveInfoPanel />
           </div>
         </div>
       </section>
