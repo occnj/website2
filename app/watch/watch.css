@@ -72,12 +72,23 @@
   overflow: hidden;
   display: grid;
   grid-template-columns: 1.4fr 1fr;
+  align-items: stretch;
 }
 .featured-sermon-video {
   position: relative;
-  aspect-ratio: 16/9;
+  min-height: 340px;
   cursor: pointer;
   align-self: stretch;
+  overflow: hidden;
+}
+.featured-sermon-video iframe,
+.featured-sermon-video > img,
+.featured-sermon-video > .img-placeholder {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
 }
 .featured-sermon-info {
   padding: var(--sp-5);
@@ -115,6 +126,7 @@
 @media (max-width: 900px) {
   .sermon-grid { grid-template-columns: repeat(2, 1fr); }
   .featured-sermon { grid-template-columns: 1fr; }
+  .featured-sermon-video { min-height: 220px; aspect-ratio: 16/9; }
 }
 @media (max-width: 600px) {
   .sermon-grid { grid-template-columns: 1fr; }

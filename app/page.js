@@ -1,15 +1,14 @@
 import Link from 'next/link';
 import './home.css';
-import { getPageHero, getUpcomingEvents, getSermons } from '@/lib/data';
+import { getPageHero, getSermons } from '@/lib/data';
 import { getChannelVideos } from '@/lib/youtube';
 import { asset } from '@/lib/basePath';
 
 export const dynamic = 'force-dynamic';
 
 export default async function HomePage() {
-  const [hero, events, ytVideos, dbSermons] = await Promise.all([
+  const [hero, ytVideos, dbSermons] = await Promise.all([
     getPageHero('index'),
-    getUpcomingEvents(),
     getChannelVideos(),
     getSermons(),
   ]);
@@ -19,7 +18,6 @@ export default async function HomePage() {
   const heroIntro = (hero && hero.intro) ||
     "Oasis Christian Centre is a warm, Spirit-led community where everyone is welcome. Come as you are — no matter where you've been.";
   const latestSermon = sermons.find((s) => s.featured) || sermons[0];
-  const upcoming = events.slice(0, 4);
 
   return (
     <>
@@ -141,7 +139,7 @@ export default async function HomePage() {
                 </div>
               </div>
             </Link>
-            <Link href="/#circles" className="involve-row">
+            <Link href="/contact" className="involve-row">
               <div className="involve-row-inner">
                 <div className="involve-left">
                   <span className="involve-num">02</span>
@@ -236,117 +234,6 @@ export default async function HomePage() {
       </section>
 
       {/* ===== EVENTS ===== */}
-      <section className="section bg-off" data-screen-label="Events">
-        <div className="container">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-5)', flexWrap: 'wrap', gap: 'var(--sp-2)' }}>
-            <div>
-              <p className="t-eyebrow">What&rsquo;s Happening</p>
-              <h2 className="t-h2 mt-2">Upcoming Events</h2>
-            </div>
-            <Link href="/events" className="btn btn-secondary btn-sm">View All Events</Link>
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-2)' }}>
-            {upcoming.length === 0 && (
-              <p className="t-body t-muted">No upcoming events right now — check back soon.</p>
-            )}
-            {upcoming.map((e, i) => {
-              const d = e.starts_at ? new Date(e.starts_at + 'T12:00:00') : null;
-              return (
-                <div className="event-card-row" key={e.id || i}>
-                  <div className="event-date-block">
-                    <div className="month">{d ? d.toLocaleString('en-US', { month: 'short' }) : e.month}</div>
-                    <div className="day">{d ? d.getDate() : e.day}</div>
-                  </div>
-                  <div className="event-info">
-                    <h4>{e.title}</h4>
-                    <p>{[e.time_label, e.location, e.category].filter(Boolean).join(' · ')}</p>
-                  </div>
-                  <Link href="/events" className="btn btn-secondary btn-sm" style={{ marginLeft: 'auto', whiteSpace: 'nowrap' }}>Details</Link>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* ===== CIRCLES ===== */}
-      <section className="section" id="circles" data-screen-label="Circles">
-        <div className="container">
-          <div className="section-label">
-            <p className="t-eyebrow">Community</p>
-          </div>
-          <div className="split-2 split-wide">
-            <div>
-              <h2 className="t-h1">Life is better<br />in a Circle.</h2>
-              <p className="t-body t-muted mt-3">Circles are Oasis&rsquo;s small groups — real, honest, intentional communities where you can grow in faith and find genuine friendship.</p>
-              <Link href="/contact" className="btn btn-primary mt-4">Find Your Circle</Link>
-            </div>
-            <div className="circles-grid">
-              <div className="circle-card">
-                <h4>WOW Women</h4>
-                <p>A sisterhood of women growing in faith, prayer, and purpose together.</p>
-              </div>
-              <div className="circle-card" style={{ borderLeftColor: 'var(--amber)' }}>
-                <h4>FMO Men</h4>
-                <p>Men doing life together — anchored, accountable, and moving forward.</p>
-              </div>
-              <div className="circle-card" style={{ borderLeftColor: '#8B6BAE' }}>
-                <h4>The Journey</h4>
-                <p>For those navigating a new season — recovery, growth, or fresh starts.</p>
-              </div>
-              <div className="circle-card" style={{ borderLeftColor: '#4A8C6A' }}>
-                <h4>The Collective</h4>
-                <p>Young adults building community, faith, and a vision for their lives.</p>
-              </div>
-              <div className="circle-card" style={{ borderLeftColor: '#C45E4A' }}>
-                <h4>Couples & Families</h4>
-                <p>Building strong homes and deeper faith together, season by season.</p>
-              </div>
-              <div className="circle-card" style={{ borderLeftColor: 'var(--blue)' }}>
-                <h4>Mixed Groups</h4>
-                <p>Open circles for anyone ready to connect with others in the community.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ===== GIVE ===== */}
-      <section className="section give-section" data-screen-label="Giving">
-        <div className="container" style={{ position: 'relative', zIndex: 1 }}>
-          <div className="split-2">
-            <div>
-              <p className="t-eyebrow" style={{ color: 'var(--amber)' }}>Generosity</p>
-              <h2 className="t-h1 text-white mt-2">Your generosity changes lives.</h2>
-              <p style={{ color: 'rgba(255,255,255,.7)', marginTop: 'var(--sp-3)', fontSize: '1rem', lineHeight: 1.7 }}>
-                Every gift supports our local community, our global missions, and the work of making Oasis a home for everyone who walks through our doors.
-              </p>
-              <div style={{ display: 'flex', gap: 'var(--sp-2)', marginTop: 'var(--sp-4)', flexWrap: 'wrap' }}>
-                <Link href="/give" className="btn btn-amber btn-lg">Give Online</Link>
-                <Link href="/give" className="btn btn-ghost btn-sm" style={{ alignSelf: 'center' }}>Learn About Giving →</Link>
-              </div>
-            </div>
-            <div className="grid-2-sm">
-              <div style={{ background: 'rgba(255,255,255,.06)', borderRadius: 'var(--radius-md)', padding: 'var(--sp-4)', border: '1px solid rgba(255,255,255,.1)' }}>
-                <div style={{ fontFamily: 'var(--font-head)', fontSize: '2rem', fontWeight: 700, color: 'var(--amber)' }}>Local</div>
-                <p style={{ fontSize: '.85rem', color: 'rgba(255,255,255,.6)', marginTop: 8, lineHeight: 1.5 }}>Supporting our Rahway neighbors through outreach, care, and community</p>
-              </div>
-              <div style={{ background: 'rgba(255,255,255,.06)', borderRadius: 'var(--radius-md)', padding: 'var(--sp-4)', border: '1px solid rgba(255,255,255,.1)' }}>
-                <div style={{ fontFamily: 'var(--font-head)', fontSize: '2rem', fontWeight: 700, color: 'var(--blue)' }}>Global</div>
-                <p style={{ fontSize: '.85rem', color: 'rgba(255,255,255,.6)', marginTop: 8, lineHeight: 1.5 }}>Funding missions and ministry partners around the world</p>
-              </div>
-              <div style={{ background: 'rgba(255,255,255,.06)', borderRadius: 'var(--radius-md)', padding: 'var(--sp-4)', border: '1px solid rgba(255,255,255,.1)' }}>
-                <div style={{ fontFamily: 'var(--font-head)', fontSize: '2rem', fontWeight: 700, color: '#fff' }}>Family</div>
-                <p style={{ fontSize: '.85rem', color: 'rgba(255,255,255,.6)', marginTop: 8, lineHeight: 1.5 }}>Building programs and spaces where every age group can thrive</p>
-              </div>
-              <div style={{ background: 'rgba(0,150,199,.12)', borderRadius: 'var(--radius-md)', padding: 'var(--sp-4)', border: '1px solid rgba(0,150,199,.25)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Link href="/give" className="btn btn-amber" style={{ width: '100%', justifyContent: 'center' }}>Give Now →</Link>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* ===== PRAYER ===== */}
       <section className="section bg-blue-light" data-screen-label="Prayer">
         <div className="container">

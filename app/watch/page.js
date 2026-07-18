@@ -1,7 +1,7 @@
 import './watch.css';
 import PageHero from '@/components/PageHero';
 import SermonGrid from '@/components/SermonGrid';
-import { getPageHero, getSermons } from '@/lib/data';
+import { getPageHero, getSermons, getSiteSettings } from '@/lib/data';
 import { getChannelVideos, YT_CHANNEL_URL } from '@/lib/youtube';
 import TwitchEmbed, { TWITCH_CHANNEL_URL } from '@/components/TwitchEmbed';
 import LiveBanner from '@/components/LiveBanner';
@@ -15,12 +15,16 @@ export const dynamic = 'force-dynamic';
 export default async function WatchPage() {
   // Everything on this page comes from the Oasis YouTube channel (@OCCNJ).
   // If the feed is unreachable, fall back to sermons added in the Admin.
-  const [hero, ytVideos, dbSermons] = await Promise.all([
+  const [hero, ytVideos, dbSermons, settings] = await Promise.all([
     getPageHero('watch'),
     getChannelVideos(),
     getSermons(),
+    getSiteSettings(),
   ]);
   const sermons = ytVideos.length ? ytVideos : dbSermons;
+  // Podcast section is hidden by default; enable it in Admin → Settings
+  // by setting `podcast_enabled` to true once the show is live.
+  const podcastEnabled = !!(settings && settings.podcast_enabled);
 
   return (
     <>
@@ -78,6 +82,7 @@ export default async function WatchPage() {
         </div>
       </section>
 
+      {podcastEnabled && (
       <section className="section bg-charcoal" data-screen-label="Podcast CTA">
         <div className="container text-center">
           <p className="t-eyebrow" style={{ color: 'var(--amber)' }}>Listen Anywhere</p>
@@ -90,6 +95,7 @@ export default async function WatchPage() {
           </div>
         </div>
       </section>
+      )}
     </>
   );
 }

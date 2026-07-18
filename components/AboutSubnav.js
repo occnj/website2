@@ -16,17 +16,31 @@ export default function AboutSubnav() {
   const [active, setActive] = useState('our-story');
 
   useEffect(() => {
-    function onScroll() {
-      let current = active;
-      SECTIONS.forEach(({ id }) => {
+    let ticking = false;
+
+    function compute() {
+      ticking = false;
+      let current = SECTIONS[0].id;
+      for (const { id } of SECTIONS) {
         const el = document.getElementById(id);
         if (el && window.scrollY >= el.offsetTop - 120) current = id;
-      });
-      setActive(current);
+      }
+      // Functional update: React skips the re-render entirely when the
+      // value is unchanged, so scrolling within a section no longer repaints
+      // the sub-nav (which was causing the flicker).
+      setActive((prev) => (prev === current ? prev : current));
     }
+
+    function onScroll() {
+      if (!ticking) {
+        ticking = true;
+        window.requestAnimationFrame(compute);
+      }
+    }
+
     window.addEventListener('scroll', onScroll, { passive: true });
+    compute();
     return () => window.removeEventListener('scroll', onScroll);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

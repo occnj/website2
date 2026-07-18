@@ -174,6 +174,7 @@ async function saveSiteInfo() {
       instagram: document.getElementById('si-instagram').value,
       facebook: document.getElementById('si-facebook').value,
       youtube: document.getElementById('si-youtube').value,
+      podcast_enabled: document.getElementById('si-podcast').checked,
     }, 'settings.site_info');
     toast('Site info saved');
   } catch (e) { fail(e); }

@@ -31,9 +31,11 @@ function fmtDate(d) {
 }
 
 // ---------- generic reorder (swap sort_order with neighbor) ----------
-async function moveRow(table, id, dir, view) {
+async function moveRow(table, id, dir, view, eq) {
   try {
-    const rows = await DB.list(table, { order: [['sort_order', 'asc']] });
+    const opts = { order: [['sort_order', 'asc']] };
+    if (eq) opts.eq = eq;
+    const rows = await DB.list(table, opts);
     const i = rows.findIndex(function (r) { return r.id === id; });
     const j = i + dir;
     if (i < 0 || j < 0 || j >= rows.length) return;
@@ -251,8 +253,8 @@ navigation: () => safe(async function () {
     items.map(function (n, i) {
       return '<div class="data-row">' +
         '<div style="display:flex;flex-direction:column;flex-shrink:0">' +
-        '<button class="icon-btn" style="padding:2px" ' + (i === 0 ? 'disabled' : '') + ' onclick="moveRow(\'nav_items\',\'' + n.id + '\',-1,\'navigation\')">' + ICONS.up + '</button>' +
-        '<button class="icon-btn" style="padding:2px" ' + (i === items.length - 1 ? 'disabled' : '') + ' onclick="moveRow(\'nav_items\',\'' + n.id + '\',1,\'navigation\')">' + ICONS.down + '</button></div>' +
+        '<button class="icon-btn" style="padding:2px" ' + (i === 0 ? 'disabled' : '') + ' onclick="moveRow(\'nav_items\',\'' + n.id + '\',-1,\'navigation\',{area:\'main\'})">' + ICONS.up + '</button>' +
+        '<button class="icon-btn" style="padding:2px" ' + (i === items.length - 1 ? 'disabled' : '') + ' onclick="moveRow(\'nav_items\',\'' + n.id + '\',1,\'navigation\',{area:\'main\'})">' + ICONS.down + '</button></div>' +
         '<div class="row-main"><div class="row-title" style="font-weight:500">' + esc(n.label) + '</div><div class="row-sub">' + esc(n.href) + '</div></div>' +
         '<label class="toggle" title="Show/hide"><input type="checkbox"' + (n.visible ? ' checked' : '') + ' onchange="toggleNav(\'' + n.id + '\', this.checked)"><span class="track"></span></label>' +
         '<div class="row-actions">' +
@@ -270,7 +272,11 @@ navigation: () => safe(async function () {
     '<div class="form-group"><label class="form-label">Service time</label><input class="form-input" id="si-service" value="' + esc(s.service_time || '') + '"></div>' +
     '<div class="form-group"><label class="form-label">Instagram URL</label><input class="form-input" id="si-instagram" value="' + esc(s.instagram || '') + '"></div>' +
     '<div class="form-group"><label class="form-label">Facebook URL</label><input class="form-input" id="si-facebook" value="' + esc(s.facebook || '') + '"></div>' +
-    '<div class="form-group" style="margin-bottom:0"><label class="form-label">YouTube URL</label><input class="form-input" id="si-youtube" value="' + esc(s.youtube || '') + '"></div>' +
+    '<div class="form-group"><label class="form-label">YouTube URL</label><input class="form-input" id="si-youtube" value="' + esc(s.youtube || '') + '"></div>' +
+    '</div>' +
+    '<div class="form-group" style="margin-bottom:0;display:flex;align-items:center;gap:10px;margin-top:8px">' +
+    '<label class="toggle" title="Show/hide podcast section on Watch page"><input type="checkbox" id="si-podcast"' + (s.podcast_enabled ? ' checked' : '') + '><span class="track"></span></label>' +
+    '<label class="form-label" style="margin:0">Show &ldquo;Subscribe to the Oasis Podcast&rdquo; section on the Watch page</label>' +
     '</div></div></div>';
 }),
 
