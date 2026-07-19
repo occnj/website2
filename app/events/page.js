@@ -5,8 +5,9 @@ import EventsList from '@/components/EventsList';
 import MiniCalendar from '@/components/MiniCalendar';
 import { getPageHero, getUpcomingEvents, getSiteSettings } from '@/lib/data';
 import { safeHttpUrl } from '@/lib/safeUrl';
+import { LifeEventsContent } from '../life-events/page';
 
-export const metadata = { title: 'Events — Oasis Christian Centre', description: 'See upcoming services, gatherings, and community events at Oasis Christian Centre.' };
+export const metadata = { title: 'Events & Life Events — Oasis Christian Centre', description: 'See upcoming gatherings and learn how Oasis supports baptism, dedication, marriage, memorials, and other life milestones.' };
 export const dynamic = 'force-dynamic';
 
 export default async function EventsPage() {
@@ -24,7 +25,20 @@ export default async function EventsPage() {
         image={hero && hero.image}
       />
 
-      <section className="section" data-screen-label="Events List">
+      <nav className="event-type-nav" aria-label="Events page sections">
+        <div className="container event-type-grid">
+          <a href="#upcoming-events">
+            <strong>Upcoming Events</strong>
+            <span>Scheduled services, gatherings, and community events</span>
+          </a>
+          <a href="#life-events">
+            <strong>Life Events</strong>
+            <span>Personal milestones and pastoral care</span>
+          </a>
+        </div>
+      </nav>
+
+      <section className="section" id="upcoming-events" data-screen-label="Upcoming Events">
         <div className="container">
           {/* Featured Event — only shown when an event is flagged "featured" in the Admin */}
           {featured && (
@@ -78,6 +92,7 @@ export default async function EventsPage() {
           </div>
         </div>
       </section>
+      <LifeEventsContent embedded />
     </>
   );
 }

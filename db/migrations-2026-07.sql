@@ -91,3 +91,21 @@ create policy "staff insert" on audit_log for insert with check (my_role() is no
 --  Verify:
 --    select podcast_enabled, twitch_channel from site_settings where id = 1;
 -- ============================================================================
+
+-- ----------------------------------------------------------------------------
+-- 5. Main navigation cleanup — Events and Life Events now share /events.
+--    Prayer Request is a standalone final item immediately before Give.
+-- ----------------------------------------------------------------------------
+delete from nav_items
+where area = 'main'
+  and lower(trim(label)) in ('teams', 'life events', 'next steps', 'prayer');
+
+update nav_items
+set label = 'Prayer Request', href = 'prayer.html', sort_order = 999, visible = true
+where area = 'main' and lower(trim(label)) = 'prayer request';
+
+insert into nav_items (label, href, sort_order, visible, area)
+select 'Prayer Request', 'prayer.html', 999, true, 'main'
+where not exists (
+  select 1 from nav_items where area = 'main' and lower(trim(label)) = 'prayer request'
+);

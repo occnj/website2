@@ -71,7 +71,7 @@ export default async function LeadershipPage() {
             Every team at Oasis is led by someone who started where you are. If you feel called to serve, we&rsquo;d love to connect with you.
           </p>
           <div style={{ display: 'flex', gap: 'var(--sp-2)', justifyContent: 'center', flexWrap: 'wrap' }}>
-            <Link href="/about#ministries" className="btn btn-primary">Explore Teams</Link>
+            <Link href="/about#ministries" className="btn btn-primary">Explore Ministries</Link>
             <Link href="/contact" className="btn btn-ghost">Contact Us</Link>
           </div>
         </div>

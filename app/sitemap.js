@@ -1,4 +1,4 @@
-const ROUTES = ['', '/about', '/plan-your-visit', '/watch', '/events', '/leadership', '/life-events', '/prayer', '/contact', '/give'];
+const ROUTES = ['', '/about', '/plan-your-visit', '/watch', '/events', '/leadership', '/prayer', '/contact', '/give'];
 
 export default function sitemap() {
   const origin = process.env.NEXT_PUBLIC_SITE_URL || 'https://oasisnj.net';

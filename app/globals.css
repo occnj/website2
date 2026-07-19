@@ -258,15 +258,8 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
 .header-logo {
   display: flex;
   align-items: center;
-  gap: 12px;
-  font-family: var(--font-head);
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: var(--charcoal);
 }
-.header-logo img { height: 40px; width: auto; }
-.header-logo span { display: flex; flex-direction: column; line-height: 1.1; }
-.header-logo .logo-sub { font-family: var(--font-body); font-size: .65rem; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; color: var(--gray-1); }
+.header-logo img { height: 46px; width: auto; }
 
 .primary-nav { display: flex; align-items: center; gap: 4px; }
 .nav-item { position: relative; }
@@ -515,8 +508,7 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
   gap: 10px;
   margin-bottom: var(--sp-2);
 }
-.footer-logo img { height: 36px; filter: brightness(0) invert(1); opacity: .9; }
-.footer-logo-text { font-family: var(--font-head); font-size: 1rem; font-weight: 700; color: #fff; }
+.footer-logo img { height: 50px; width: auto; }
 .footer-tagline { font-size: .88rem; line-height: 1.6; opacity: .7; max-width: 240px; margin-bottom: var(--sp-3); }
 .footer-col h4 { font-family: var(--font-body); font-size: .75rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: rgba(255,255,255,.45); margin-bottom: var(--sp-2); }
 .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
@@ -719,12 +711,10 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
   .btn-lg { padding: 15px 26px; font-size: .95rem; }
   .hero-actions .btn { flex: 1 1 auto; justify-content: center; }
   .event-card-row { padding: var(--sp-2); gap: var(--sp-2); }
-  .header-logo span { font-size: 1rem; }
 }
 @media (max-width: 480px) {
   .container, .container-narrow { padding: 0 var(--sp-2); }
   .header-inner { padding: 0 var(--sp-2); }
-  .header-logo img { height: 34px; }
-  .header-logo .logo-sub { display: none; }
+  .header-logo img { height: 38px; }
   .info-strip-inner { padding: 0; }
 }

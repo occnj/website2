@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 import './life-events.css';
 import PageHero from '@/components/PageHero';
 import FaqAccordion from '@/components/FaqAccordion';
@@ -15,17 +16,25 @@ const LIFE_EVENT_FAQS = [
   { q: 'Can family and friends come to watch?', a: 'Absolutely — and we encourage it. Baptisms, dedications, and milestone moments are always better shared. Invite your people and celebrate together.' },
 ];
 
-export default async function LifeEventsPage() {
+export async function LifeEventsContent({ embedded = false } = {}) {
   const hero = await getPageHero('life-events');
 
   return (
-    <>
-      <PageHero
+    <div id={embedded ? 'life-events' : undefined}>
+      {embedded ? (
+        <section className="section life-events-intro" data-screen-label="Life Events Introduction">
+          <div className="container-narrow text-center">
+            <p className="t-eyebrow">Life Events</p>
+            <h2 className="t-h1 mt-2">Personal milestones, not calendar events.</h2>
+            <p className="t-body t-muted mt-3">Upcoming Events are scheduled church gatherings. Life Events are personal moments—baptism, baby dedication, marriage, and memorial care—where our pastoral team walks with you.</p>
+          </div>
+        </section>
+      ) : <PageHero
         eyebrow="Next Steps"
         title={(hero && hero.title) || 'Life Events'}
         description={(hero && hero.intro) || "Some moments in life deserve to be marked. We're honored to stand with you for the ones that matter most."}
         image={hero && hero.image}
-      />
+      />}
 
       <section className="section" data-screen-label="Intro">
         <div className="container-narrow text-center">
@@ -127,6 +136,10 @@ export default async function LifeEventsPage() {
           <FaqAccordion items={LIFE_EVENT_FAQS} />
         </div>
       </section>
-    </>
+    </div>
   );
+}
+
+export default function LifeEventsPage() {
+  redirect('/events#life-events');
 }

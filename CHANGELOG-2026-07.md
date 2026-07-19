@@ -192,6 +192,20 @@ Service window (auto live/offline switching): edit the two numbers in
   warnings on fresh-install SQL, branded 404/icon, robots, sitemap, metadata, and ESLint.
 - Removed fake contact values and dead links; pages now use shared Admin settings.
 
+## July 18 navigation, events, social, and branding update
+
+- Combined Upcoming Events and Life Events on `/events` with an explicit section
+  selector explaining that dated gatherings and personal pastoral milestones are
+  different. `/life-events` now redirects to the Life Events section.
+- Removed Teams and Life Events from the main navigation. Prayer Request is a
+  standalone final navigation item immediately before the external Give button.
+- Clarified the Facebook/Instagram URL controls in Admin. Valid saved links show
+  SVG icons in desktop navigation, mobile navigation, and the footer.
+- Replaced the previous image-plus-text wordmark in the public header/footer and
+  Admin login/sidebar with the supplied Oasis logo; the same asset is site metadata.
+- Added idempotent navigation cleanup to `db/migrations-2026-07.sql` and updated
+  the fresh-install seed in `supabase-setup.sql`.
+
 ## Credential hardening
 
 - Removed hardcoded Supabase project URL/anon JWT from current and legacy tracked

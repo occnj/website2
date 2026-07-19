@@ -57,8 +57,8 @@ create table nav_items (
 insert into nav_items (label, href, sort_order) values
  ('About','about.html',1),('Plan Your Visit','plan-your-visit.html',2),
  ('Watch','watch.html',3),('Events','events.html',4),
- ('Leadership','leadership.html',5),('Life Events','life-events.html',6),
- ('Contact','contact.html',7);
+ ('Leadership','leadership.html',5),('Contact','contact.html',6),
+ ('Prayer Request','prayer.html',7);
 
 -- ===== PAGES + CONTENT BLOCKS =====
 create table pages (

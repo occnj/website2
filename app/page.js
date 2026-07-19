@@ -137,7 +137,7 @@ export default async function HomePage() {
                 <div className="involve-left">
                   <span className="involve-num">01</span>
                   <div>
-                    <div className="involve-title">Teams</div>
+                    <div className="involve-title">Ministries</div>
                     <div className="involve-desc">Use your gifts where they matter most. Worship, media, hospitality, children&rsquo;s ministry and more.</div>
                   </div>
                 </div>
@@ -165,7 +165,7 @@ export default async function HomePage() {
                 </div>
               </div>
             </Link>
-            <Link href="/life-events" className="involve-row">
+            <Link href="/events#life-events" className="involve-row">
               <div className="involve-row-inner">
                 <div className="involve-left">
                   <span className="involve-num">04</span>

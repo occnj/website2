@@ -39,11 +39,7 @@ export default function AdminPage() {
       <div className="login-screen" id="login-screen">
         <div className="login-card">
           <div className="brand">
-            <img src={asset('/uploads/logo-1776793086472.png')} alt="Oasis" />
-            <div style={{ lineHeight: 1.2 }}>
-              <div style={{ fontFamily: 'var(--font-head)', fontWeight: 700, fontSize: '1.1rem' }}>Oasis Admin</div>
-              <div style={{ fontSize: '.68rem', letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--amber)', fontWeight: 600 }}>Content Manager</div>
-            </div>
+            <img src={asset('/uploads/oasis-logo.png')} alt="Oasis Christian Centre" />
           </div>
           <div className="form-group">
             <label className="form-label">Username or email</label>
@@ -74,8 +70,7 @@ export default function AdminPage() {
         <div className="sidebar-backdrop" id="sidebar-backdrop" onClick={() => window.__adminToggleSidebar && window.__adminToggleSidebar(false)}></div>
         <aside className="sidebar" id="sidebar">
           <div className="sidebar-brand">
-            <img src={asset('/uploads/logo-1776793086472.png')} alt="Oasis" />
-            <div className="sidebar-brand-text"><strong>Oasis Admin</strong><span>Content Manager</span></div>
+            <img src={asset('/uploads/oasis-logo.png')} alt="Oasis Christian Centre" />
           </div>
           <nav className="sidebar-nav" id="sidebar-nav">
             <div className="sidebar-heading">Overview</div>

@@ -65,6 +65,10 @@ Pages → pick the page → Edit → change the field → **Publish Changes**
 4. Save — it appears on the Events page and home page automatically
 - Past events drop off the site automatically; no need to delete them
 
+The public **Events** page has two clearly separated areas:
+- **Upcoming Events** contains dated services, gatherings, and community events.
+- **Life Events** contains baptism, baby dedication, marriage, and memorial care.
+
 ### Sermons & Watch page
 - The Watch page pulls messages automatically from the **YouTube channel (@OCCNJ)** —
   new uploads appear on their own, no manual entry needed.
@@ -96,7 +100,14 @@ shows all three as tabs. To change the default tab or the channel handles:
 
 ### Navigation & footer
 **Navigation** tab → **↑↓ arrows** to reorder menu items, toggle to hide, edit
-footer/socials → Save
+footer/socials → Save. Prayer Request is kept as the final navigation item immediately
+before Give; Teams and Life Events are not separate main-menu items.
+
+To show Facebook and Instagram icons:
+1. Admin → **Navigation** → **Site info & footer** → **Social icons**
+2. Paste each complete public URL beginning with `https://`
+3. Save. Configured icons appear in the desktop navigation, mobile menu, and footer;
+   an empty or invalid URL stays hidden so visitors never receive a dead link.
 
 ---
 

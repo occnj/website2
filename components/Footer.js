@@ -18,8 +18,7 @@ export default function Footer() {
         <div className="footer-grid">
           <div className="footer-brand">
             <div className="footer-logo">
-              <img src={asset('/uploads/logo-1776793086472.png')} alt="Oasis" />
-              <span className="footer-logo-text">Oasis Christian Centre</span>
+              <img src={asset('/uploads/oasis-logo.png')} alt="Oasis Christian Centre" />
             </div>
             <p className="footer-tagline">{(settings && settings.tagline) || 'Know God. Find Hope. Make a Difference.'}</p>
             {(address || serviceTime) && <p style={{ fontSize: '.82rem', opacity: .6, lineHeight: 1.6 }}>
@@ -39,9 +38,9 @@ export default function Footer() {
           <div className="footer-col">
             <h4>Connect</h4>
             <ul>
-              <li><Link href="/about#ministries">Teams</Link></li>
+              <li><Link href="/about#ministries">Ministries</Link></li>
               <li><Link href="/prayer">Prayer Request</Link></li>
-              <li><Link href="/life-events">Life Events</Link></li>
+              <li><Link href="/events#life-events">Life Events</Link></li>
             </ul>
           </div>
           <div className="footer-col">

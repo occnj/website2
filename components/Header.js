@@ -22,18 +22,13 @@ const STATIC_LINKS = [
   { label: 'About', href: '/about' },
   { label: 'Plan Your Visit', href: '/plan-your-visit' },
   { label: 'Watch', href: '/watch' },
-  {
-    label: 'Next Steps',
-    dropdown: [
-      { label: 'Teams', href: '/about#ministries' },
-      { label: 'Prayer Request', href: '/prayer' },
-      { label: 'Life Events', href: '/life-events' },
-    ],
-  },
   { label: 'Events', href: '/events' },
   { label: 'Leadership', href: '/leadership' },
   { label: 'Contact', href: '/contact' },
+  { label: 'Prayer Request', href: '/prayer' },
 ];
+
+const REMOVED_NAV_LABELS = new Set(['teams', 'life events', 'next steps', 'prayer', 'prayer request']);
 
 export default function Header() {
   const [scrolled, setScrolled] = useState(false);
@@ -57,60 +52,29 @@ export default function Header() {
   }, []);
 
   const links = navItems && navItems.length
-    ? navItems.map((n) => ({ label: n.label, href: normalizeHref(n.href) }))
+    ? [
+        ...navItems
+          .filter((n) => !REMOVED_NAV_LABELS.has((n.label || '').trim().toLowerCase()))
+          .map((n) => ({ label: n.label, href: normalizeHref(n.href) })),
+        { label: 'Prayer Request', href: '/prayer' },
+      ]
     : STATIC_LINKS;
-  const dropdownItem = STATIC_LINKS.find((l) => l.dropdown);
 
   return (
     <>
       <header className={'site-header' + (scrolled ? ' scrolled' : '')}>
         <div className="header-inner">
           <Link href="/" className="header-logo">
-            <img src={asset('/uploads/logo-1776793086472.png')} alt="Oasis Christian Centre" />
-            <span>
-              Oasis Christian Centre
-              <span className="logo-sub">Rahway, NJ</span>
-            </span>
+            <img src={asset('/uploads/oasis-logo.png')} alt="Oasis Christian Centre" />
           </Link>
           <nav className="primary-nav">
             {links.map((link, i) => (
               <div className="nav-item" key={link.label}>
-                {link.dropdown ? (
-                  <>
-                    <button type="button" className="nav-link" aria-haspopup="true">
-                      {link.label}
-                      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 10L3 5h10z" /></svg>
-                    </button>
-                    <div className="nav-dropdown">
-                      {link.dropdown.map((d) => (
-                        <Link href={d.href} key={d.label}>
-                          <strong style={{ display: 'block', fontSize: '.88rem', fontWeight: 500 }}>{d.label}</strong>
-                        </Link>
-                      ))}
-                    </div>
-                  </>
-                ) : (
-                  <Link href={link.href} className={'nav-link' + (pathname === link.href ? ' active' : '')}>
-                    {link.label}
-                  </Link>
-                )}
+                <Link href={link.href} className={'nav-link' + (pathname === link.href ? ' active' : '')}>
+                  {link.label}
+                </Link>
               </div>
             ))}
-            {navItems && navItems.length && dropdownItem ? (
-              <div className="nav-item">
-                <button type="button" className="nav-link" aria-haspopup="true">
-                  {dropdownItem.label}
-                  <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 10L3 5h10z" /></svg>
-                </button>
-                <div className="nav-dropdown">
-                  {dropdownItem.dropdown.map((d) => (
-                    <Link href={d.href} key={d.label}>
-                      <strong style={{ display: 'block', fontSize: '.88rem', fontWeight: 500 }}>{d.label}</strong>
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            ) : null}
           </nav>
           <div className="header-cta">
             <SocialLinks settings={settings} className="header-social" />
@@ -129,18 +93,9 @@ export default function Header() {
       </header>
       <nav id="mobile-navigation" aria-label="Mobile navigation" className={'mobile-nav' + (mobileOpen ? ' open' : '')}>
         {links.map((link) => (
-          link.dropdown ? (
-            <span key={link.label}>
-              <span className="mobile-section-label">{link.label}</span>
-              {link.dropdown.map((d) => (
-                <Link href={d.href} key={d.label} className="mobile-sub" onClick={() => setMobileOpen(false)}>{d.label}</Link>
-              ))}
-            </span>
-          ) : (
-            <Link href={link.href} key={link.label} className={pathname === link.href ? 'active' : ''} onClick={() => setMobileOpen(false)}>
-              {link.label}
-            </Link>
-          )
+          <Link href={link.href} key={link.label} className={pathname === link.href ? 'active' : ''} onClick={() => setMobileOpen(false)}>
+            {link.label}
+          </Link>
         ))}
         <div className="mobile-cta flex" style={{ gap: 12, flexWrap: 'wrap' }}>
           <SocialLinks settings={settings} className="mobile-social" />

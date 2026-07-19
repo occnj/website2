@@ -271,8 +271,9 @@ navigation: () => safe(async function () {
     '<div class="form-group"><label class="form-label">Phone</label><input class="form-input" id="si-phone" value="' + esc(s.phone || '') + '"></div>' +
     '<div class="form-group"><label class="form-label">Email</label><input class="form-input" id="si-email" value="' + esc(s.email || '') + '"></div>' +
     '<div class="form-group"><label class="form-label">Service time</label><input class="form-input" id="si-service" value="' + esc(s.service_time || '') + '"></div>' +
-    '<div class="form-group"><label class="form-label">Instagram URL</label><input class="form-input" id="si-instagram" value="' + esc(s.instagram || '') + '"></div>' +
-    '<div class="form-group"><label class="form-label">Facebook URL</label><input class="form-input" id="si-facebook" value="' + esc(s.facebook || '') + '"></div>' +
+    '<div style="grid-column:1/-1;padding:12px 0 2px"><h4 style="margin:0 0 4px">Social icons</h4><div class="sub">Enter the complete https:// URL. Facebook and Instagram icons appear in the desktop navigation, mobile menu, and footer after you save.</div></div>' +
+    '<div class="form-group"><label class="form-label">Instagram URL</label><input class="form-input" id="si-instagram" placeholder="https://instagram.com/your-page" value="' + esc(s.instagram || '') + '"></div>' +
+    '<div class="form-group"><label class="form-label">Facebook URL</label><input class="form-input" id="si-facebook" placeholder="https://facebook.com/your-page" value="' + esc(s.facebook || '') + '"></div>' +
     '<div class="form-group"><label class="form-label">YouTube URL</label><input class="form-input" id="si-youtube" value="' + esc(s.youtube || '') + '"></div>' +
     '<div class="form-group"><label class="form-label">Public calendar URL</label><input class="form-input" id="si-calendar" value="' + esc(s.calendar_url || '') + '"></div>' +
     '<div class="form-group"><label class="form-label">Apple Podcasts URL</label><input class="form-input" id="si-podcast-apple" value="' + esc(s.podcast_apple_url || '') + '"></div>' +
