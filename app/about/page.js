@@ -1,8 +1,9 @@
 import Link from 'next/link';
 import './about.css';
+import '../leadership/leadership.css';
 import PageHero from '@/components/PageHero';
 import AboutSubnav from '@/components/AboutSubnav';
-import { getPageHero } from '@/lib/data';
+import { getPageHero, getTeamMembers } from '@/lib/data';
 
 export const metadata = {
   title: 'About Us — Oasis Christian Centre',
@@ -44,7 +45,7 @@ const MINISTRIES = [
 ];
 
 export default async function AboutPage() {
-  const hero = await getPageHero('about');
+  const [hero, team] = await Promise.all([getPageHero('about'), getTeamMembers()]);
 
   return (
     <>
@@ -105,11 +106,11 @@ export default async function AboutPage() {
               <div className="hub-card-title">Our Beliefs</div>
               <div className="hub-card-desc">What we believe about God, Scripture, salvation, and the church.</div>
             </a>
-            <Link href="/leadership" className="hub-card">
+            <a href="#leadership" className="hub-card">
               <div className="hub-card-num">03</div>
               <div className="hub-card-title">Leadership</div>
               <div className="hub-card-desc">Meet the pastoral team and ministry leaders who serve Oasis.</div>
-            </Link>
+            </a>
             <a href="#ministries" className="hub-card">
               <div className="hub-card-num">04</div>
               <div className="hub-card-title">Ministries</div>
@@ -173,6 +174,54 @@ export default async function AboutPage() {
                 <div className="belief-text">{text}</div>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* LEADERSHIP */}
+      <section className="section" id="leadership" data-screen-label="Leadership">
+        <div className="container">
+          <div style={{ maxWidth: 640, margin: '0 auto var(--sp-6)', textAlign: 'center' }}>
+            <p className="t-eyebrow">Leadership</p>
+            <h2 className="t-h1 mt-2">Meet our team.</h2>
+            <p className="t-body t-muted mt-3">Oasis is led by people who love God, love people, and are committed to serving the Rahway community with integrity and joy.</p>
+          </div>
+          <div className="leader-grid" data-team-list>
+            {team.length === 0 && (
+              <p style={{ gridColumn: '1/-1', color: 'var(--gray-1)', textAlign: 'center', padding: '60px 0' }}>
+                Our leadership team page is being updated. Check back soon!
+              </p>
+            )}
+            {team.map((t) => {
+              const links = t.links || {};
+              const initials = (t.name || '').split(' ').map((w) => w[0]).slice(0, 2).join('');
+              return (
+                <div className="leader-card" key={t.id}>
+                  <div className="leader-photo">
+                    {t.photo_url ? (
+                      <img src={t.photo_url} alt={t.name} />
+                    ) : (
+                      <div className="img-placeholder" style={{ height: '100%', minHeight: 280 }}>
+                        <span style={{ fontFamily: 'var(--font-head)', fontSize: '2.4rem', color: '#9BABB6' }}>{initials}</span>
+                      </div>
+                    )}
+                    <div className="leader-photo-overlay"></div>
+                  </div>
+                  <div className="leader-info">
+                    <div className="leader-name">{t.name}</div>
+                    <div className="leader-role">{t.role_title}</div>
+                    {t.bio ? <p className="leader-bio">{t.bio}</p> : null}
+                    {(links.instagram || links.facebook || links.email) && (
+                      <div style={{ display: 'flex', gap: 14, marginTop: 10, fontSize: '.8rem', fontWeight: 600 }}>
+                        {links.instagram ? <a href={links.instagram} target="_blank" rel="noopener">Instagram</a> : null}
+                        {links.facebook ? <a href={links.facebook} target="_blank" rel="noopener">Facebook</a> : null}
+                        {links.email ? <a href={`mailto:${links.email}`}>Email</a> : null}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>

@@ -1,12 +1,12 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
 
 const SECTIONS = [
   { id: 'our-story', label: 'Our Story' },
   { id: 'our-values', label: 'Our Values' },
   { id: 'our-beliefs', label: 'Our Beliefs' },
+  { id: 'leadership', label: 'Leadership' },
   { id: 'ministries', label: 'Ministries' },
   { id: 'missions', label: 'Missions' },
   { id: 'serve', label: 'Serve' },
@@ -56,7 +56,6 @@ export default function AboutSubnav() {
             {s.label}
           </a>
         ))}
-        <Link href="/leadership" className="subnav-link">Leadership</Link>
       </div>
     </div>
   );

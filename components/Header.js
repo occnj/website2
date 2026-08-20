@@ -23,12 +23,11 @@ const STATIC_LINKS = [
   { label: 'Plan Your Visit', href: '/plan-your-visit' },
   { label: 'Watch', href: '/watch' },
   { label: 'Events', href: '/events' },
-  { label: 'Leadership', href: '/leadership' },
   { label: 'Contact', href: '/contact' },
   { label: 'Prayer Request', href: '/prayer' },
 ];
 
-const REMOVED_NAV_LABELS = new Set(['teams', 'life events', 'next steps', 'prayer', 'prayer request']);
+const REMOVED_NAV_LABELS = new Set(['teams', 'life events', 'next steps', 'prayer', 'prayer request', 'leadership']);
 
 export default function Header() {
   const [scrolled, setScrolled] = useState(false);
