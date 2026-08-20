@@ -13,6 +13,11 @@ const TITLES = {
   media: 'Media Library', users: 'Users & Roles',
 };
 
+// Cache-bust admin static files. Every build bakes in a new timestamp, so the
+// browser fetches fresh copies of views.js / actions.js / db.js / admin.css
+// instead of serving stale cached versions that are missing new features.
+const ADMIN_V = '?v=' + Date.now();
+
 export default function AdminPage() {
   useEffect(() => {
     let cancelled = false;
@@ -20,10 +25,10 @@ export default function AdminPage() {
     window.OASIS_RUNTIME_CONFIG = { SUPABASE_URL, SUPABASE_ANON_KEY };
 
     loadScriptSequence([
-      asset('/admin/config.js'),
-      asset('/admin/db.js'),
-      asset('/admin/views.js'),
-      asset('/admin/actions.js'),
+      asset('/admin/config.js') + ADMIN_V,
+      asset('/admin/db.js') + ADMIN_V,
+      asset('/admin/views.js') + ADMIN_V,
+      asset('/admin/actions.js') + ADMIN_V,
     ]).then(() => {
       if (cancelled) return;
       initAdminController();
@@ -34,7 +39,7 @@ export default function AdminPage() {
 
   return (
     <>
-      <link rel="stylesheet" href={asset('/admin/admin.css')} />
+      <link rel="stylesheet" href={asset('/admin/admin.css') + ADMIN_V} />
       <style>{`.site-header, .site-footer { display: none !important; } a { color: var(--blue); } a:hover { color: var(--blue-dark); }`}</style>
 
       <div className="login-screen" id="login-screen">
