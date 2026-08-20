@@ -10,8 +10,8 @@ export const metadata = {
   title: 'Oasis Christian Centre — Rahway, NJ',
   description: 'Know God, Find Hope, Make a Difference. Join us Sundays at 10AM in Rahway, NJ.',
   icons: {
-    icon: [{ url: '/uploads/oasis-logo.png', sizes: '32x32', type: 'image/png' }],
-    apple: [{ url: '/uploads/oasis-logo.png', sizes: '180x180', type: 'image/png' }],
+    icon: [{ url: '/uploads/logo-1776793086472.png', sizes: '32x32', type: 'image/png' }],
+    apple: [{ url: '/uploads/logo-1776793086472.png', sizes: '180x180', type: 'image/png' }],
   },
   openGraph: {
     type: 'website',

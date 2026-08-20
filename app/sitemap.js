@@ -1,6 +1,6 @@
 import { getMinistries, getMinistryPosts } from '@/lib/data';
 
-const STATIC_ROUTES = ['', '/about', '/plan-your-visit', '/watch', '/events', '/leadership', '/prayer', '/contact', '/give'];
+const STATIC_ROUTES = ['', '/about', '/ministries', '/plan-your-visit', '/watch', '/events', '/leadership', '/prayer', '/contact', '/give'];
 
 export const dynamic = 'force-dynamic';
 

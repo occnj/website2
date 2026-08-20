@@ -20,6 +20,7 @@ function normalizeHref(href) {
 
 const STATIC_LINKS = [
   { label: 'About', href: '/about' },
+  { label: 'Ministries', href: '/ministries' },
   { label: 'Plan Your Visit', href: '/plan-your-visit' },
   { label: 'Watch', href: '/watch' },
   { label: 'Events', href: '/events' },
