@@ -1,13 +1,15 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { getMinistryPost } from '@/lib/data';
+import { getMinistryBySlug, getMinistryPostBySlug } from '@/lib/data';
 import { sanitizeHtml } from '@/lib/sanitizeHtml';
 import '../../ministries.css';
 
 export const dynamic = 'force-dynamic';
 
 export async function generateMetadata({ params }) {
-  const post = await getMinistryPost(params.postId);
+  const ministry = await getMinistryBySlug(params.slug);
+  if (!ministry) return {};
+  const post = await getMinistryPostBySlug(ministry.id, params.postId);
   if (!post) return {};
   return {
     title: `${post.title} — Oasis Christian Centre`,
@@ -23,10 +25,14 @@ function fmtDate(d) {
 }
 
 export default async function MinistryPostPage({ params }) {
-  const post = await getMinistryPost(params.postId);
+  // params.slug is the ministry slug (from the URL) — always reliable.
+  // params.postId is either a slug or a UUID (backward-compat).
+  const ministry = await getMinistryBySlug(params.slug);
+  if (!ministry) notFound();
+
+  const post = await getMinistryPostBySlug(ministry.id, params.postId);
   if (!post) notFound();
 
-  const ministry = post.ministries || {};
   const color = ministry.color || 'var(--blue)';
   const safeBody = post.body ? await sanitizeHtml(post.body) : '';
 
@@ -34,9 +40,11 @@ export default async function MinistryPostPage({ params }) {
     <section className="section">
       <div className="container">
         <article className="post-article">
-          <Link href={`/ministries/${ministry.slug || params.slug}`} className="post-back">
+          {/* Use params.slug — the URL segment — not the joined ministry object,
+              which could be null if the FK join didn't resolve. */}
+          <Link href={`/ministries/${params.slug}`} className="post-back">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M19 12H5M12 5l-7 7 7 7" /></svg>
-            Back to {ministry.name || 'Ministry'}
+            Back to {ministry.name}
           </Link>
 
           <div style={{ marginBottom: 'var(--sp-3)' }}>
@@ -55,16 +63,13 @@ export default async function MinistryPostPage({ params }) {
           )}
 
           {safeBody ? (
-            <div
-              className="post-article-body"
-              dangerouslySetInnerHTML={{ __html: safeBody }}
-            />
+            <div className="post-article-body" dangerouslySetInnerHTML={{ __html: safeBody }} />
           ) : (
             <p style={{ color: 'var(--gray-1)' }}>No content yet.</p>
           )}
 
           <div style={{ marginTop: 'var(--sp-5)', paddingTop: 'var(--sp-4)', borderTop: '1px solid var(--border)', display: 'flex', gap: 'var(--sp-2)', flexWrap: 'wrap' }}>
-            <Link href={`/ministries/${ministry.slug || params.slug}`} className="btn btn-secondary">
+            <Link href={`/ministries/${params.slug}`} className="btn btn-secondary">
               ← More from {ministry.name}
             </Link>
             <Link href="/contact" className="btn btn-primary">Get Involved</Link>

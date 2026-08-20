@@ -62,7 +62,7 @@ export default async function MinistryPage({ params }) {
           ) : (
             <div className="ministry-posts-grid">
               {posts.map((post) => (
-                <Link href={`/ministries/${ministry.slug}/${post.id}`} className="post-card" key={post.id}>
+                <Link href={`/ministries/${ministry.slug}/${post.slug || post.id}`} className="post-card" key={post.id}>
                   <div className="post-card-img">
                     {post.image_url ? (
                       <img src={post.image_url} alt={post.title} />

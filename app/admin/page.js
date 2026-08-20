@@ -81,7 +81,7 @@ export default function AdminPage() {
             <button className="side-link" data-view="sermons" data-role="content">Sermons</button>
             <button className="side-link" data-view="events">Events</button>
             <button className="side-link" data-view="team" data-role="content">Team</button>
-            <button className="side-link" data-view="ministries" data-role="content">Ministries</button>
+            <button className="side-link" data-view="ministries" data-role="content" style={{ display: 'none' }} data-show-if="not-events-only">Ministries</button>
             <button className="side-link" data-view="give" data-role="content">External Giving Link</button>
             <div className="sidebar-heading" data-role="content">Site</div>
             <button className="side-link" data-view="navigation" data-role="content">Navigation</button>
@@ -235,8 +235,11 @@ function initAdminController() {
     }
     const isAdmin = ['owner', 'admin'].indexOf(me.role) >= 0;
     const isEditor = isAdmin || me.role === 'editor';
+    const isEventsOnly = me.role === 'events_only';
     document.querySelectorAll('[data-role="admin"]').forEach((el) => { el.style.display = isAdmin ? '' : 'none'; });
     document.querySelectorAll('[data-role="content"]').forEach((el) => { el.style.display = isEditor ? '' : 'none'; });
+    // Items hidden from events_only accounts
+    document.querySelectorAll('[data-show-if="not-events-only"]').forEach((el) => { el.style.display = (!isEventsOnly && isEditor) ? '' : 'none'; });
     document.getElementById('me-name').textContent = me.full_name || me.email;
     document.getElementById('me-role').textContent = me.role === 'owner' ? 'Owner' : me.role;
     document.getElementById('me-avatar').textContent = (me.full_name || me.email || '?').split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase();

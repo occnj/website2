@@ -183,10 +183,15 @@ const MINISTRY_POST_FIELDS = [
   { key: 'published', label: 'Published', type: 'check', default: true, half: true },
   { key: 'body', label: 'Content', type: 'richtext' },
 ];
+function slugifyPost(title, existingSlug) {
+  if (existingSlug) return existingSlug; // preserve on edit
+  return title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+}
 function ministryPostRowFrom(out, id, ministryId) {
   if (!out.title) throw new Error('Post title is required');
+  const slug = slugifyPost(out.title, id ? out._slug : null);
   return { id: id || undefined, ministry_id: ministryId, title: out.title,
-    body: out.body || '', image_url: out.image_url || null,
+    slug: slug, body: out.body || '', image_url: out.image_url || null,
     published_at: out.published_at || new Date().toISOString().slice(0, 10),
     published: out.published };
 }
@@ -200,6 +205,7 @@ async function editMinistryPost(id, ministryId) {
   const p = (await DB.list('ministry_posts', { eq: { id: id } }))[0];
   if (p && p.published_at) p.published_at = p.published_at.slice(0, 10);
   openEditor('Edit Post', MINISTRY_POST_FIELDS, p, async function (out) {
+    out._slug = p.slug || null; // carry existing slug forward so we don't regenerate
     await DB.save('ministry_posts', ministryPostRowFrom(out, id, ministryId || p.ministry_id), 'ministry_post.update', out.title);
     toast('Post saved'); go('ministries');
   });
