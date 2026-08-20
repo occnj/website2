@@ -284,3 +284,4 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
 }
 .login-help { display:block; margin:12px auto 0; border:0; background:transparent; color:var(--blue); cursor:pointer; font:inherit; font-size:.82rem; }
 .login-help:hover { text-decoration:underline; }
+@keyframes spin { to { transform: rotate(360deg); } }

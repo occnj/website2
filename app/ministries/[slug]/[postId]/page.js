@@ -28,6 +28,7 @@ export default async function MinistryPostPage({ params }) {
 
   const ministry = post.ministries || {};
   const color = ministry.color || 'var(--blue)';
+  const safeBody = post.body ? await sanitizeHtml(post.body) : '';
 
   return (
     <section className="section">
@@ -53,10 +54,10 @@ export default async function MinistryPostPage({ params }) {
             <img src={post.image_url} alt={post.title} className="post-article-img" />
           )}
 
-          {post.body ? (
+          {safeBody ? (
             <div
               className="post-article-body"
-              dangerouslySetInnerHTML={{ __html: await sanitizeHtml(post.body) }}
+              dangerouslySetInnerHTML={{ __html: safeBody }}
             />
           ) : (
             <p style={{ color: 'var(--gray-1)' }}>No content yet.</p>

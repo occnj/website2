@@ -181,7 +181,7 @@ const MINISTRY_POST_FIELDS = [
   { key: 'image_url', label: 'Cover image', type: 'image', folder: 'library' },
   { key: 'published_at', label: 'Date', type: 'date', half: true },
   { key: 'published', label: 'Published', type: 'check', default: true, half: true },
-  { key: 'body', label: 'Content (HTML supported)', type: 'textarea' },
+  { key: 'body', label: 'Content', type: 'richtext' },
 ];
 function ministryPostRowFrom(out, id, ministryId) {
   if (!out.title) throw new Error('Post title is required');

@@ -5,6 +5,17 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  async redirects() {
+    return [
+      // Short vanity URLs for each ministry — easy to share with church members
+      { source: '/wow',        destination: '/ministries/wow-women',      permanent: false },
+      { source: '/fmo',        destination: '/ministries/fmo-men',        permanent: false },
+      { source: '/youth',      destination: '/ministries/the-collective', permanent: false },
+      { source: '/kids',       destination: '/ministries/kids',           permanent: false },
+      { source: '/journey',    destination: '/ministries/the-journey',    permanent: false },
+      { source: '/missions',   destination: '/ministries/missions',       permanent: false },
+    ];
+  },
   async headers() {
     return [
       {

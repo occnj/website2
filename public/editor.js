@@ -44,15 +44,28 @@
         });
       },
       upload: function (file) {
-        return this.session().then(function (s) {
-          if (sb && s) {
-            var path = 'inline/' + Date.now() + '-' + file.name.replace(/[^a-zA-Z0-9.\-_]/g, '_');
-            return sb.storage.from('media').upload(path, file, { upsert: false }).then(function (up) {
-              if (up.error) throw up.error;
-              return sb.storage.from('media').getPublicUrl(path).data.publicUrl;
+        // Compress via API first, fall back to original if it fails
+        var compress = function (f) {
+          var fd = new FormData(); fd.append('file', f);
+          return fetch('/api/compress-image', { method: 'POST', body: fd }).then(function (res) {
+            if (!res.ok) throw new Error('skip');
+            return res.blob().then(function (blob) {
+              var name = f.name.replace(/\.[^.]+$/, '') + '.webp';
+              return new File([blob], name, { type: 'image/webp' });
             });
-          }
-          return new Promise(function (res) { var fr = new FileReader(); fr.onload = function () { res(fr.result); }; fr.readAsDataURL(file); });
+          }).catch(function () { return f; }); // fall back to original
+        };
+        return compress(file).then(function (uploadFile) {
+          return store.session().then(function (s) {
+            if (sb && s) {
+              var path = 'inline/' + Date.now() + '-' + uploadFile.name.replace(/[^a-zA-Z0-9.\-_]/g, '_');
+              return sb.storage.from('media').upload(path, uploadFile, { upsert: false }).then(function (up) {
+                if (up.error) throw up.error;
+                return sb.storage.from('media').getPublicUrl(path).data.publicUrl;
+              });
+            }
+            return new Promise(function (res) { var fr = new FileReader(); fr.onload = function () { res(fr.result); }; fr.readAsDataURL(uploadFile); });
+          });
         });
       }
     };
@@ -137,7 +150,8 @@
       '#cms-pop input[type=text]{font:inherit;font-size:.82rem;padding:7px 9px;border:1px solid #d7dde2;border-radius:7px;width:100%}',
       '.cms-added{outline:1px dashed rgba(0,150,199,.4);outline-offset:3px}',
       '#cms-toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:#12202c;color:#fff;padding:11px 18px;border-radius:10px;font-family:system-ui;font-size:.85rem;z-index:100003;opacity:0;transition:opacity .2s;box-shadow:0 6px 24px rgba(0,0,0,.3)}',
-      '#cms-toast.show{opacity:1}'
+      '#cms-toast.show{opacity:1}',
+      '@keyframes cms-spin{to{transform:rotate(360deg)}}'
     ].join('\n');
     document.head.appendChild(s);
   }
@@ -270,11 +284,22 @@
     inp.type = 'file'; inp.accept = 'image/*';
     inp.onchange = function () {
       if (!inp.files[0]) return;
-      setStatus('Uploading image…', 'warn');
+      setStatus('Uploading — please wait…', 'warn');
+      // Show a visible overlay on the image being replaced so the user knows something is happening
+      var overlay = document.createElement('div');
+      overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.45);z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px';
+      overlay.innerHTML = '<div style="width:44px;height:44px;border:4px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:cms-spin .7s linear infinite"></div><span style="color:#fff;font-family:sans-serif;font-size:.95rem;font-weight:600">Uploading image…</span>';
+      document.body.appendChild(overlay);
       store.upload(inp.files[0]).then(function (url) {
+        document.body.removeChild(overlay);
         window.OASIS.applyImage(el, url);
-        ensure('img')[K(el)] = url; markDirty(); toast('Image updated');
-      }).catch(function (e) { toast('Upload failed: ' + (e.message || e)); });
+        ensure('img')[K(el)] = url; markDirty(); toast('Image updated ✓');
+        setStatus('Unsaved changes', 'warn');
+      }).catch(function (e) {
+        document.body.removeChild(overlay);
+        toast('Upload failed: ' + (e.message || e));
+        setStatus('Upload failed', 'warn');
+      });
     };
     inp.click();
   }

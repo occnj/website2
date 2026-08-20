@@ -50,11 +50,34 @@
     }).then(function () {});
   }
 
-  async function upload(file, folder) {
-    const path = (folder || 'library') + '/' + Date.now() + '-' + file.name.replace(/[^a-zA-Z0-9.\-_]/g, '_');
-    const { error } = await client.storage.from('media').upload(path, file, { upsert: false });
+  async function compressAndUpload(file, folder) {
+    // Try to compress via the server-side API first. Falls back to the original
+    // file if compression fails (e.g. SVG, unsupported format, API unavailable).
+    let uploadFile = file;
+    let uploadName = file.name;
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      const res = await fetch('/api/compress-image', { method: 'POST', body: fd });
+      if (res.ok) {
+        const blob = await res.blob();
+        const saving = res.headers.get('X-Size-Saving') || '';
+        uploadName = file.name.replace(/\.[^.]+$/, '') + '.webp';
+        uploadFile = new File([blob], uploadName, { type: 'image/webp' });
+        if (window.toast && saving) window.toast('Compressed ' + saving + ' smaller — uploading…');
+      }
+    } catch (e) {
+      console.warn('[upload] compression skipped:', e.message);
+    }
+    const path = (folder || 'library') + '/' + Date.now() + '-' + uploadName.replace(/[^a-zA-Z0-9.\-_]/g, '_');
+    const { error } = await client.storage.from('media').upload(path, uploadFile, { upsert: false });
     if (error) throw error;
     return client.storage.from('media').getPublicUrl(path).data.publicUrl;
+  }
+
+  async function upload(file, folder) {
+    if (window.toast) window.toast('Compressing & uploading — please wait…');
+    return compressAndUpload(file, folder);
   }
 
   // Pick a file from disk, upload, return public URL

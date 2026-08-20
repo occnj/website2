@@ -70,6 +70,21 @@ function openEditor(title, fields, row, onSave) {
     const v = (row && row[f.key] != null) ? row[f.key] : (f.default != null ? f.default : '');
     let ctrl;
     if (f.type === 'textarea') ctrl = '<textarea class="form-textarea" id="fld-' + f.key + '">' + esc(v) + '</textarea>';
+    else if (f.type === 'richtext') ctrl =
+      '<div class="richtext-wrap" style="border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden">' +
+      '<div class="richtext-toolbar" style="display:flex;flex-wrap:wrap;gap:2px;padding:6px 8px;background:var(--off-white);border-bottom:1px solid var(--border)">' +
+      ['<b>B</b>|bold','<i>I</i>|italic','<u>U</u>|underline','H2|formatBlock:h2','H3|formatBlock:h3','¶|formatBlock:p',
+       '• List|insertUnorderedList','1. List|insertOrderedList','🔗|createLink','— HR|insertHorizontalRule'].map(function(btn){
+        var parts = btn.split('|'); var lbl = parts[0]; var cmd = parts[1];
+        var isLink = cmd === 'createLink';
+        var onclick = isLink
+          ? 'event.preventDefault();var u=prompt("URL:");if(u){document.getElementById(\"fld-' + f.key + '\").focus();document.execCommand(\"createLink\",false,u);}'
+          : 'event.preventDefault();document.getElementById(\"fld-' + f.key + '\").focus();' + (cmd.startsWith('formatBlock:') ? 'document.execCommand(\"formatBlock\",false,\"' + cmd.split(':')[1] + '\")' : 'document.execCommand(\"' + cmd + '\",false,null)') + ';';
+        return '<button type="button" style="padding:3px 8px;font-size:.78rem;border:1px solid var(--border);border-radius:3px;background:#fff;cursor:pointer;font-family:inherit" onclick="' + onclick + '">' + lbl + '</button>';
+      }).join('') +
+      '</div>' +
+      '<div id="fld-' + f.key + '" contenteditable="true" style="min-height:200px;padding:12px;font-size:.9rem;line-height:1.7;outline:none;overflow-y:auto;max-height:380px" oninput="this._rt_dirty=true">' + (v || '') + '</div>' +
+      '</div>';
     else if (f.type === 'select') ctrl = '<select class="form-select" id="fld-' + f.key + '">' + f.options.map(function (o) { return '<option value="' + esc(o) + '"' + (o === v ? ' selected' : '') + '>' + esc(o) + '</option>'; }).join('') + '</select>';
     else if (f.type === 'check') ctrl = '<label class="toggle"><input type="checkbox" id="fld-' + f.key + '"' + (v ? ' checked' : '') + '><span class="track"></span></label>';
     else if (f.type === 'image') ctrl =
@@ -88,12 +103,13 @@ function openEditor(title, fields, row, onSave) {
 }
 async function editorUpload(key, folder) {
   try {
-    toast('Uploading…');
+    const slot = document.getElementById('slot-' + key);
+    if (slot) slot.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;height:100%;min-height:120px"><div style="width:28px;height:28px;border:3px solid var(--blue);border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite"></div><span style="font-size:.78rem;color:var(--gray-1)">Uploading — please wait…</span></div>';
     const url = await DB.pickAndUpload(folder);
-    if (!url) return;
+    if (!url) { if (slot) slot.innerHTML = '<span>Click to upload image</span>'; return; }
     document.getElementById('fld-' + key).value = url;
-    document.getElementById('slot-' + key).innerHTML = '<img class="fill" src="' + esc(url) + '" alt=""><div class="replace-hint">Click to replace</div>';
-    toast('Image uploaded');
+    if (slot) slot.innerHTML = '<img class="fill" src="' + esc(url) + '" alt=""><div class="replace-hint">Click to replace</div>';
+    toast('Image uploaded ✓');
   } catch (e) { fail(e); }
 }
 function closeEditor() { document.getElementById('editor-modal').classList.remove('open'); }
@@ -101,7 +117,10 @@ async function saveEditor() {
   const out = {};
   editorCtx.fields.forEach(function (f) {
     const el = document.getElementById('fld-' + f.key);
-    out[f.key] = f.type === 'check' ? el.checked : el.value;
+    if (!el) return;
+    if (f.type === 'check') out[f.key] = el.checked;
+    else if (f.type === 'richtext') out[f.key] = el.innerHTML;
+    else out[f.key] = el.value;
   });
   try { await editorCtx.onSave(out); closeEditor(); }
   catch (e) { fail(e); }
@@ -133,11 +152,19 @@ dashboard: () => safe(async function () {
       '<button class="btn btn-outline" onclick="addTeamMember()">+ Team Member</button>' +
       '<button class="btn btn-outline" onclick="addSermon()">+ Sermon</button>') +
     '</div></div>' +
-    (log.length ? '<div class="panel"><div class="panel-head"><div><h3>Recent activity</h3></div></div><div class="data-list">' +
+    (log.length ? '<div class="panel"><div class="panel-head"><div><h3>Recent activity</h3><div class="sub">Who changed what and when</div></div></div><div class="data-list">' +
       log.map(function (l) {
-        return '<div class="data-row"><div class="avatar">' + esc((l.actor_name || '?').slice(0, 2).toUpperCase()) + '</div>' +
-          '<div class="row-main"><div class="row-title" style="font-weight:500">' + esc(l.actor_name || 'Unknown') + ' · ' + esc(l.action) + '</div>' +
-          '<div class="row-sub">' + esc(l.detail || '') + ' · ' + new Date(l.created_at).toLocaleString() + '</div></div></div>';
+        var actionLabel = (l.action || '').replace(/\./g, ' → ').replace(/_/g, ' ');
+        var badgeColor = l.action && l.action.includes('delete') ? 'var(--red,#c0392b)' : l.action && l.action.includes('create') ? '#2e7d32' : 'var(--blue)';
+        var timeStr = new Date(l.created_at).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+        return '<div class="data-row"><div class="avatar">' + esc((l.actor_name || '?').split(' ').map(function(w){return w[0];}).slice(0,2).join('').toUpperCase()) + '</div>' +
+          '<div class="row-main">' +
+          '<div class="row-title" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">' +
+          '<strong>' + esc(l.actor_name || 'Unknown user') + '</strong>' +
+          '<span style="font-size:.7rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;background:' + badgeColor + ';color:#fff;padding:2px 7px;border-radius:100px">' + esc(actionLabel) + '</span>' +
+          '</div>' +
+          '<div class="row-sub">' + (l.detail ? esc(l.detail) + ' · ' : '') + timeStr + '</div>' +
+          '</div></div>';
       }).join('') + '</div></div>' : '');
 }),
 
@@ -150,7 +177,7 @@ pages: () => safe(async function () {
         '<div class="row-main"><div class="row-title">' + esc(p.title) + '</div><div class="row-sub">/' + (p.slug === 'index' ? '' : esc(p.slug)) + '</div></div>' +
         '<span class="tag ' + (p.published ? 'tag-green' : 'tag-gray') + '" style="margin-right:8px">' + (p.published ? 'Published' : 'Hidden') + '</span>' +
         '<button class="btn btn-sm btn-outline" onclick="editPage(\'' + p.id + '\')">Fields</button>' +
-        '<a class="btn btn-sm btn-primary" href="' + (p.slug === 'index' ? '/' : '/' + encodeURIComponent(p.slug)) + '?edit=1" target="_blank">Visual edit ↗</a></div>';
+        '<a class="btn btn-sm btn-primary" href="' + (p.slug === 'index' ? '/?edit=1' : p.slug === 'life-events' ? '/events?edit=1' : '/' + encodeURIComponent(p.slug) + '?edit=1') + '" target="_blank">Visual edit ↗</a></div>';
     }).join('') + '</div></div>';
 }),
 
