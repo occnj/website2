@@ -37,6 +37,30 @@ export default async function MinistryPostPage({ params }) {
   const safeBody = post.body ? await sanitizeHtml(post.body) : '';
 
   return (
+    <>
+      {/* Hero band — gives the floating header an image to sit over and makes
+          the post read well on mobile. Falls back to the ministry colour when
+          the post has no image. */}
+      <section
+        className={'post-hero' + (post.image_url ? ' has-img' : '')}
+        style={!post.image_url ? { background: color } : undefined}
+      >
+        {post.image_url && (
+          <div className="post-hero-bg">
+            <img src={post.image_url} alt={post.title} />
+            <div className="post-hero-overlay" />
+          </div>
+        )}
+        <div className="container">
+          <span className="ministry-accent" style={{ background: post.image_url ? '#fff' : 'rgba(255,255,255,.85)' }}></span>
+          <p className="t-eyebrow post-hero-eyebrow">{ministry.name}</p>
+          <h1 className="t-h1 text-white mt-2">{post.title}</h1>
+          {post.published_at && (
+            <p className="post-hero-date">{fmtDate(post.published_at)}</p>
+          )}
+        </div>
+      </section>
+
     <section className="section">
       <div className="container">
         <article className="post-article">
@@ -46,21 +70,6 @@ export default async function MinistryPostPage({ params }) {
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M19 12H5M12 5l-7 7 7 7" /></svg>
             Back to {ministry.name}
           </Link>
-
-          <div style={{ marginBottom: 'var(--sp-3)' }}>
-            <span className="ministry-accent" style={{ background: color }}></span>
-            <p className="t-eyebrow" style={{ color }}>{ministry.name}</p>
-            <h1 className="t-h1 mt-2">{post.title}</h1>
-            {post.published_at && (
-              <p style={{ fontSize: '.82rem', color: 'var(--gray-1)', marginTop: 8, fontWeight: 600, letterSpacing: '.03em' }}>
-                {fmtDate(post.published_at)}
-              </p>
-            )}
-          </div>
-
-          {post.image_url && (
-            <img src={post.image_url} alt={post.title} className="post-article-img" />
-          )}
 
           {safeBody ? (
             <div className="post-article-body" dangerouslySetInnerHTML={{ __html: safeBody }} />
@@ -77,5 +86,6 @@ export default async function MinistryPostPage({ params }) {
         </article>
       </div>
     </section>
+    </>
   );
 }

@@ -51,6 +51,12 @@ export default function Header() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
+  // On Ministries pages the header floats transparently over the hero image
+  // (mobile): no bar background, logo + menu float, Give keeps its amber pill.
+  // Once the user scrolls past the hero, the solid bar returns for legibility.
+  const overHero = pathname === '/ministries' || /^\/ministries\/[^/]+/.test(pathname);
+  const floating = overHero && !scrolled;
+
   const links = navItems && navItems.length
     ? [
         ...navItems
@@ -62,7 +68,7 @@ export default function Header() {
 
   return (
     <>
-      <header className={'site-header' + (scrolled ? ' scrolled' : '')}>
+      <header className={'site-header' + (scrolled ? ' scrolled' : '') + (overHero ? ' over-hero' : '') + (floating ? ' floating' : '')}>
         <div className="header-inner">
           <Link href="/" className="header-logo">
             <img src={asset('/uploads/oasis-logo.png')} alt="Oasis Christian Centre" />
@@ -78,7 +84,7 @@ export default function Header() {
           </nav>
           <div className="header-cta">
             <SocialLinks settings={settings} className="header-social" />
-            <GiveLink className="btn btn-amber btn-sm">Give</GiveLink>
+            <GiveLink className="btn btn-amber btn-sm header-give">Give</GiveLink>
             <button
               className={'nav-toggle' + (mobileOpen ? ' active' : '')}
               aria-label="Menu"

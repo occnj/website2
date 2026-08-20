@@ -88,6 +88,36 @@
   margin-top: var(--sp-2);
 }
 
+/* Single post hero — sits under the floating header */
+.post-hero {
+  position: relative;
+  overflow: hidden;
+  background: var(--charcoal);
+  color: #fff;
+  padding: calc(var(--header-h) + var(--sp-6)) 0 var(--sp-6);
+}
+.post-hero-bg { position: absolute; inset: 0; z-index: 0; }
+.post-hero-bg img { width: 100%; height: 100%; object-fit: cover; }
+.post-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to top, rgba(26,40,53,.92) 0%, rgba(26,40,53,.45) 55%, rgba(26,40,53,.55) 100%);
+}
+.post-hero .container { position: relative; z-index: 1; }
+.post-hero .ministry-accent { margin-bottom: var(--sp-2); }
+.post-hero-eyebrow { color: #fff; opacity: .9; }
+.post-hero-date {
+  font-size: .82rem;
+  color: rgba(255,255,255,.85);
+  margin-top: 8px;
+  font-weight: 600;
+  letter-spacing: .03em;
+}
+@media (max-width: 768px) {
+  .post-hero { padding: calc(var(--header-h) + var(--sp-5)) 0 var(--sp-5); }
+}
+
 /* Single post */
 .post-article {
   max-width: 720px;
