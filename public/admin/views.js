@@ -228,6 +228,55 @@ team: () => safe(async function () {
     '</div></div>';
 }),
 
+// ---------------- MINISTRIES ----------------
+ministries: () => safe(async function () {
+  const ministries = await DB.list('ministries', { order: [['sort_order', 'asc']] });
+  // Build accordion: each ministry row + its posts inline
+  const postsByMinistry = {};
+  await Promise.all(ministries.map(async function (m) {
+    const posts = await DB.list('ministry_posts', { order: [['published_at', 'desc']], eq: { ministry_id: m.id } });
+    postsByMinistry[m.id] = posts;
+  }));
+
+  const ministryRows = ministries.map(function (m, i) {
+    const posts = postsByMinistry[m.id] || [];
+    const dot = '<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:' + esc(m.color || '#4A90E2') + ';margin-right:8px;flex-shrink:0"></span>';
+    const postRows = posts.map(function (p) {
+      return '<div class="data-row" style="padding-left:24px;' + (p.published ? '' : 'opacity:.5') + '">' +
+        (p.image_url ? '<img class="row-thumb" src="' + esc(p.image_url) + '" alt="">' : '<div class="row-thumb-sq" style="display:grid;place-items:center;color:var(--gray-2)">' + ICONS.pages + '</div>') +
+        '<div class="row-main"><div class="row-title">' + esc(p.title) + '</div>' +
+        '<div class="row-sub">' + (p.published_at ? new Date(p.published_at + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'No date') + '</div></div>' +
+        '<span class="tag ' + (p.published ? 'tag-green' : 'tag-gray') + '" style="flex-shrink:0">' + (p.published ? 'Published' : 'Draft') + '</span>' +
+        '<div class="row-actions">' +
+        '<button class="icon-btn" title="Edit post" onclick="editMinistryPost(\'' + p.id + '\',\'' + m.id + '\')">' + ICONS.edit + '</button>' +
+        '<button class="icon-btn" title="Delete post" onclick="confirmAction(\'Delete post <strong>' + esc(p.title).replace(/'/g, '&#39;') + '</strong>?\', function(){delMinistryPost(\'' + p.id + '\',\'' + m.id + '\')})">' + ICONS.trash + '</button>' +
+        '</div></div>';
+    }).join('');
+
+    return '<div style="border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;margin-bottom:12px">' +
+      '<div class="data-row" style="background:var(--off-white)">' +
+      '<div style="display:flex;flex-direction:column;flex-shrink:0">' +
+      '<button class="icon-btn" style="padding:2px" ' + (i === 0 ? 'disabled' : '') + ' onclick="moveRow(\'ministries\',\'' + m.id + '\',-1,\'ministries\')">' + ICONS.up + '</button>' +
+      '<button class="icon-btn" style="padding:2px" ' + (i === ministries.length - 1 ? 'disabled' : '') + ' onclick="moveRow(\'ministries\',\'' + m.id + '\',1,\'ministries\')">' + ICONS.down + '</button></div>' +
+      '<div class="row-main"><div class="row-title" style="display:flex;align-items:center">' + dot + esc(m.name) + '</div>' +
+      '<div class="row-sub">/ministries/' + esc(m.slug) + ' · ' + posts.length + ' post' + (posts.length !== 1 ? 's' : '') + '</div></div>' +
+      '<span class="tag ' + (m.published ? 'tag-green' : 'tag-gray') + '" style="flex-shrink:0">' + (m.published ? 'Published' : 'Hidden') + '</span>' +
+      '<div class="row-actions">' +
+      '<button class="btn btn-sm btn-outline" onclick="addMinistryPost(\'' + m.id + '\',\'' + esc(m.name) + '\')">+ Post</button>' +
+      '<button class="icon-btn" title="Edit ministry" onclick="editMinistry(\'' + m.id + '\')">' + ICONS.edit + '</button>' +
+      '<button class="icon-btn" title="Delete ministry" onclick="confirmAction(\'Delete ministry <strong>' + esc(m.name).replace(/'/g, '&#39;') + '</strong> and all its posts?\', function(){delMinistry(\'' + m.id + '\')})">' + ICONS.trash + '</button>' +
+      '</div></div>' +
+      (posts.length ? '<div class="data-list" style="border-top:1px solid var(--border)">' + postRows + '</div>' : '') +
+      '</div>';
+  }).join('');
+
+  return '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">' +
+    '<div><h3 style="margin:0;font-family:var(--font-head)">Ministries (' + ministries.length + ')</h3>' +
+    '<div class="sub">Each ministry has its own blog. Add posts from the ministry row.</div></div>' +
+    '<button class="btn btn-primary" onclick="addMinistry()">+ Add Ministry</button></div>' +
+    (ministries.length ? ministryRows : '<div class="panel"><div class="panel-body" style="color:var(--gray-1)">No ministries yet — click "+ Add Ministry" to get started.</div></div>');
+}),
+
 // ---------------- EXTERNAL GIVING LINK ----------------
 give: () => safe(async function () {
   const s = await DB.getSettings();

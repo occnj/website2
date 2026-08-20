@@ -1,9 +1,10 @@
 import Link from 'next/link';
 import './about.css';
 import '../leadership/leadership.css';
+import '../ministries/ministries.css';
 import PageHero from '@/components/PageHero';
 import AboutSubnav from '@/components/AboutSubnav';
-import { getPageHero, getTeamMembers } from '@/lib/data';
+import { getPageHero, getTeamMembers, getMinistries } from '@/lib/data';
 
 export const metadata = {
   title: 'About Us — Oasis Christian Centre',
@@ -35,17 +36,10 @@ const BELIEFS = [
   ['Marriage', 'Mark 10:6–9', 'Oasis Christian Centre believes in the sanctity of marriage between one man and one woman, as established by God at creation. Married people are expected to maintain their marriage vows to each other.'],
 ];
 
-const MINISTRIES = [
-  ['WOW — Women of Worth', 'A sisterhood of women growing in faith, prayer, and purpose. Through brunches, Bible studies, and real conversations, WOW builds women who lead with grace.', 'var(--blue)'],
-  ['FMO — For Men Only', 'Men doing life together — anchored in the Word, accountable to each other, and moving forward with purpose. Brotherhood that goes beyond Sunday.', 'var(--amber)'],
-  ['The Collective — Youth', 'Young adults and high school students building community, deepening faith, and discovering their God-given purpose together.', '#4A8C6A'],
-  ['Kids Ministry', 'Safe, fun, and age-appropriate environments from nursery through middle school. Our kids team is committed to raising the next generation in faith.', '#8B6BAE'],
-  ['The Journey', 'For those navigating recovery, restoration, or a fresh start. The Journey walks alongside people with grace, truth, and practical support.', '#C45E4A'],
-  ['Missions', 'Oasis is a sending church. We actively support global mission partners and mobilize our congregation to make a difference both locally and around the world.', 'var(--charcoal)'],
-];
+
 
 export default async function AboutPage() {
-  const [hero, team] = await Promise.all([getPageHero('about'), getTeamMembers()]);
+  const [hero, team, ministries] = await Promise.all([getPageHero('about'), getTeamMembers(), getMinistries()]);
 
   return (
     <>
@@ -237,11 +231,22 @@ export default async function AboutPage() {
             <p className="t-body t-muted" style={{ maxWidth: 380 }}>Every ministry at Oasis exists to help people know God, find their people, and make a real difference.</p>
           </div>
           <div className="grid-3">
-            {MINISTRIES.map(([title, desc, color]) => (
-              <div key={title} style={{ background: '#fff', borderRadius: 'var(--radius-md)', padding: 'var(--sp-4)', boxShadow: 'var(--shadow-sm)', borderTop: `3px solid ${color}` }}>
-                <h3 className="t-h3">{title}</h3>
-                <p className="t-small t-muted mt-2">{desc}</p>
-                <Link href="/contact" className="btn btn-secondary btn-sm mt-3">Learn More</Link>
+            {ministries.length === 0 && (
+              <p style={{ gridColumn: '1/-1', color: 'var(--gray-1)', padding: 'var(--sp-4) 0' }}>
+                Ministry information is coming soon — check back shortly.
+              </p>
+            )}
+            {ministries.map((m) => (
+              <div key={m.id} className="ministry-card" style={{ borderTop: `3px solid ${m.color || 'var(--blue)'}` }}>
+                <div className="ministry-card-top">
+                  <span className="ministry-card-dot" style={{ background: m.color || 'var(--blue)' }}></span>
+                  <span className="ministry-card-name">{m.name}</span>
+                </div>
+                <p className="ministry-card-desc">{m.description}</p>
+                <div className="ministry-card-links">
+                  <Link href={`/ministries/${m.slug}`} className="btn btn-primary btn-sm">Blog & Updates</Link>
+                  <Link href="/contact" className="btn btn-secondary btn-sm">Get Involved</Link>
+                </div>
               </div>
             ))}
           </div>

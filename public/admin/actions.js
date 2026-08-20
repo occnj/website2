@@ -125,6 +125,73 @@ async function delTeamMember(id) {
   catch (e) { fail(e); }
 }
 
+// ---------- MINISTRIES ----------
+const MINISTRY_FIELDS = [
+  { key: 'name', label: 'Ministry name', half: true, placeholder: 'e.g. WOW — Women of Worth' },
+  { key: 'slug', label: 'URL slug', half: true, placeholder: 'e.g. wow-women' },
+  { key: 'color', label: 'Accent color', half: true, placeholder: '#4A90E2 or var(--blue)', hint: 'hex or CSS var' },
+  { key: 'image_url', label: 'Hero image', type: 'image', folder: 'library' },
+  { key: 'description', label: 'Description', type: 'textarea' },
+  { key: 'published', label: 'Published (visible on About page)', type: 'check', default: true, half: true },
+];
+function ministryRowFrom(out, id) {
+  if (!out.name) throw new Error('Ministry name is required');
+  const slug = out.slug || out.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  return { id: id || undefined, name: out.name, slug: slug, color: out.color || 'var(--blue)',
+    description: out.description, image_url: out.image_url || null, published: out.published, sort_order: 99 };
+}
+function addMinistry() {
+  openEditor('Add Ministry', MINISTRY_FIELDS, {}, async function (out) {
+    await DB.save('ministries', ministryRowFrom(out), 'ministry.create', out.name);
+    toast('Ministry added'); go('ministries');
+  });
+}
+async function editMinistry(id) {
+  const m = (await DB.list('ministries', { eq: { id: id } }))[0];
+  openEditor('Edit Ministry', MINISTRY_FIELDS, m, async function (out) {
+    await DB.save('ministries', ministryRowFrom(out, id), 'ministry.update', out.name);
+    toast('Ministry saved'); go('ministries');
+  });
+}
+async function delMinistry(id) {
+  try { await DB.del('ministries', id, 'ministry.delete', id); toast('Ministry deleted'); go('ministries'); }
+  catch (e) { fail(e); }
+}
+
+// ---------- MINISTRY POSTS ----------
+const MINISTRY_POST_FIELDS = [
+  { key: 'title', label: 'Post title' },
+  { key: 'image_url', label: 'Cover image', type: 'image', folder: 'library' },
+  { key: 'published_at', label: 'Date', type: 'date', half: true },
+  { key: 'published', label: 'Published', type: 'check', default: true, half: true },
+  { key: 'body', label: 'Content (HTML supported)', type: 'textarea' },
+];
+function ministryPostRowFrom(out, id, ministryId) {
+  if (!out.title) throw new Error('Post title is required');
+  return { id: id || undefined, ministry_id: ministryId, title: out.title,
+    body: out.body || '', image_url: out.image_url || null,
+    published_at: out.published_at || new Date().toISOString().slice(0, 10),
+    published: out.published };
+}
+function addMinistryPost(ministryId, ministryName) {
+  openEditor('New Post — ' + ministryName, MINISTRY_POST_FIELDS, {}, async function (out) {
+    await DB.save('ministry_posts', ministryPostRowFrom(out, null, ministryId), 'ministry_post.create', out.title);
+    toast('Post added'); go('ministries');
+  });
+}
+async function editMinistryPost(id, ministryId) {
+  const p = (await DB.list('ministry_posts', { eq: { id: id } }))[0];
+  if (p && p.published_at) p.published_at = p.published_at.slice(0, 10);
+  openEditor('Edit Post', MINISTRY_POST_FIELDS, p, async function (out) {
+    await DB.save('ministry_posts', ministryPostRowFrom(out, id, ministryId || p.ministry_id), 'ministry_post.update', out.title);
+    toast('Post saved'); go('ministries');
+  });
+}
+async function delMinistryPost(id, ministryId) {
+  try { await DB.del('ministry_posts', id, 'ministry_post.delete', id); toast('Post deleted'); go('ministries'); }
+  catch (e) { fail(e); }
+}
+
 // ---------- GIVING ----------
 async function saveGive() {
   try {

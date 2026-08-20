@@ -143,6 +143,41 @@ create table sermons (
   manual boolean default true        -- false when added by the sync function
 );
 
+-- ===== MINISTRIES =====
+create table if not exists ministries (
+  id uuid primary key default gen_random_uuid(),
+  name text not null,
+  slug text unique not null,
+  description text,
+  color text default 'var(--blue)',
+  image_url text,
+  sort_order int default 0,
+  published boolean default true,
+  created_at timestamptz default now()
+);
+
+-- Seed the 6 ministries that were previously hardcoded
+insert into ministries (name, slug, description, color, sort_order) values
+  ('WOW — Women of Worth',  'wow-women',     'A sisterhood of women growing in faith, prayer, and purpose. Through brunches, Bible studies, and real conversations, WOW builds women who lead with grace.',                                              'var(--blue)',     1),
+  ('FMO — For Men Only',    'fmo-men',       'Men doing life together — anchored in the Word, accountable to each other, and moving forward with purpose. Brotherhood that goes beyond Sunday.',                                                      'var(--amber)',    2),
+  ('The Collective — Youth','the-collective', 'Young adults and high school students building community, deepening faith, and discovering their God-given purpose together.',                                                                           '#4A8C6A',         3),
+  ('Kids Ministry',         'kids',          'Safe, fun, and age-appropriate environments from nursery through middle school. Our kids team is committed to raising the next generation in faith.',                                                    '#8B6BAE',         4),
+  ('The Journey',           'the-journey',   'For those navigating recovery, restoration, or a fresh start. The Journey walks alongside people with grace, truth, and practical support.',                                                             '#C45E4A',         5),
+  ('Missions',              'missions',      'Oasis is a sending church. We actively support global mission partners and mobilize our congregation to make a difference both locally and around the world.',                                           'var(--charcoal)', 6)
+on conflict (slug) do nothing;
+
+-- ===== MINISTRY POSTS =====
+create table if not exists ministry_posts (
+  id uuid primary key default gen_random_uuid(),
+  ministry_id uuid references ministries(id) on delete cascade,
+  title text not null,
+  body text,
+  image_url text,
+  published_at date default current_date,
+  published boolean default true,
+  created_at timestamptz default now()
+);
+
 -- ===== AUDIT LOG =====
 create table audit_log (
   id bigint generated always as identity primary key,
@@ -165,6 +200,8 @@ alter table page_blocks enable row level security;
 alter table team_members enable row level security;
 alter table events enable row level security;
 alter table sermons enable row level security;
+alter table ministries enable row level security;
+alter table ministry_posts enable row level security;
 alter table audit_log enable row level security;
 
 -- Public site reads
@@ -175,6 +212,8 @@ create policy "public read" on page_blocks for select using (visible);
 create policy "public read" on team_members for select using (published);
 create policy "public read" on events for select using (published);
 create policy "public read" on sermons for select using (not hidden);
+create policy "public read" on ministries for select using (published);
+create policy "public read" on ministry_posts for select using (published);
 
 -- Staff writes (owner/admin/editor)
 create policy "staff write" on site_settings for all using (my_role() in ('owner','admin','editor'));
@@ -185,6 +224,10 @@ create policy "staff write" on nav_items for all using (my_role() in ('owner','a
 create policy "staff write" on pages for all using (my_role() in ('owner','admin','editor'));
 create policy "staff write" on page_blocks for all using (my_role() in ('owner','admin','editor'));
 create policy "staff write" on team_members for all using (my_role() in ('owner','admin','editor'));
+create policy "staff write" on ministries for all using (my_role() in ('owner','admin','editor'));
+create policy "staff write" on ministry_posts for all using (my_role() in ('owner','admin','editor'));
+create policy "staff read unpub ministries" on ministries for select using (my_role() is not null);
+create policy "staff read unpub posts" on ministry_posts for select using (my_role() is not null);
 create policy "staff write" on sermons for all using (my_role() in ('owner','admin','editor'));
 create policy "staff read hidden" on sermons for select using (my_role() in ('owner','admin','editor'));
 create policy "staff read unpub" on events for select using (my_role() is not null);
