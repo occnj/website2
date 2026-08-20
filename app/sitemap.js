@@ -9,7 +9,7 @@ export default async function sitemap() {
   const now = new Date();
 
   const entries = STATIC_ROUTES.map((path) => ({
-    url: `${origin}/website${path}`,
+    url: `${origin}${path}`,
     lastModified: now,
     changeFrequency: path === '/events' ? 'weekly' : 'monthly',
     priority: path === '' ? 1 : 0.7,
@@ -21,7 +21,7 @@ export default async function sitemap() {
     const ministries = await getMinistries();
     for (const m of ministries) {
       entries.push({
-        url: `${origin}/website/ministries/${m.slug}`,
+        url: `${origin}/ministries/${m.slug}`,
         lastModified: now,
         changeFrequency: 'weekly',
         priority: 0.6,
@@ -29,7 +29,7 @@ export default async function sitemap() {
       const posts = await getMinistryPosts(m.id);
       for (const p of posts) {
         entries.push({
-          url: `${origin}/website/ministries/${m.slug}/${p.id}`,
+          url: `${origin}/ministries/${m.slug}/${p.id}`,
           lastModified: p.published_at ? new Date(p.published_at) : now,
           changeFrequency: 'monthly',
           priority: 0.5,

@@ -147,10 +147,10 @@ pages: () => safe(async function () {
   return '<div class="panel"><div class="panel-head"><div><h3>Site pages</h3><div class="sub">Edit each page\u2019s text, images and SEO</div></div></div><div class="data-list">' +
     pages.map(function (p) {
       return '<div class="data-row"><div class="row-thumb-sq" style="display:grid;place-items:center;color:var(--gray-2)">' + ICONS.pages + '</div>' +
-        '<div class="row-main"><div class="row-title">' + esc(p.title) + '</div><div class="row-sub">/website' + (p.slug === 'index' ? '' : '/' + esc(p.slug)) + '</div></div>' +
+        '<div class="row-main"><div class="row-title">' + esc(p.title) + '</div><div class="row-sub">/' + (p.slug === 'index' ? '' : esc(p.slug)) + '</div></div>' +
         '<span class="tag ' + (p.published ? 'tag-green' : 'tag-gray') + '" style="margin-right:8px">' + (p.published ? 'Published' : 'Hidden') + '</span>' +
         '<button class="btn btn-sm btn-outline" onclick="editPage(\'' + p.id + '\')">Fields</button>' +
-        '<a class="btn btn-sm btn-primary" href="/website' + (p.slug === 'index' ? '' : '/' + encodeURIComponent(p.slug)) + '?edit=1" target="_blank">Visual edit ↗</a></div>';
+        '<a class="btn btn-sm btn-primary" href="' + (p.slug === 'index' ? '/' : '/' + encodeURIComponent(p.slug)) + '?edit=1" target="_blank">Visual edit ↗</a></div>';
     }).join('') + '</div></div>';
 }),
 

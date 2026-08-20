@@ -270,7 +270,7 @@ function initAdminController() {
     if (!DB.connected) { loginError('Supabase is not configured.'); return; }
     const CFG = window.OASIS_CONFIG;
     const email = (user.toLowerCase() === (CFG.ADMIN_USERNAME || '').toLowerCase()) ? CFG.ADMIN_EMAIL : user;
-    const { error } = await DB.client.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin + '/website/admin' });
+    const { error } = await DB.client.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin + '/admin' });
     loginError(error ? 'Password reset failed: ' + error.message : 'If that account exists, a password reset email has been sent.');
   }
   window.__adminForgotPassword = forgotPassword;

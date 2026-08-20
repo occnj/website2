@@ -9,7 +9,7 @@
   var ACTIVE = /(?:\?|&)edit=1\b/.test(location.search) || /(?:^|#).*\bedit\b/.test(location.hash) || localStorage.getItem('oasis_edit') === '1';
   if (!ACTIVE) return;
 
-  var BASE_PATH = '/website';
+  var BASE_PATH = '';
   var pagePath = location.pathname.indexOf(BASE_PATH) === 0 ? location.pathname.slice(BASE_PATH.length) : location.pathname;
   var pathParts = pagePath.split('/').filter(Boolean);
   var slug = (pathParts.pop() || 'index').replace('.html', '');

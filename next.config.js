@@ -1,6 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  basePath: '/website',
   outputFileTracingRoot: __dirname,
   poweredByHeader: false,
   images: {

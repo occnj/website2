@@ -26,7 +26,7 @@ export default function ContactForm() {
     }
     setSending(true);
     try {
-      const res = await fetch('/website/api/contact', {
+      const res = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
@@ -113,7 +113,7 @@ export default function ContactForm() {
         )}
 
         <p style={{ textAlign: 'center', fontSize: '.78rem', color: 'var(--gray-1)', marginTop: 'var(--sp-3)' }}>
-          Need prayer? <a href="/website/prayer" style={{ color: 'var(--blue)', fontWeight: 600 }}>Submit a prayer request →</a>
+          Need prayer? <a href="/prayer" style={{ color: 'var(--blue)', fontWeight: 600 }}>Submit a prayer request →</a>
         </p>
       </form>
     </div>

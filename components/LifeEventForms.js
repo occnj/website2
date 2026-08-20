@@ -12,7 +12,7 @@ function LifeEventForm({ kind }) {
     const fields = Object.fromEntries(form.entries());
     setState({ sending: true, sent: false, error: '' });
     try {
-      const response = await fetch('/website/api/contact', {
+      const response = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
