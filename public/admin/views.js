@@ -10,6 +10,7 @@ const ICONS = {
 };
 
 function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;'); }
+function jsq(s) { return String(s == null ? '' : s).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/</g, '&lt;'); }
 function fail(e) { console.error(e); toast('⚠ ' + (e.message || e)); }
 function needSetup(msg) {
   return '<div class="panel"><div class="panel-body" style="color:var(--gray-1)">' + msg + '</div></div>';
@@ -72,18 +73,14 @@ function openEditor(title, fields, row, onSave) {
     if (f.type === 'textarea') ctrl = '<textarea class="form-textarea" id="fld-' + f.key + '">' + esc(v) + '</textarea>';
     else if (f.type === 'richtext') ctrl =
       '<div class="richtext-wrap" style="border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden">' +
-      '<div class="richtext-toolbar" style="display:flex;flex-wrap:wrap;gap:2px;padding:6px 8px;background:var(--off-white);border-bottom:1px solid var(--border)">' +
-      ['<b>B</b>|bold','<i>I</i>|italic','<u>U</u>|underline','H2|formatBlock:h2','H3|formatBlock:h3','¶|formatBlock:p',
-       '• List|insertUnorderedList','1. List|insertOrderedList','🔗|createLink','— HR|insertHorizontalRule'].map(function(btn){
-        var parts = btn.split('|'); var lbl = parts[0]; var cmd = parts[1];
-        var isLink = cmd === 'createLink';
-        var onclick = isLink
-          ? 'event.preventDefault();var u=prompt("URL:");if(u){document.getElementById(\"fld-' + f.key + '\").focus();document.execCommand(\"createLink\",false,u);}'
-          : 'event.preventDefault();document.getElementById(\"fld-' + f.key + '\").focus();' + (cmd.startsWith('formatBlock:') ? 'document.execCommand(\"formatBlock\",false,\"' + cmd.split(':')[1] + '\")' : 'document.execCommand(\"' + cmd + '\",false,null)') + ';';
-        return '<button type="button" style="padding:3px 8px;font-size:.78rem;border:1px solid var(--border);border-radius:3px;background:#fff;cursor:pointer;font-family:inherit" onclick="' + onclick + '">' + lbl + '</button>';
+      '<div class="richtext-toolbar" data-rt-toolbar="fld-' + f.key + '" style="display:flex;flex-wrap:wrap;gap:2px;padding:6px 8px;background:var(--off-white);border-bottom:1px solid var(--border)">' +
+      [['B','bold','font-weight:700'],['I','italic','font-style:italic'],['U','underline','text-decoration:underline'],
+       ['H2','formatBlock:h2',''],['H3','formatBlock:h3',''],['P','formatBlock:p',''],
+       ['\u2022 List','insertUnorderedList',''],['1. List','insertOrderedList',''],['\ud83d\udd17 Link','createLink',''],['\u2014 HR','insertHorizontalRule','']].map(function(b){
+        return '<button type="button" data-rt-cmd="' + b[1] + '" style="padding:3px 8px;font-size:.78rem;border:1px solid var(--border);border-radius:3px;background:#fff;cursor:pointer;font-family:inherit;' + b[2] + '">' + b[0] + '</button>';
       }).join('') +
       '</div>' +
-      '<div id="fld-' + f.key + '" contenteditable="true" style="min-height:200px;padding:12px;font-size:.9rem;line-height:1.7;outline:none;overflow-y:auto;max-height:380px" oninput="this._rt_dirty=true">' + (v || '') + '</div>' +
+      '<div id="fld-' + f.key + '" contenteditable="true" style="min-height:200px;padding:12px;font-size:.9rem;line-height:1.7;outline:none;overflow-y:auto;max-height:380px">' + (v || '') + '</div>' +
       '</div>';
     else if (f.type === 'select') ctrl = '<select class="form-select" id="fld-' + f.key + '">' + f.options.map(function (o) { return '<option value="' + esc(o) + '"' + (o === v ? ' selected' : '') + '>' + esc(o) + '</option>'; }).join('') + '</select>';
     else if (f.type === 'check') ctrl = '<label class="toggle"><input type="checkbox" id="fld-' + f.key + '"' + (v ? ' checked' : '') + '><span class="track"></span></label>';
@@ -100,6 +97,25 @@ function openEditor(title, fields, row, onSave) {
     body.replace(/<div class="form-group"(?! data-half)/g, '</div><div style="grid-column:1/-1" class="form-group"').replace(/^<\/div>/, '') +
     '</div>';
   document.getElementById('editor-modal').classList.add('open');
+  // Wire rich-text toolbars (delegated: one listener per toolbar)
+  document.querySelectorAll('[data-rt-toolbar]').forEach(function (tb) {
+    var target = document.getElementById(tb.getAttribute('data-rt-toolbar'));
+    tb.addEventListener('mousedown', function (e) {
+      var btn = e.target.closest('[data-rt-cmd]');
+      if (!btn || !target) return;
+      e.preventDefault(); // keep focus/selection in the editable div
+      target.focus();
+      var cmd = btn.getAttribute('data-rt-cmd');
+      if (cmd === 'createLink') {
+        var u = prompt('Link URL:');
+        if (u) document.execCommand('createLink', false, u);
+      } else if (cmd.indexOf('formatBlock:') === 0) {
+        document.execCommand('formatBlock', false, cmd.split(':')[1]);
+      } else {
+        document.execCommand(cmd, false, null);
+      }
+    });
+  });
 }
 async function editorUpload(key, folder) {
   try {
@@ -289,7 +305,7 @@ ministries: () => safe(async function () {
       '<div class="row-sub">/ministries/' + esc(m.slug) + ' · ' + posts.length + ' post' + (posts.length !== 1 ? 's' : '') + '</div></div>' +
       '<span class="tag ' + (m.published ? 'tag-green' : 'tag-gray') + '" style="flex-shrink:0">' + (m.published ? 'Published' : 'Hidden') + '</span>' +
       '<div class="row-actions">' +
-      '<button class="btn btn-sm btn-outline" onclick="addMinistryPost(\'' + m.id + '\',\'' + esc(m.name) + '\')">+ Post</button>' +
+      '<button class="btn btn-sm btn-outline" onclick="addMinistryPost(\'' + m.id + '\',\'' + jsq(m.name) + '\')">+ Post</button>' +
       '<button class="icon-btn" title="Edit ministry" onclick="editMinistry(\'' + m.id + '\')">' + ICONS.edit + '</button>' +
       '<button class="icon-btn" title="Delete ministry" onclick="confirmAction(\'Delete ministry <strong>' + esc(m.name).replace(/'/g, '&#39;') + '</strong> and all its posts?\', function(){delMinistry(\'' + m.id + '\')})">' + ICONS.trash + '</button>' +
       '</div></div>' +
