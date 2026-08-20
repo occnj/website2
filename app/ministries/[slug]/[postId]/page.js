@@ -56,7 +56,7 @@ export default async function MinistryPostPage({ params }) {
           {post.body ? (
             <div
               className="post-article-body"
-              dangerouslySetInnerHTML={{ __html: sanitizeHtml(post.body) }}
+              dangerouslySetInnerHTML={{ __html: await sanitizeHtml(post.body) }}
             />
           ) : (
             <p style={{ color: 'var(--gray-1)' }}>No content yet.</p>
