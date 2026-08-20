@@ -80,7 +80,7 @@ function openEditor(title, fields, row, onSave) {
         return '<button type="button" class="rt-btn" data-rt-cmd="' + b[1] + '" style="padding:3px 8px;font-size:.78rem;border:1px solid var(--border);border-radius:3px;background:#fff;cursor:pointer;font-family:inherit;' + b[2] + '">' + b[0] + '</button>';
       }).join('') +
       '</div>' +
-      '<div id="fld-' + f.key + '" contenteditable="true" style="min-height:200px;padding:12px;font-size:.9rem;line-height:1.7;outline:none;overflow-y:auto;max-height:380px">' + (v || '') + '</div>' +
+      '<div id="fld-' + f.key + '" contenteditable="true" data-rt-editor="1" style="min-height:200px;padding:12px;font-size:.9rem;line-height:1.7;outline:none;overflow-y:auto;max-height:380px">' + (v ? v : '<p><br></p>') + '</div>' +
       '</div>';
     else if (f.type === 'select') ctrl = '<select class="form-select" id="fld-' + f.key + '">' + f.options.map(function (o) { return '<option value="' + esc(o) + '"' + (o === v ? ' selected' : '') + '>' + esc(o) + '</option>'; }).join('') + '</select>';
     else if (f.type === 'check') ctrl = '<label class="toggle"><input type="checkbox" id="fld-' + f.key + '"' + (v ? ' checked' : '') + '><span class="track"></span></label>';
@@ -112,14 +112,66 @@ function openEditor(title, fields, row, onSave) {
     body.replace(/<div class="form-group"(?! data-half)/g, '</div><div style="grid-column:1/-1" class="form-group"').replace(/^<\/div>/, '') +
     '</div>';
   document.getElementById('editor-modal').classList.add('open');
+  // Tell the browser to use <p> for new paragraphs (not <div>) in all editors.
+  try { document.execCommand('defaultParagraphSeparator', false, 'p'); } catch (_) {}
   // Wire rich-text toolbars (delegated: one listener per toolbar)
   document.querySelectorAll('[data-rt-toolbar]').forEach(function (tb) {
     var target = document.getElementById(tb.getAttribute('data-rt-toolbar'));
+
+    // When the user clicks a toolbar button the editor div loses focus and the
+    // browser discards the selection before mousedown fires. We save the range
+    // on every selectionchange so we can restore it before execCommand runs.
+    var savedRange = null;
+    function saveRange() {
+      var sel = window.getSelection();
+      if (sel && sel.rangeCount > 0) {
+        var r = sel.getRangeAt(0);
+        // Only save if the range is actually inside this editor.
+        if (target && target.contains(r.commonAncestorContainer)) {
+          savedRange = r.cloneRange();
+        }
+      }
+    }
+    function restoreRange() {
+      if (!savedRange) return;
+      var sel = window.getSelection();
+      if (!sel) return;
+      sel.removeAllRanges();
+      sel.addRange(savedRange);
+    }
+    if (target) {
+      target.addEventListener('keyup', saveRange);
+      target.addEventListener('mouseup', saveRange);
+      document.addEventListener('selectionchange', function () {
+        var sel = window.getSelection();
+        if (sel && sel.rangeCount > 0 && target.contains(sel.getRangeAt(0).commonAncestorContainer)) {
+          saveRange();
+        }
+      });
+
+      // Pressing Enter inside the editor creates a new <p> paragraph instead
+      // of the browser default <div> or <br>, so the body reads as clean HTML.
+      target.addEventListener('keydown', function (e) {
+        if (e.key !== 'Enter' || e.shiftKey) return;
+        // Only intervene if the current block is already a <p> or the cursor
+        // is at the top level (no block element) — don't override H1/H2/H3/li.
+        var block = '';
+        try { block = (document.queryCommandValue('formatBlock') || '').toLowerCase(); } catch (_) {}
+        if (block && block !== 'p' && block !== 'div' && block !== '') return;
+        e.preventDefault();
+        document.execCommand('formatBlock', false, 'p');
+        // Insert a real line break that splits into two paragraphs.
+        document.execCommand('insertParagraph', false, null);
+      });
+    }
+
     tb.addEventListener('mousedown', function (e) {
       var btn = e.target.closest('[data-rt-cmd]');
       if (!btn || !target) return;
       e.preventDefault(); // keep focus/selection in the editable div
+      // Restore the saved selection BEFORE focusing, so execCommand acts on it.
       target.focus();
+      restoreRange();
       var cmd = btn.getAttribute('data-rt-cmd');
       if (cmd === 'createLink') {
         var u = prompt('Link URL:');
@@ -129,6 +181,7 @@ function openEditor(title, fields, row, onSave) {
       } else {
         document.execCommand(cmd, false, null);
       }
+      saveRange();
       // Reflect the new formatting on the buttons right away.
       syncRichTextToolbar(tb, target);
     });
@@ -280,7 +333,12 @@ async function saveEditor() {
     const el = document.getElementById('fld-' + f.key);
     if (!el) return;
     if (f.type === 'check') out[f.key] = el.checked;
-    else if (f.type === 'richtext') out[f.key] = el.innerHTML;
+    else if (f.type === 'richtext') {
+      var html = el.innerHTML.trim();
+      // Discard the empty-paragraph placeholder we seed the editor with.
+      if (html === '<p><br></p>' || html === '<br>') html = '';
+      out[f.key] = html;
+    }
     else if (f.type === 'gallery') { try { out[f.key] = JSON.parse(el.value || '[]'); } catch (e) { out[f.key] = []; } }
     else out[f.key] = el.value;
   });
