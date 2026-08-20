@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getMinistryPost } from '@/lib/data';
+import { sanitizeHtml } from '@/lib/sanitizeHtml';
 import '../../ministries.css';
 
 export const dynamic = 'force-dynamic';
@@ -55,7 +56,7 @@ export default async function MinistryPostPage({ params }) {
           {post.body ? (
             <div
               className="post-article-body"
-              dangerouslySetInnerHTML={{ __html: post.body }}
+              dangerouslySetInnerHTML={{ __html: sanitizeHtml(post.body) }}
             />
           ) : (
             <p style={{ color: 'var(--gray-1)' }}>No content yet.</p>

@@ -128,28 +128,45 @@ async function delTeamMember(id) {
 // ---------- MINISTRIES ----------
 const MINISTRY_FIELDS = [
   { key: 'name', label: 'Ministry name', half: true, placeholder: 'e.g. WOW — Women of Worth' },
-  { key: 'slug', label: 'URL slug', half: true, placeholder: 'e.g. wow-women' },
+  { key: 'slug', label: 'URL slug', half: true, placeholder: 'e.g. wow-women', hint: 'leave blank to auto-generate; changing it later breaks existing links' },
   { key: 'color', label: 'Accent color', half: true, placeholder: '#4A90E2 or var(--blue)', hint: 'hex or CSS var' },
   { key: 'image_url', label: 'Hero image', type: 'image', folder: 'library' },
   { key: 'description', label: 'Description', type: 'textarea' },
   { key: 'published', label: 'Published (visible on About page)', type: 'check', default: true, half: true },
 ];
+function slugify(s) {
+  return String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+}
 function ministryRowFrom(out, id) {
   if (!out.name) throw new Error('Ministry name is required');
-  const slug = out.slug || out.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-  return { id: id || undefined, name: out.name, slug: slug, color: out.color || 'var(--blue)',
-    description: out.description, image_url: out.image_url || null, published: out.published, sort_order: 99 };
+  const row = { id: id || undefined, name: out.name, color: out.color || 'var(--blue)',
+    description: out.description, image_url: out.image_url || null, published: out.published };
+  // Slug is only set on create (or normalized if the admin typed one). On edit
+  // we leave the existing slug untouched unless the admin explicitly changed it,
+  // because changing it breaks every existing post URL.
+  const typed = slugify(out.slug);
+  if (typed) row.slug = typed;
+  else if (!id) row.slug = slugify(out.name);
+  return row;
 }
 function addMinistry() {
   openEditor('Add Ministry', MINISTRY_FIELDS, {}, async function (out) {
-    await DB.save('ministries', ministryRowFrom(out), 'ministry.create', out.name);
+    // Place new ministries at the end of the current order.
+    const existing = await DB.list('ministries', { order: [['sort_order', 'desc']], limit: 1 });
+    const row = ministryRowFrom(out);
+    row.sort_order = existing.length ? (existing[0].sort_order || 0) + 1 : 0;
+    if (!row.slug) throw new Error('Could not build a URL slug from that name — enter one manually');
+    await DB.save('ministries', row, 'ministry.create', out.name);
     toast('Ministry added'); go('ministries');
   });
 }
 async function editMinistry(id) {
   const m = (await DB.list('ministries', { eq: { id: id } }))[0];
   openEditor('Edit Ministry', MINISTRY_FIELDS, m, async function (out) {
-    await DB.save('ministries', ministryRowFrom(out, id), 'ministry.update', out.name);
+    const row = ministryRowFrom(out, id);
+    // If the admin cleared the slug field, keep the old slug rather than dropping it.
+    if (!row.slug) row.slug = m.slug;
+    await DB.save('ministries', row, 'ministry.update', out.name);
     toast('Ministry saved'); go('ministries');
   });
 }

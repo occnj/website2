@@ -29,15 +29,10 @@ function excerpt(body, max = 160) {
 }
 
 export default async function MinistryPage({ params }) {
-  const [ministry, posts] = await Promise.all([
-    getMinistryBySlug(params.slug),
-    (async () => {
-      const m = await getMinistryBySlug(params.slug);
-      return m ? getMinistryPosts(m.id) : [];
-    })(),
-  ]);
-
+  const ministry = await getMinistryBySlug(params.slug);
   if (!ministry) notFound();
+
+  const posts = await getMinistryPosts(ministry.id);
 
   const color = ministry.color || 'var(--blue)';
 
