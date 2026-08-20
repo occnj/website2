@@ -87,41 +87,87 @@ async function saveYtChannel() {
 }
 
 // ---------- TEAM ----------
-const TEAM_FIELDS = [
-  { key: 'photo', label: 'Profile photo', type: 'image', folder: 'team' },
-  { key: 'name', label: 'Full name', half: true },
-  { key: 'role_title', label: 'Position / title', half: true, placeholder: 'e.g. Lead Pastor' },
-  { key: 'grouping', label: 'Section', type: 'select', options: ['Senior Leadership', 'Pastoral Team', 'Ministry Leaders', 'Staff'], half: true },
-  { key: 'published', label: 'Published (visible on site)', type: 'check', default: true, half: true },
-  { key: 'bio', label: 'Biography', type: 'textarea' },
-  { key: 'link_instagram', label: 'Instagram', half: true, hint: 'optional' },
-  { key: 'link_facebook', label: 'Facebook', half: true, hint: 'optional' },
-  { key: 'link_email', label: 'Contact email', half: true, hint: 'optional' },
-];
+// The Section dropdown is populated live from the admin-managed team_sections
+// table, so admins can add a new section and immediately assign people to it
+// without any code change. Falls back to the legacy defaults if the sections
+// table is empty or unavailable.
+const DEFAULT_SECTIONS = ['Senior Leadership', 'Pastoral Team', 'Ministry Leaders', 'Staff'];
+async function loadSectionNames() {
+  try {
+    const rows = await DB.list('team_sections', { order: [['sort_order', 'asc']] });
+    const names = (rows || []).map(function (r) { return r.name; }).filter(Boolean);
+    return names.length ? names : DEFAULT_SECTIONS;
+  } catch (e) {
+    return DEFAULT_SECTIONS;
+  }
+}
+function teamFields(sectionNames) {
+  return [
+    { key: 'photo', label: 'Profile photo', type: 'image', folder: 'team' },
+    { key: 'name', label: 'Full name', half: true },
+    { key: 'role_title', label: 'Position / title', half: true, placeholder: 'e.g. Lead Pastor' },
+    { key: 'grouping', label: 'Section', type: 'select', options: sectionNames, half: true },
+    { key: 'published', label: 'Published (visible on site)', type: 'check', default: true, half: true },
+    { key: 'bio', label: 'Biography', type: 'textarea' },
+    { key: 'link_instagram', label: 'Instagram', half: true, hint: 'optional' },
+    { key: 'link_facebook', label: 'Facebook', half: true, hint: 'optional' },
+    { key: 'link_email', label: 'Contact email', half: true, hint: 'optional' },
+  ];
+}
 function teamRowFrom(out, id) {
   if (!out.name || !out.role_title) throw new Error('Name and position are required');
   return { id: id || undefined, name: out.name, role_title: out.role_title, grouping: out.grouping,
     bio: out.bio, photo_url: out.photo, published: out.published,
     links: { instagram: out.link_instagram || '', facebook: out.link_facebook || '', email: out.link_email || '' } };
 }
-function addTeamMember() {
-  openEditor('Add team member', TEAM_FIELDS, {}, async function (out) {
+async function addTeamMember() {
+  const sections = await loadSectionNames();
+  openEditor('Add team member', teamFields(sections), {}, async function (out) {
     await DB.save('team_members', teamRowFrom(out), 'team.create', out.name);
     toast('Team member added'); go('team');
   });
 }
 async function editTeamMember(id) {
+  const sections = await loadSectionNames();
   const t = (await DB.list('team_members', { eq: { id: id } }))[0];
   t.photo = t.photo_url;
   const L = t.links || {};
   t.link_instagram = L.instagram; t.link_facebook = L.facebook; t.link_email = L.email;
-  openEditor('Edit team member', TEAM_FIELDS, t, async function (out) {
+  openEditor('Edit team member', teamFields(sections), t, async function (out) {
     await DB.save('team_members', teamRowFrom(out, id), 'team.update', out.name);
     toast('Saved'); go('team');
   });
 }
 async function delTeamMember(id) {
   try { await DB.del('team_members', id, 'team.delete', id); toast('Removed'); go('team'); }
+  catch (e) { fail(e); }
+}
+
+// ---------- TEAM SECTIONS (admin-managed groupings) ----------
+const SECTION_FIELDS = [
+  { key: 'name', label: 'Section name', placeholder: 'e.g. Senior Leadership' },
+  { key: 'description', label: 'Short description', type: 'textarea', hint: 'optional — shows under the heading on the About page' },
+  { key: 'published', label: 'Visible on site', type: 'check', default: true, half: true },
+];
+function sectionRowFrom(out, id) {
+  if (!out.name) throw new Error('Section name is required');
+  return { id: id || undefined, name: out.name, description: out.description || null, published: out.published };
+}
+function addTeamSection() {
+  openEditor('Add section', SECTION_FIELDS, {}, async function (out) {
+    await DB.save('team_sections', sectionRowFrom(out), 'section.create', out.name);
+    toast('Section added'); go('team');
+  });
+}
+async function editTeamSection(id) {
+  const s = (await DB.list('team_sections', { eq: { id: id } }))[0];
+  openEditor('Edit section', SECTION_FIELDS, s, async function (out) {
+    await DB.save('team_sections', sectionRowFrom(out, id), 'section.update', out.name);
+    toast('Section saved'); go('team');
+  });
+}
+async function delTeamSection(id) {
+  try { await DB.del('team_sections', id, 'section.delete', id); toast('Section removed'); go('team'); }
   catch (e) { fail(e); }
 }
 
@@ -182,6 +228,8 @@ const MINISTRY_POST_FIELDS = [
   { key: 'published_at', label: 'Date', type: 'date', half: true },
   { key: 'published', label: 'Published', type: 'check', default: true, half: true },
   { key: 'body', label: 'Content', type: 'richtext' },
+  { key: 'gallery', label: 'Photo gallery', type: 'gallery', folder: 'gallery', max: 20,
+    hint: 'up to 20 photos — portrait or landscape. Select many at once; drag to reorder' },
 ];
 function slugifyPost(title, existingSlug) {
   if (existingSlug) return existingSlug; // preserve on edit
@@ -192,6 +240,7 @@ function ministryPostRowFrom(out, id, ministryId) {
   const slug = slugifyPost(out.title, id ? out._slug : null);
   return { id: id || undefined, ministry_id: ministryId, title: out.title,
     slug: slug, body: out.body || '', image_url: out.image_url || null,
+    gallery: Array.isArray(out.gallery) ? out.gallery.slice(0, 20) : [],
     published_at: out.published_at || new Date().toISOString().slice(0, 10),
     published: out.published };
 }

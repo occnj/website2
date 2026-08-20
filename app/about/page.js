@@ -4,7 +4,7 @@ import '../leadership/leadership.css';
 import '../ministries/ministries.css';
 import PageHero from '@/components/PageHero';
 import AboutSubnav from '@/components/AboutSubnav';
-import { getPageHero, getTeamMembers, getMinistries } from '@/lib/data';
+import { getPageHero, getTeamMembers, getTeamSections, getMinistries } from '@/lib/data';
 
 export const metadata = {
   title: 'About Us — Oasis Christian Centre',
@@ -38,8 +38,43 @@ const BELIEFS = [
 
 
 
+// Build the ordered list of { name, description, members } groups for the
+// leadership area. Preserves each section's admin-defined order and each
+// member's own sort_order within it.
+function buildTeamGroups(team, sections) {
+  const members = team || [];
+  if (!sections || sections.length === 0) {
+    return members.length ? [{ name: null, description: null, members }] : [];
+  }
+  const byName = new Map();
+  const groups = sections.map((s) => {
+    const g = { name: s.name, description: s.description || null, members: [] };
+    byName.set((s.name || '').trim().toLowerCase(), g);
+    return g;
+  });
+  const leftovers = [];
+  members.forEach((m) => {
+    const key = (m.grouping || '').trim().toLowerCase();
+    const g = byName.get(key);
+    if (g) g.members.push(m);
+    else leftovers.push(m);
+  });
+  if (leftovers.length) groups.push({ name: 'More of our team', description: null, members: leftovers });
+  // Drop empty sections so we never render a heading with no people under it.
+  return groups.filter((g) => g.members.length > 0);
+}
+
 export default async function AboutPage() {
-  const [hero, team, ministries] = await Promise.all([getPageHero('about'), getTeamMembers(), getMinistries()]);
+  const [hero, team, sections, ministries] = await Promise.all([
+    getPageHero('about'), getTeamMembers(), getTeamSections(), getMinistries(),
+  ]);
+
+  // Group team members into admin-defined sections. Members are matched to a
+  // section by their `grouping` label. Sections come pre-sorted; any member
+  // whose grouping doesn't match a defined section is collected into a trailing
+  // "More of our team" bucket so nobody is ever hidden. If no sections exist
+  // yet (migration not run), we render one flat group.
+  const groups = buildTeamGroups(team, sections);
 
   return (
     <>
@@ -180,43 +215,53 @@ export default async function AboutPage() {
             <h2 className="t-h1 mt-2">Meet our team.</h2>
             <p className="t-body t-muted mt-3">Oasis is led by people who love God, love people, and are committed to serving the Rahway community with integrity and joy.</p>
           </div>
-          <div className="leader-grid" data-team-list>
-            {team.length === 0 && (
-              <p style={{ gridColumn: '1/-1', color: 'var(--gray-1)', textAlign: 'center', padding: '60px 0' }}>
-                Our leadership team page is being updated. Check back soon!
-              </p>
-            )}
-            {team.map((t) => {
-              const links = t.links || {};
-              const initials = (t.name || '').split(' ').map((w) => w[0]).slice(0, 2).join('');
-              return (
-                <div className="leader-card" key={t.id}>
-                  <div className="leader-photo">
-                    {t.photo_url ? (
-                      <img src={t.photo_url} alt={t.name} />
-                    ) : (
-                      <div className="img-placeholder" style={{ height: '100%', minHeight: 280 }}>
-                        <span style={{ fontFamily: 'var(--font-head)', fontSize: '2.4rem', color: '#9BABB6' }}>{initials}</span>
-                      </div>
-                    )}
-                    <div className="leader-photo-overlay"></div>
-                  </div>
-                  <div className="leader-info">
-                    <div className="leader-name">{t.name}</div>
-                    <div className="leader-role">{t.role_title}</div>
-                    {t.bio ? <p className="leader-bio">{t.bio}</p> : null}
-                    {(links.instagram || links.facebook || links.email) && (
-                      <div style={{ display: 'flex', gap: 14, marginTop: 10, fontSize: '.8rem', fontWeight: 600 }}>
-                        {links.instagram ? <a href={links.instagram} target="_blank" rel="noopener">Instagram</a> : null}
-                        {links.facebook ? <a href={links.facebook} target="_blank" rel="noopener">Facebook</a> : null}
-                        {links.email ? <a href={`mailto:${links.email}`}>Email</a> : null}
-                      </div>
-                    )}
-                  </div>
+          {groups.length === 0 && (
+            <p style={{ color: 'var(--gray-1)', textAlign: 'center', padding: '60px 0' }}>
+              Our leadership team page is being updated. Check back soon!
+            </p>
+          )}
+          {groups.map((group, gi) => (
+            <div className="leader-section" key={group.name || gi}>
+              {group.name && (
+                <div className="leader-section-head">
+                  <h3 className="leader-section-title">{group.name}</h3>
+                  {group.description ? <p className="leader-section-desc">{group.description}</p> : null}
                 </div>
-              );
-            })}
-          </div>
+              )}
+              <div className="leader-grid" data-team-list>
+                {group.members.map((t) => {
+                  const links = t.links || {};
+                  const initials = (t.name || '').split(' ').map((w) => w[0]).slice(0, 2).join('');
+                  return (
+                    <div className="leader-card" key={t.id}>
+                      <div className="leader-photo">
+                        {t.photo_url ? (
+                          <img src={t.photo_url} alt={t.name} />
+                        ) : (
+                          <div className="img-placeholder" style={{ height: '100%', minHeight: 280 }}>
+                            <span style={{ fontFamily: 'var(--font-head)', fontSize: '2.4rem', color: '#9BABB6' }}>{initials}</span>
+                          </div>
+                        )}
+                        <div className="leader-photo-overlay"></div>
+                      </div>
+                      <div className="leader-info">
+                        <div className="leader-name">{t.name}</div>
+                        <div className="leader-role">{t.role_title}</div>
+                        {t.bio ? <p className="leader-bio">{t.bio}</p> : null}
+                        {(links.instagram || links.facebook || links.email) && (
+                          <div style={{ display: 'flex', gap: 14, marginTop: 10, fontSize: '.8rem', fontWeight: 600 }}>
+                            {links.instagram ? <a href={links.instagram} target="_blank" rel="noopener">Instagram</a> : null}
+                            {links.facebook ? <a href={links.facebook} target="_blank" rel="noopener">Facebook</a> : null}
+                            {links.email ? <a href={`mailto:${links.email}`}>Email</a> : null}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
         </div>
       </section>
 

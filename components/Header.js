@@ -51,11 +51,12 @@ export default function Header() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  // On Ministries pages the header floats transparently over the hero image
-  // (mobile): no bar background, logo + menu float, Give keeps its amber pill.
-  // Once the user scrolls past the hero, the solid bar returns for legibility.
-  const overHero = pathname === '/ministries' || /^\/ministries\/[^/]+/.test(pathname);
-  const floating = overHero && !scrolled;
+  // Site-wide floating header: the bar is transparent at the top of every page
+  // so the logo + nav float over the content/hero, and fades to a solid bar as
+  // soon as the user scrolls (keeps links readable on light pages). The Give
+  // button keeps its amber pill in every state. Pages that open with a dark hero
+  // (Ministries, About, etc.) get white floating nav; the solid bar returns on scroll.
+  const floating = !scrolled;
 
   const links = navItems && navItems.length
     ? [
@@ -68,7 +69,7 @@ export default function Header() {
 
   return (
     <>
-      <header className={'site-header' + (scrolled ? ' scrolled' : '') + (overHero ? ' over-hero' : '') + (floating ? ' floating' : '')}>
+      <header className={'site-header' + (scrolled ? ' scrolled' : '') + (floating ? ' floating' : '')}>
         <div className="header-inner">
           <Link href="/" className="header-logo">
             <img src={asset('/uploads/oasis-logo.png')} alt="Oasis Christian Centre" />

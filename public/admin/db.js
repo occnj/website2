@@ -80,6 +80,25 @@
     return compressAndUpload(file, folder);
   }
 
+  // Upload several files in sequence, reporting progress after each one so the
+  // UI can show "3 of 12" instead of freezing. Returns the list of public URLs
+  // in the same order. onProgress({ done, total, url, name, failed }).
+  async function uploadMany(files, folder, onProgress) {
+    var list = Array.prototype.slice.call(files || []);
+    var urls = [];
+    for (var i = 0; i < list.length; i++) {
+      try {
+        var url = await compressAndUpload(list[i], folder);
+        urls.push(url);
+        if (onProgress) onProgress({ done: i + 1, total: list.length, url: url, name: list[i].name, failed: false });
+      } catch (e) {
+        console.warn('[uploadMany] failed:', list[i] && list[i].name, e && e.message);
+        if (onProgress) onProgress({ done: i + 1, total: list.length, url: null, name: list[i].name, failed: true });
+      }
+    }
+    return urls;
+  }
+
   // Pick a file from disk, upload, return public URL
   function pickAndUpload(folder) {
     return new Promise(function (resolve, reject) {
@@ -88,6 +107,21 @@
       inp.onchange = function () {
         if (!inp.files[0]) return resolve(null);
         upload(inp.files[0], folder).then(resolve).catch(reject);
+      };
+      inp.click();
+    });
+  }
+
+  // Pick MANY files at once (multiple), upload them all with progress.
+  function pickAndUploadMany(folder, onProgress, maxFiles) {
+    return new Promise(function (resolve, reject) {
+      const inp = document.createElement('input');
+      inp.type = 'file'; inp.accept = 'image/*'; inp.multiple = true;
+      inp.onchange = function () {
+        var files = Array.prototype.slice.call(inp.files || []);
+        if (!files.length) return resolve([]);
+        if (maxFiles && files.length > maxFiles) files = files.slice(0, maxFiles);
+        uploadMany(files, folder, onProgress).then(resolve).catch(reject);
       };
       inp.click();
     });
@@ -122,6 +156,7 @@
     loadProfile: loadProfile, get me() { return me; },
     list: list, save: save, del: del, audit: audit,
     upload: upload, pickAndUpload: pickAndUpload,
+    uploadMany: uploadMany, pickAndUploadMany: pickAndUploadMany,
     getSettings: getSettings, saveSettings: saveSettings,
     getFormSettings: getFormSettings, saveFormSettings: saveFormSettings,
     canManageUsers: canManageUsers, isEventsOnly: isEventsOnly,

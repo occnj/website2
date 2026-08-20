@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getMinistryBySlug, getMinistryPostBySlug } from '@/lib/data';
 import { sanitizeHtml } from '@/lib/sanitizeHtml';
+import PostGallery from '@/components/PostGallery';
 import '../../ministries.css';
 
 export const dynamic = 'force-dynamic';
@@ -75,6 +76,10 @@ export default async function MinistryPostPage({ params }) {
             <div className="post-article-body" dangerouslySetInnerHTML={{ __html: safeBody }} />
           ) : (
             <p style={{ color: 'var(--gray-1)' }}>No content yet.</p>
+          )}
+
+          {Array.isArray(post.gallery) && post.gallery.length > 0 && (
+            <PostGallery images={post.gallery} />
           )}
 
           <div style={{ marginTop: 'var(--sp-5)', paddingTop: 'var(--sp-4)', borderTop: '1px solid var(--border)', display: 'flex', gap: 'var(--sp-2)', flexWrap: 'wrap' }}>

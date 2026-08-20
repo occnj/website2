@@ -248,10 +248,12 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
 .site-header.scrolled { box-shadow: var(--shadow-md); }
 .site-header { transition: background .25s ease, box-shadow .2s, border-color .25s ease; }
 
-/* --- FLOATING HEADER (Ministries pages, over hero) ---
-   Drop the bar background so the logo + menu float over the hero image.
-   The Give button keeps its amber pill. When the user scrolls past the hero
-   the `.floating` class is removed and the solid bar returns automatically. */
+/* --- FLOATING HEADER (site-wide, transparent at top of page) ---
+   The bar is transparent at the very top of every page so the logo + nav float
+   over the hero/content; a soft dark scrim keeps white text legible even over
+   light page tops. As soon as the user scrolls (`.scrolled` on, `.floating`
+   off) the solid frosted bar returns. The Give button keeps its amber pill in
+   every state. */
 .site-header.floating {
   background: transparent;
   border-bottom-color: transparent;
@@ -259,16 +261,29 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
 }
-/* Make floating controls legible over the dark hero overlay */
+/* Subtle top-to-transparent scrim behind the floating bar for legibility */
+.site-header.floating::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  bottom: auto;
+  height: calc(var(--header-h) + 32px);
+  background: linear-gradient(to bottom, rgba(20,28,38,.42) 0%, rgba(20,28,38,.12) 55%, transparent 100%);
+  pointer-events: none;
+  z-index: -1;
+}
+/* Floating controls render light over the scrim */
 .site-header.floating .nav-link { color: #fff; }
 .site-header.floating .nav-link:hover { color: #fff; background: rgba(255,255,255,.15); }
 .site-header.floating .nav-link.active { color: #fff; }
 .site-header.floating .nav-toggle span { background: #fff; }
-.site-header.floating .header-social a { color: rgba(255,255,255,.85); }
+.site-header.floating .header-social a { color: rgba(255,255,255,.9); }
 .site-header.floating .header-social a:hover { color: #fff; background: rgba(255,255,255,.15); }
-/* Soft shadow so a white logo / white bars stay visible on light hero areas */
+/* Drop-shadow so a white logo / white bars stay crisp on any background */
 .site-header.floating .header-logo img,
-.site-header.floating .nav-toggle span { filter: drop-shadow(0 1px 3px rgba(0,0,0,.45)); }
+.site-header.floating .nav-toggle span,
+.site-header.floating .nav-link { text-shadow: 0 1px 6px rgba(0,0,0,.35); }
+.site-header.floating .header-logo img { filter: drop-shadow(0 1px 4px rgba(0,0,0,.45)); }
 /* Give button already has its own amber background + shadow — leave it as-is */
 .header-inner {
   display: flex;
@@ -677,12 +692,11 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
   .primary-nav { display: none; }
   .header-cta .btn { display: none; }
   .nav-toggle { display: flex; }
-  /* On Ministries pages, keep the Give pill floating in the bar on mobile */
-  .site-header.over-hero .header-give { display: inline-flex; }
-  /* Tighten the CTA cluster so logo + Give + menu sit cleanly on small screens */
-  .site-header.over-hero .header-social { display: none; }
-  .site-header.over-hero .header-cta { gap: var(--sp-1); }
-  .site-header.over-hero .header-give { padding: 8px 16px; }
+  /* Keep the Give pill in the bar on mobile across the whole site */
+  .header-give { display: inline-flex !important; }
+  .header-social { display: none; }
+  .header-cta { gap: var(--sp-1); }
+  .header-give { padding: 8px 16px; }
   .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
   .info-strip-inner { flex-direction: column; gap: var(--sp-2); align-items: flex-start; padding: 0 var(--sp-3); }
   .footer-grid { flex-direction: column; gap: var(--sp-4); }

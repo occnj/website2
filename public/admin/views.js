@@ -75,9 +75,9 @@ function openEditor(title, fields, row, onSave) {
       '<div class="richtext-wrap" style="border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden">' +
       '<div class="richtext-toolbar" data-rt-toolbar="fld-' + f.key + '" style="display:flex;flex-wrap:wrap;gap:2px;padding:6px 8px;background:var(--off-white);border-bottom:1px solid var(--border)">' +
       [['B','bold','font-weight:700'],['I','italic','font-style:italic'],['U','underline','text-decoration:underline'],
-       ['H2','formatBlock:h2',''],['H3','formatBlock:h3',''],['P','formatBlock:p',''],
+       ['H1','formatBlock:h1',''],['H2','formatBlock:h2',''],['H3','formatBlock:h3',''],['P','formatBlock:p',''],
        ['\u2022 List','insertUnorderedList',''],['1. List','insertOrderedList',''],['\ud83d\udd17 Link','createLink',''],['\u2014 HR','insertHorizontalRule','']].map(function(b){
-        return '<button type="button" data-rt-cmd="' + b[1] + '" style="padding:3px 8px;font-size:.78rem;border:1px solid var(--border);border-radius:3px;background:#fff;cursor:pointer;font-family:inherit;' + b[2] + '">' + b[0] + '</button>';
+        return '<button type="button" class="rt-btn" data-rt-cmd="' + b[1] + '" style="padding:3px 8px;font-size:.78rem;border:1px solid var(--border);border-radius:3px;background:#fff;cursor:pointer;font-family:inherit;' + b[2] + '">' + b[0] + '</button>';
       }).join('') +
       '</div>' +
       '<div id="fld-' + f.key + '" contenteditable="true" style="min-height:200px;padding:12px;font-size:.9rem;line-height:1.7;outline:none;overflow-y:auto;max-height:380px">' + (v || '') + '</div>' +
@@ -88,6 +88,21 @@ function openEditor(title, fields, row, onSave) {
       '<div class="img-slot" style="aspect-ratio:16/9" onclick="editorUpload(\'' + f.key + '\',\'' + (f.folder || 'library') + '\')" id="slot-' + f.key + '">' +
       (v ? '<img class="fill" src="' + esc(v) + '" alt=""><div class="replace-hint">Click to replace</div>' : '<span>Click to upload image</span>') +
       '</div><input type="hidden" id="fld-' + f.key + '" value="' + esc(v) + '">';
+    else if (f.type === 'gallery') {
+      var items = [];
+      try { items = Array.isArray(v) ? v : (v ? JSON.parse(v) : []); } catch (e) { items = []; }
+      var max = f.max || 20;
+      ctrl =
+        '<div class="gallery-field" id="gal-' + f.key + '" data-folder="' + (f.folder || 'gallery') + '" data-max="' + max + '">' +
+          '<div class="gallery-grid" id="gal-grid-' + f.key + '"></div>' +
+          '<div class="gallery-actions">' +
+            '<button type="button" class="btn btn-sm btn-outline" onclick="galleryAdd(\'' + f.key + '\')">＋ Add photos</button>' +
+            '<span class="gallery-count" id="gal-count-' + f.key + '"></span>' +
+          '</div>' +
+          '<div class="gallery-progress" id="gal-prog-' + f.key + '" style="display:none"></div>' +
+          '<input type="hidden" id="fld-' + f.key + '" value="' + esc(JSON.stringify(items)) + '">' +
+        '</div>';
+    }
     else ctrl = '<input class="form-input" id="fld-' + f.key + '" type="' + (f.type || 'text') + '" value="' + esc(v) + '" placeholder="' + esc(f.placeholder || '') + '">';
     return '<div class="form-group"' + (f.half ? ' data-half' : '') + '><label class="form-label">' + esc(f.label) +
       (f.hint ? ' <span class="form-hint">— ' + esc(f.hint) + '</span>' : '') + '</label>' + ctrl + '</div>';
@@ -114,7 +129,137 @@ function openEditor(title, fields, row, onSave) {
       } else {
         document.execCommand(cmd, false, null);
       }
+      // Reflect the new formatting on the buttons right away.
+      syncRichTextToolbar(tb, target);
     });
+  });
+  // Highlight the toolbar buttons that match the formatting under the cursor,
+  // and keep them in sync as the selection moves (arrow keys, clicks, typing).
+  wireRichTextActiveState();
+  // Render any gallery fields' current thumbnails.
+  (editorCtx.fields || []).forEach(function (f) { if (f.type === 'gallery') renderGallery(f.key); });
+}
+
+// ---------- GALLERY FIELD ----------
+function galleryValue(key) {
+  var el = document.getElementById('fld-' + key);
+  if (!el) return [];
+  try { return JSON.parse(el.value || '[]'); } catch (e) { return []; }
+}
+function gallerySet(key, arr) {
+  var el = document.getElementById('fld-' + key);
+  if (el) el.value = JSON.stringify(arr || []);
+  renderGallery(key);
+}
+function renderGallery(key) {
+  var grid = document.getElementById('gal-grid-' + key);
+  var count = document.getElementById('gal-count-' + key);
+  if (!grid) return;
+  var arr = galleryValue(key);
+  var wrap = document.getElementById('gal-' + key);
+  var max = wrap ? parseInt(wrap.getAttribute('data-max'), 10) || 20 : 20;
+  grid.innerHTML = arr.map(function (url, i) {
+    return '<div class="gallery-thumb" draggable="true" data-i="' + i + '">' +
+      '<img src="' + esc(url) + '" alt="">' +
+      '<button type="button" class="gallery-thumb-x" title="Remove" onclick="galleryRemove(\'' + key + '\',' + i + ')">×</button>' +
+      '</div>';
+  }).join('');
+  if (count) count.textContent = arr.length + ' / ' + max + ' photos';
+  wireGalleryDnD(key, grid);
+}
+function galleryRemove(key, i) {
+  var arr = galleryValue(key);
+  arr.splice(i, 1);
+  gallerySet(key, arr);
+}
+async function galleryAdd(key) {
+  var wrap = document.getElementById('gal-' + key);
+  if (!wrap) return;
+  var folder = wrap.getAttribute('data-folder') || 'gallery';
+  var max = parseInt(wrap.getAttribute('data-max'), 10) || 20;
+  var current = galleryValue(key);
+  var room = max - current.length;
+  if (room <= 0) { toast('Gallery is full (' + max + ' max)'); return; }
+  var prog = document.getElementById('gal-prog-' + key);
+  var urls = await DB.pickAndUploadMany(folder, function (p) {
+    if (!prog) return;
+    prog.style.display = 'block';
+    prog.innerHTML =
+      '<div class="gallery-prog-bar"><span style="width:' + Math.round((p.done / p.total) * 100) + '%"></span></div>' +
+      '<div class="gallery-prog-text">Uploading ' + p.done + ' of ' + p.total + '…' + (p.failed ? ' (1 skipped)' : '') + '</div>';
+  }, room);
+  if (prog) prog.style.display = 'none';
+  if (urls && urls.length) {
+    gallerySet(key, current.concat(urls));
+    toast(urls.length + ' photo' + (urls.length > 1 ? 's' : '') + ' added ✓');
+  }
+}
+// Drag-to-reorder thumbnails.
+function wireGalleryDnD(key, grid) {
+  var dragEl = null;
+  grid.querySelectorAll('.gallery-thumb').forEach(function (el) {
+    el.addEventListener('dragstart', function () { dragEl = el; el.classList.add('dragging'); });
+    el.addEventListener('dragend', function () { el.classList.remove('dragging'); dragEl = null; });
+    el.addEventListener('dragover', function (e) { e.preventDefault(); });
+    el.addEventListener('drop', function (e) {
+      e.preventDefault();
+      if (!dragEl || dragEl === el) return;
+      var arr = galleryValue(key);
+      var from = parseInt(dragEl.getAttribute('data-i'), 10);
+      var to = parseInt(el.getAttribute('data-i'), 10);
+      var moved = arr.splice(from, 1)[0];
+      arr.splice(to, 0, moved);
+      gallerySet(key, arr);
+    });
+  });
+}
+
+// Which execCommand states are simple on/off toggles (queryCommandState).
+var RT_TOGGLE_CMDS = ['bold', 'italic', 'underline', 'insertUnorderedList', 'insertOrderedList'];
+
+// Update one toolbar's button highlighting based on the current selection.
+// Only runs when the selection is actually inside that toolbar's editor.
+function syncRichTextToolbar(tb, target) {
+  var sel = window.getSelection && window.getSelection();
+  var inThisEditor = false;
+  if (sel && sel.rangeCount && target) {
+    var node = sel.anchorNode;
+    while (node) { if (node === target) { inThisEditor = true; break; } node = node.parentNode; }
+  }
+  var block = '';
+  if (inThisEditor) {
+    try { block = (document.queryCommandValue('formatBlock') || '').toLowerCase(); } catch (e) { block = ''; }
+  }
+  tb.querySelectorAll('[data-rt-cmd]').forEach(function (btn) {
+    var cmd = btn.getAttribute('data-rt-cmd');
+    var active = false;
+    if (inThisEditor) {
+      if (cmd.indexOf('formatBlock:') === 0) {
+        // e.g. formatBlock:h2 is active when the block is <h2>. Browsers report
+        // paragraphs as either 'p' or '' — treat both as the P button's state.
+        var want = cmd.split(':')[1];
+        active = (block === want) || (want === 'p' && (block === '' || block === 'div'));
+      } else if (RT_TOGGLE_CMDS.indexOf(cmd) >= 0) {
+        try { active = document.queryCommandState(cmd); } catch (e) { active = false; }
+      }
+      // createLink / insertHorizontalRule are one-shot actions, never "active".
+    }
+    btn.classList.toggle('rt-active', active);
+  });
+}
+
+// Attach a single document-level selectionchange listener (idempotent) that
+// refreshes every open rich-text toolbar. Cheap: only touches toolbars whose
+// editor currently holds the selection.
+function wireRichTextActiveState() {
+  if (window.__rtActiveWired) { updateAllRichTextToolbars(); return; }
+  window.__rtActiveWired = true;
+  document.addEventListener('selectionchange', updateAllRichTextToolbars);
+}
+function updateAllRichTextToolbars() {
+  document.querySelectorAll('[data-rt-toolbar]').forEach(function (tb) {
+    var target = document.getElementById(tb.getAttribute('data-rt-toolbar'));
+    if (target) syncRichTextToolbar(tb, target);
   });
 }
 async function editorUpload(key, folder) {
@@ -136,6 +281,7 @@ async function saveEditor() {
     if (!el) return;
     if (f.type === 'check') out[f.key] = el.checked;
     else if (f.type === 'richtext') out[f.key] = el.innerHTML;
+    else if (f.type === 'gallery') { try { out[f.key] = JSON.parse(el.value || '[]'); } catch (e) { out[f.key] = []; } }
     else out[f.key] = el.value;
   });
   try { await editorCtx.onSave(out); closeEditor(); }
@@ -253,8 +399,33 @@ events: () => safe(async function () {
 // ---------------- TEAM ----------------
 team: () => safe(async function () {
   const team = await DB.list('team_members', { order: [['sort_order', 'asc']] });
+  let sections = [];
+  try { sections = await DB.list('team_sections', { order: [['sort_order', 'asc']] }); } catch (e) { sections = []; }
+  const countByName = {};
+  team.forEach(function (t) { const k = (t.grouping || '').trim().toLowerCase(); countByName[k] = (countByName[k] || 0) + 1; });
+  const sectionsPanel =
+    '<div class="panel" style="margin-bottom:18px"><div class="panel-head">' +
+    '<div><h3>Leadership sections</h3><div class="sub">Group leaders into named sections (up to 4 per row on the site). Add or rename sections here — no code needed.</div></div>' +
+    '<button class="btn btn-sm btn-primary" onclick="addTeamSection()">+ Add Section</button>' +
+    '</div><div class="data-list">' +
+    (sections.length ? sections.map(function (s, i) {
+      const n = countByName[(s.name || '').trim().toLowerCase()] || 0;
+      return '<div class="data-row" style="' + (s.published ? '' : 'opacity:.5') + '">' +
+        '<div style="display:flex;flex-direction:column;flex-shrink:0">' +
+        '<button class="icon-btn" style="padding:2px" ' + (i === 0 ? 'disabled' : '') + ' onclick="moveRow(\'team_sections\',\'' + s.id + '\',-1,\'team\')">' + ICONS.up + '</button>' +
+        '<button class="icon-btn" style="padding:2px" ' + (i === sections.length - 1 ? 'disabled' : '') + ' onclick="moveRow(\'team_sections\',\'' + s.id + '\',1,\'team\')">' + ICONS.down + '</button></div>' +
+        '<div class="row-main"><div class="row-title">' + esc(s.name) + '</div>' +
+        '<div class="row-sub">' + n + ' member' + (n !== 1 ? 's' : '') + (s.description ? ' · ' + esc(s.description) : '') + '</div></div>' +
+        '<span class="tag ' + (s.published ? 'tag-green' : 'tag-gray') + '" style="flex-shrink:0">' + (s.published ? 'Visible' : 'Hidden') + '</span>' +
+        '<div class="row-actions">' +
+        '<button class="icon-btn" title="Edit" onclick="editTeamSection(\'' + s.id + '\')">' + ICONS.edit + '</button>' +
+        '<button class="icon-btn" title="Delete" onclick="confirmAction(\'Delete section <strong>' + esc(s.name).replace(/'/g, '&#39;') + '</strong>? Members stay, but fall into “More of our team” until reassigned.\', function(){delTeamSection(\'' + s.id + '\')})">' + ICONS.trash + '</button>' +
+        '</div></div>';
+    }).join('') : '<div class="data-row"><div class="row-main" style="color:var(--gray-1)">No sections yet — add one, or run the team-sections migration. Until then everyone shows in one group.</div></div>') +
+    '</div></div>';
   return '<div style="display:flex;justify-content:flex-end;margin-bottom:14px"><button class="btn btn-primary" onclick="addTeamMember()">+ Add Team Member</button></div>' +
-    '<div class="panel"><div class="panel-head"><div><h3>Leadership team (' + team.length + ')</h3><div class="sub">Use ↑↓ to reorder · appears on the Leadership page in this order</div></div></div><div class="data-list">' +
+    sectionsPanel +
+    '<div class="panel"><div class="panel-head"><div><h3>Leadership team (' + team.length + ')</h3><div class="sub">Use ↑↓ to reorder · assign each person to a section when editing</div></div></div><div class="data-list">' +
     (team.length ? team.map(function (t, i) {
       return '<div class="data-row" style="' + (t.published ? '' : 'opacity:.5') + '">' +
         '<div style="display:flex;flex-direction:column;flex-shrink:0">' +

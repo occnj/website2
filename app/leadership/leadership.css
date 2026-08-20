@@ -1,7 +1,25 @@
 .leader-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: var(--sp-4);
+}
+/* Leadership sections (admin-defined groupings) */
+.leader-section + .leader-section { margin-top: var(--sp-6); }
+.leader-section-head { margin-bottom: var(--sp-4); }
+.leader-section-title {
+  font-family: var(--font-head);
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--charcoal);
+  padding-bottom: var(--sp-2);
+  border-bottom: 2px solid var(--border);
+}
+.leader-section-desc {
+  font-size: .9rem;
+  color: var(--gray-1);
+  line-height: 1.6;
+  margin-top: var(--sp-2);
+  max-width: 640px;
 }
 .leader-card {
   background: #fff;
@@ -28,12 +46,12 @@
 .leader-role { font-size: .78rem; font-weight: 600; letter-spacing: .07em; text-transform: uppercase; color: var(--blue); margin-top: 3px; }
 .leader-bio { font-size: .85rem; color: var(--gray-1); line-height: 1.65; margin-top: var(--sp-2); }
 
-@media (max-width: 900px) {
+@media (max-width: 1024px) {
+  .leader-grid { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 760px) {
   .leader-grid { grid-template-columns: repeat(2, 1fr); }
 }
-@media (max-width: 600px) {
-  .leader-grid { grid-template-columns: 1fr 1fr; }
-}
-@media (max-width: 400px) {
+@media (max-width: 420px) {
   .leader-grid { grid-template-columns: 1fr; }
 }
