@@ -2,6 +2,13 @@
 const nextConfig = {
   outputFileTracingRoot: __dirname,
   poweredByHeader: false,
+  env: {
+    // Keep unhashed public/admin assets in lockstep with each deployment.
+    ADMIN_ASSET_VERSION: process.env.ADMIN_ASSET_VERSION ||
+      process.env.VERCEL_GIT_COMMIT_SHA ||
+      process.env.GITHUB_SHA ||
+      Date.now().toString(),
+  },
   images: {
     unoptimized: true,
   },

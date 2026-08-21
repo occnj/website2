@@ -5,6 +5,7 @@ import * as supabase from '@supabase/supabase-js';
 import { loadScriptSequence } from '@/lib/scriptLoader';
 import { asset } from '@/lib/basePath';
 import { SUPABASE_ANON_KEY, SUPABASE_URL } from '@/lib/supabase';
+import { createRichTextEditor } from './richTextEditor';
 
 const TITLES = {
   dashboard: 'Dashboard', pages: 'Pages', sermons: 'Sermons', events: 'Events',
@@ -14,16 +15,17 @@ const TITLES = {
   media: 'Media Library', users: 'Users & Roles',
 };
 
-// Cache-bust admin static files. Every build bakes in a new timestamp, so the
-// browser fetches fresh copies of views.js / actions.js / db.js / admin.css
-// instead of serving stale cached versions that are missing new features.
-const ADMIN_V = '?v=' + Date.now();
+// This value is generated once in next.config.js for the entire build. Using
+// Date.now() here caused the server and browser to render different URLs.
+const ADMIN_V = '?v=' + process.env.ADMIN_ASSET_VERSION;
 
 export default function AdminPage() {
   useEffect(() => {
     let cancelled = false;
     window.supabase = supabase;
     window.OASIS_RUNTIME_CONFIG = { SUPABASE_URL, SUPABASE_ANON_KEY };
+    const richTextApi = { create: createRichTextEditor };
+    window.OasisRichText = richTextApi;
 
     loadScriptSequence([
       asset('/admin/config.js') + ADMIN_V,
@@ -35,7 +37,11 @@ export default function AdminPage() {
       initAdminController();
     });
 
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+      if (window.closeEditor) window.closeEditor();
+      if (window.OasisRichText === richTextApi) delete window.OasisRichText;
+    };
   }, []);
 
   return (
