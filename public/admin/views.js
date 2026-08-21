@@ -117,61 +117,48 @@ function openEditor(title, fields, row, onSave) {
   // Wire rich-text toolbars (delegated: one listener per toolbar)
   document.querySelectorAll('[data-rt-toolbar]').forEach(function (tb) {
     var target = document.getElementById(tb.getAttribute('data-rt-toolbar'));
+    if (!target) return;
 
-    // When the user clicks a toolbar button the editor div loses focus and the
-    // browser discards the selection before mousedown fires. We save the range
-    // on every selectionchange so we can restore it before execCommand runs.
-    var savedRange = null;
-    function saveRange() {
-      var sel = window.getSelection();
-      if (sel && sel.rangeCount > 0) {
-        var r = sel.getRangeAt(0);
-        // Only save if the range is actually inside this editor.
-        if (target && target.contains(r.commonAncestorContainer)) {
-          savedRange = r.cloneRange();
-        }
-      }
-    }
-    function restoreRange() {
-      if (!savedRange) return;
-      var sel = window.getSelection();
-      if (!sel) return;
-      sel.removeAllRanges();
-      sel.addRange(savedRange);
-    }
-    if (target) {
-      target.addEventListener('keyup', saveRange);
-      target.addEventListener('mouseup', saveRange);
-      document.addEventListener('selectionchange', function () {
-        var sel = window.getSelection();
-        if (sel && sel.rangeCount > 0 && target.contains(sel.getRangeAt(0).commonAncestorContainer)) {
-          saveRange();
-        }
-      });
+    // Pressing Enter inside the editor creates a new <p> paragraph.
+    target.addEventListener('keydown', function (e) {
+      if (e.key !== 'Enter' || e.shiftKey) return;
+      var block = '';
+      try { block = (document.queryCommandValue('formatBlock') || '').toLowerCase(); } catch (_) {}
+      if (block && block !== 'p' && block !== 'div' && block !== '') return;
+      e.preventDefault();
+      document.execCommand('formatBlock', false, '<p>');
+      document.execCommand('insertParagraph', false, null);
+    });
 
-      // Pressing Enter inside the editor creates a new <p> paragraph instead
-      // of the browser default <div> or <br>, so the body reads as clean HTML.
-      target.addEventListener('keydown', function (e) {
-        if (e.key !== 'Enter' || e.shiftKey) return;
-        // Only intervene if the current block is already a <p> or the cursor
-        // is at the top level (no block element) — don't override H1/H2/H3/li.
-        var block = '';
-        try { block = (document.queryCommandValue('formatBlock') || '').toLowerCase(); } catch (_) {}
-        if (block && block !== 'p' && block !== 'div' && block !== '') return;
-        e.preventDefault();
-        document.execCommand('formatBlock', false, '<p>');
-        // Insert a real line break that splits into two paragraphs.
-        document.execCommand('insertParagraph', false, null);
-      });
-    }
-
+    // The toolbar uses mousedown (not click) so we can call preventDefault()
+    // to stop the browser from moving focus out of the editor. The selection
+    // is captured at the very top of the handler — before anything can
+    // interfere — and force-restored right before execCommand runs.
     tb.addEventListener('mousedown', function (e) {
       var btn = e.target.closest('[data-rt-cmd]');
-      if (!btn || !target) return;
-      e.preventDefault(); // keep focus/selection in the editable div
-      // Restore the saved selection BEFORE focusing, so execCommand acts on it.
+      if (!btn) return;
+
+      // 1. Snapshot the live selection RIGHT NOW — it's still in the editor
+      //    because nothing has happened yet.
+      var sel = window.getSelection();
+      var liveRange = null;
+      if (sel && sel.rangeCount > 0) {
+        liveRange = sel.getRangeAt(0).cloneRange();
+      }
+
+      // 2. Prevent the button from stealing focus.
+      e.preventDefault();
+
+      // 3. Make sure the editor is focused and force the selection back.
       target.focus();
-      restoreRange();
+      if (liveRange) {
+        try {
+          sel.removeAllRanges();
+          sel.addRange(liveRange);
+        } catch (_) {}
+      }
+
+      // 4. Run the command — selection is guaranteed to be in place.
       var cmd = btn.getAttribute('data-rt-cmd');
       if (cmd === 'createLink') {
         var u = prompt('Link URL:');
@@ -181,8 +168,8 @@ function openEditor(title, fields, row, onSave) {
       } else {
         document.execCommand(cmd, false, null);
       }
-      saveRange();
-      // Reflect the new formatting on the buttons right away.
+
+      // 5. Sync the toolbar highlights to reflect the new state.
       syncRichTextToolbar(tb, target);
     });
   });
