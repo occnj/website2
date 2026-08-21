@@ -1,11 +1,55 @@
-import { Editor } from '@tiptap/core';
+import { Editor, Mark, mergeAttributes } from '@tiptap/core';
 import Placeholder from '@tiptap/extension-placeholder';
 import StarterKit from '@tiptap/starter-kit';
+
+const TEXT_SIZE_CLASSES = {
+  large: 'rt-text-large',
+  medium: 'rt-text-medium',
+  small: 'rt-text-small',
+};
+
+const TextSize = Mark.create({
+  name: 'textSize',
+
+  addAttributes() {
+    return {
+      size: {
+        default: null,
+        renderHTML: ({ size }) => {
+          const className = TEXT_SIZE_CLASSES[size];
+          return className ? { class: className } : {};
+        },
+      },
+    };
+  },
+
+  parseHTML() {
+    return Object.entries(TEXT_SIZE_CLASSES).map(([size, className]) => ({
+      tag: `span.${className}`,
+      getAttrs: () => ({ size }),
+    }));
+  },
+
+  renderHTML({ HTMLAttributes }) {
+    return ['span', mergeAttributes(HTMLAttributes), 0];
+  },
+
+  addCommands() {
+    return {
+      setTextSize: (size) => ({ commands }) => commands.setMark(this.name, { size }),
+      unsetTextSize: () => ({ commands }) => commands.unsetMark(this.name),
+    };
+  },
+});
 
 const STATEFUL_COMMANDS = new Set([
   'bold',
   'italic',
   'underline',
+  'textSize:large',
+  'textSize:medium',
+  'textSize:small',
+  'textSize:normal',
   'formatBlock:h1',
   'formatBlock:h2',
   'formatBlock:h3',
@@ -20,6 +64,10 @@ function commandIsActive(editor, command) {
     case 'bold': return editor.isActive('bold');
     case 'italic': return editor.isActive('italic');
     case 'underline': return editor.isActive('underline');
+    case 'textSize:large': return editor.isActive('textSize', { size: 'large' });
+    case 'textSize:medium': return editor.isActive('textSize', { size: 'medium' });
+    case 'textSize:small': return editor.isActive('textSize', { size: 'small' });
+    case 'textSize:normal': return !editor.isActive('textSize');
     case 'formatBlock:h1': return editor.isActive('heading', { level: 1 });
     case 'formatBlock:h2': return editor.isActive('heading', { level: 2 });
     case 'formatBlock:h3': return editor.isActive('heading', { level: 3 });
@@ -47,6 +95,10 @@ export function runRichTextCommand(editor, command, promptForLink = window.promp
     case 'bold': return editor.chain().focus().toggleBold().run();
     case 'italic': return editor.chain().focus().toggleItalic().run();
     case 'underline': return editor.chain().focus().toggleUnderline().run();
+    case 'textSize:large': return editor.chain().focus().setTextSize('large').run();
+    case 'textSize:medium': return editor.chain().focus().setTextSize('medium').run();
+    case 'textSize:small': return editor.chain().focus().setTextSize('small').run();
+    case 'textSize:normal': return editor.chain().focus().unsetTextSize().run();
     case 'formatBlock:h1': return editor.chain().focus().toggleHeading({ level: 1 }).run();
     case 'formatBlock:h2': return editor.chain().focus().toggleHeading({ level: 2 }).run();
     case 'formatBlock:h3': return editor.chain().focus().toggleHeading({ level: 3 }).run();
@@ -86,6 +138,7 @@ export function createRichTextEditor({ element, toolbar, content, label, promptF
         },
         trailingNode: false,
       }),
+      TextSize,
       Placeholder.configure({ placeholder: 'Start writing…' }),
     ],
     content: content || '<p></p>',

@@ -82,8 +82,13 @@ function openEditor(title, fields, row, onSave) {
     else if (f.type === 'richtext') ctrl =
       '<div class="richtext-wrap">' +
       '<div class="richtext-toolbar" role="toolbar" aria-label="' + esc(f.label) + ' formatting" data-rt-toolbar="fld-' + f.key + '">' +
-      [['B','bold','Bold'],['I','italic','Italic'],['U','underline','Underline'],
-       ['H1','formatBlock:h1','Heading 1'],['H2','formatBlock:h2','Heading 2'],['H3','formatBlock:h3','Heading 3'],['P','formatBlock:p','Paragraph'],
+      '<span class="rt-group-label">Selected text:</span>' +
+      [['Large','textSize:large','Make selected text large'],['Medium','textSize:medium','Make selected text medium'],['Small','textSize:small','Make selected text small'],['Normal','textSize:normal','Restore selected text size'],
+       ['B','bold','Bold'],['I','italic','Italic'],['U','underline','Underline']].map(function(b){
+        return '<button type="button" class="rt-btn" data-rt-cmd="' + b[1] + '" aria-label="' + b[2] + '" title="' + b[2] + '" aria-pressed="false">' + b[0] + '</button>';
+      }).join('') +
+      '<span class="rt-group-label">Whole paragraph:</span>' +
+      [['H1','formatBlock:h1','Heading 1 (whole paragraph)'],['H2','formatBlock:h2','Heading 2 (whole paragraph)'],['H3','formatBlock:h3','Heading 3 (whole paragraph)'],['P','formatBlock:p','Paragraph'],
        ['\u2022 List','insertUnorderedList','Bulleted list'],['1. List','insertOrderedList','Numbered list'],['\ud83d\udd17 Link','createLink','Add or remove link'],['\u2014 HR','insertHorizontalRule','Horizontal rule']].map(function(b){
         var pressed = b[1] === 'insertHorizontalRule' ? '' : ' aria-pressed="false"';
         return '<button type="button" class="rt-btn" data-rt-cmd="' + b[1] + '" aria-label="' + b[2] + '" title="' + b[2] + '"' + pressed + '>' + b[0] + '</button>';

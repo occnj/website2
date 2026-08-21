@@ -302,6 +302,13 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
   background: var(--off-white);
   border-bottom: 1px solid var(--border);
 }
+.rt-group-label {
+  align-self: center;
+  margin: 0 2px 0 5px;
+  color: var(--gray-1);
+  font-size: .7rem;
+  font-weight: 700;
+}
 .rt-btn {
   padding: 4px 8px;
   font: inherit;
@@ -342,6 +349,9 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
 [data-rt-editor] .tiptap-editor ol { margin: .5em 0; padding-left: 1.5em; }
 [data-rt-editor] .tiptap-editor a { color: var(--blue); text-decoration: underline; }
 [data-rt-editor] .tiptap-editor hr { border: 0; border-top: 1px solid var(--border); margin: 1em 0; }
+[data-rt-editor] .tiptap-editor .rt-text-large { font-size: 1.8em; line-height: 1.25; }
+[data-rt-editor] .tiptap-editor .rt-text-medium { font-size: 1.4em; line-height: 1.35; }
+[data-rt-editor] .tiptap-editor .rt-text-small { font-size: .82em; }
 [data-rt-editor] .tiptap-editor p.is-editor-empty:first-child::before {
   content: 'Start writing…';
   color: var(--gray-2);

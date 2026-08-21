@@ -15,7 +15,7 @@
     "@tiptap/core": "^3.30.2",
     "@tiptap/extension-placeholder": "^3.30.2",
     "@tiptap/starter-kit": "^3.30.2",
-    "isomorphic-dompurify": "^3.22.0",
+    "isomorphic-dompurify": "2.26.0",
     "next": "^15.5.18",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",

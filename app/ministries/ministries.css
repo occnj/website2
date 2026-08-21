@@ -139,6 +139,9 @@
 .post-article-body h1 { font-family: var(--font-head); font-size: 1.8rem; font-weight: 700; margin: var(--sp-4) 0 var(--sp-2); line-height: 1.2; }
 .post-article-body h2 { font-family: var(--font-head); font-size: 1.5rem; font-weight: 700; margin: var(--sp-4) 0 var(--sp-2); }
 .post-article-body h3 { font-family: var(--font-head); font-size: 1.2rem; font-weight: 700; margin: var(--sp-3) 0 var(--sp-2); }
+.post-article-body .rt-text-large { font-size: 1.8em; line-height: 1.25; }
+.post-article-body .rt-text-medium { font-size: 1.4em; line-height: 1.35; }
+.post-article-body .rt-text-small { font-size: .82em; }
 .post-article-body ul, .post-article-body ol { padding-left: 1.5em; margin: 0 0 var(--sp-3); }
 .post-article-body li { margin-bottom: .4em; }
 .post-article-body blockquote {
