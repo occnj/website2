@@ -64,23 +64,32 @@ function runConfirm() {
 // ---------- generic editor modal ----------
 // fields: [{key,label,type:'text'|'textarea'|'date'|'select'|'check'|'image',options,hint,half}]
 let editorCtx = null;
+function destroyRichTextEditors() {
+  if (!editorCtx || !editorCtx.richTextEditors) return;
+  Object.keys(editorCtx.richTextEditors).forEach(function (key) {
+    editorCtx.richTextEditors[key].destroy();
+  });
+  editorCtx.richTextEditors = {};
+}
 function openEditor(title, fields, row, onSave) {
-  editorCtx = { fields: fields, row: row || {}, onSave: onSave };
+  destroyRichTextEditors();
+  editorCtx = { fields: fields, row: row || {}, onSave: onSave, richTextEditors: {} };
   document.getElementById('editor-title').textContent = title;
   const body = fields.map(function (f) {
     const v = (row && row[f.key] != null) ? row[f.key] : (f.default != null ? f.default : '');
     let ctrl;
     if (f.type === 'textarea') ctrl = '<textarea class="form-textarea" id="fld-' + f.key + '">' + esc(v) + '</textarea>';
     else if (f.type === 'richtext') ctrl =
-      '<div class="richtext-wrap" style="border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden">' +
-      '<div class="richtext-toolbar" data-rt-toolbar="fld-' + f.key + '" style="display:flex;flex-wrap:wrap;gap:2px;padding:6px 8px;background:var(--off-white);border-bottom:1px solid var(--border)">' +
-      [['B','bold','font-weight:700'],['I','italic','font-style:italic'],['U','underline','text-decoration:underline'],
-       ['H1','formatBlock:h1',''],['H2','formatBlock:h2',''],['H3','formatBlock:h3',''],['P','formatBlock:p',''],
-       ['\u2022 List','insertUnorderedList',''],['1. List','insertOrderedList',''],['\ud83d\udd17 Link','createLink',''],['\u2014 HR','insertHorizontalRule','']].map(function(b){
-        return '<button type="button" class="rt-btn" data-rt-cmd="' + b[1] + '" style="padding:3px 8px;font-size:.78rem;border:1px solid var(--border);border-radius:3px;background:#fff;cursor:pointer;font-family:inherit;' + b[2] + '">' + b[0] + '</button>';
+      '<div class="richtext-wrap">' +
+      '<div class="richtext-toolbar" role="toolbar" aria-label="' + esc(f.label) + ' formatting" data-rt-toolbar="fld-' + f.key + '">' +
+      [['B','bold','Bold'],['I','italic','Italic'],['U','underline','Underline'],
+       ['H1','formatBlock:h1','Heading 1'],['H2','formatBlock:h2','Heading 2'],['H3','formatBlock:h3','Heading 3'],['P','formatBlock:p','Paragraph'],
+       ['\u2022 List','insertUnorderedList','Bulleted list'],['1. List','insertOrderedList','Numbered list'],['\ud83d\udd17 Link','createLink','Add or remove link'],['\u2014 HR','insertHorizontalRule','Horizontal rule']].map(function(b){
+        var pressed = b[1] === 'insertHorizontalRule' ? '' : ' aria-pressed="false"';
+        return '<button type="button" class="rt-btn" data-rt-cmd="' + b[1] + '" aria-label="' + b[2] + '" title="' + b[2] + '"' + pressed + '>' + b[0] + '</button>';
       }).join('') +
       '</div>' +
-      '<div id="fld-' + f.key + '" contenteditable="true" data-rt-editor="1" style="min-height:200px;padding:12px;font-size:.9rem;line-height:1.7;outline:none;overflow-y:auto;max-height:380px">' + (v ? v : '<p><br></p>') + '</div>' +
+      '<div id="fld-' + f.key + '" data-rt-editor="1"></div>' +
       '</div>';
     else if (f.type === 'select') ctrl = '<select class="form-select" id="fld-' + f.key + '">' + f.options.map(function (o) { return '<option value="' + esc(o) + '"' + (o === v ? ' selected' : '') + '>' + esc(o) + '</option>'; }).join('') + '</select>';
     else if (f.type === 'check') ctrl = '<label class="toggle"><input type="checkbox" id="fld-' + f.key + '"' + (v ? ' checked' : '') + '><span class="track"></span></label>';
@@ -112,70 +121,23 @@ function openEditor(title, fields, row, onSave) {
     body.replace(/<div class="form-group"(?! data-half)/g, '</div><div style="grid-column:1/-1" class="form-group"').replace(/^<\/div>/, '') +
     '</div>';
   document.getElementById('editor-modal').classList.add('open');
-  // Tell the browser to use <p> for new paragraphs (not <div>) in all editors.
-  try { document.execCommand('defaultParagraphSeparator', false, 'p'); } catch (_) {}
-  // Wire rich-text toolbars (delegated: one listener per toolbar)
-  document.querySelectorAll('[data-rt-toolbar]').forEach(function (tb) {
-    var target = document.getElementById(tb.getAttribute('data-rt-toolbar'));
-    if (!target) return;
-
-    // Pressing Enter inside the editor creates a new <p> paragraph.
-    target.addEventListener('keydown', function (e) {
-      if (e.key !== 'Enter' || e.shiftKey) return;
-      var block = '';
-      try { block = (document.queryCommandValue('formatBlock') || '').toLowerCase(); } catch (_) {}
-      if (block && block !== 'p' && block !== 'div' && block !== '') return;
-      e.preventDefault();
-      document.execCommand('formatBlock', false, '<p>');
-      document.execCommand('insertParagraph', false, null);
-    });
-
-    // The toolbar uses mousedown (not click) so we can call preventDefault()
-    // to stop the browser from moving focus out of the editor. The selection
-    // is captured at the very top of the handler — before anything can
-    // interfere — and force-restored right before execCommand runs.
-    tb.addEventListener('mousedown', function (e) {
-      var btn = e.target.closest('[data-rt-cmd]');
-      if (!btn) return;
-
-      // 1. Snapshot the live selection RIGHT NOW — it's still in the editor
-      //    because nothing has happened yet.
-      var sel = window.getSelection();
-      var liveRange = null;
-      if (sel && sel.rangeCount > 0) {
-        liveRange = sel.getRangeAt(0).cloneRange();
-      }
-
-      // 2. Prevent the button from stealing focus.
-      e.preventDefault();
-
-      // 3. Make sure the editor is focused and force the selection back.
-      target.focus();
-      if (liveRange) {
-        try {
-          sel.removeAllRanges();
-          sel.addRange(liveRange);
-        } catch (_) {}
-      }
-
-      // 4. Run the command — selection is guaranteed to be in place.
-      var cmd = btn.getAttribute('data-rt-cmd');
-      if (cmd === 'createLink') {
-        var u = prompt('Link URL:');
-        if (u) document.execCommand('createLink', false, u);
-      } else if (cmd.indexOf('formatBlock:') === 0) {
-        document.execCommand('formatBlock', false, '<' + cmd.split(':')[1] + '>');
-      } else {
-        document.execCommand(cmd, false, null);
-      }
-
-      // 5. Sync the toolbar highlights to reflect the new state.
-      syncRichTextToolbar(tb, target);
+  if (!window.OasisRichText || !window.OasisRichText.create) {
+    closeEditor();
+    fail(new Error('The rich-text editor failed to load. Refresh the page and try again.'));
+    return;
+  }
+  fields.forEach(function (f) {
+    if (f.type !== 'richtext') return;
+    var initialValue = (row && row[f.key] != null) ? row[f.key] : (f.default != null ? f.default : '');
+    var element = document.getElementById('fld-' + f.key);
+    var toolbar = document.querySelector('[data-rt-toolbar="fld-' + f.key + '"]');
+    editorCtx.richTextEditors[f.key] = window.OasisRichText.create({
+      element: element,
+      toolbar: toolbar,
+      content: initialValue,
+      label: f.label,
     });
   });
-  // Highlight the toolbar buttons that match the formatting under the cursor,
-  // and keep them in sync as the selection moves (arrow keys, clicks, typing).
-  wireRichTextActiveState();
   // Render any gallery fields' current thumbnails.
   (editorCtx.fields || []).forEach(function (f) { if (f.type === 'gallery') renderGallery(f.key); });
 }
@@ -254,54 +216,6 @@ function wireGalleryDnD(key, grid) {
   });
 }
 
-// Which execCommand states are simple on/off toggles (queryCommandState).
-var RT_TOGGLE_CMDS = ['bold', 'italic', 'underline', 'insertUnorderedList', 'insertOrderedList'];
-
-// Update one toolbar's button highlighting based on the current selection.
-// Only runs when the selection is actually inside that toolbar's editor.
-function syncRichTextToolbar(tb, target) {
-  var sel = window.getSelection && window.getSelection();
-  var inThisEditor = false;
-  if (sel && sel.rangeCount && target) {
-    var node = sel.anchorNode;
-    while (node) { if (node === target) { inThisEditor = true; break; } node = node.parentNode; }
-  }
-  var block = '';
-  if (inThisEditor) {
-    try { block = (document.queryCommandValue('formatBlock') || '').toLowerCase(); } catch (e) { block = ''; }
-  }
-  tb.querySelectorAll('[data-rt-cmd]').forEach(function (btn) {
-    var cmd = btn.getAttribute('data-rt-cmd');
-    var active = false;
-    if (inThisEditor) {
-      if (cmd.indexOf('formatBlock:') === 0) {
-        // e.g. formatBlock:h2 is active when the block is <h2>. Browsers report
-        // paragraphs as either 'p' or '' — treat both as the P button's state.
-        var want = cmd.split(':')[1];
-        active = (block === want) || (want === 'p' && (block === '' || block === 'div'));
-      } else if (RT_TOGGLE_CMDS.indexOf(cmd) >= 0) {
-        try { active = document.queryCommandState(cmd); } catch (e) { active = false; }
-      }
-      // createLink / insertHorizontalRule are one-shot actions, never "active".
-    }
-    btn.classList.toggle('rt-active', active);
-  });
-}
-
-// Attach a single document-level selectionchange listener (idempotent) that
-// refreshes every open rich-text toolbar. Cheap: only touches toolbars whose
-// editor currently holds the selection.
-function wireRichTextActiveState() {
-  if (window.__rtActiveWired) { updateAllRichTextToolbars(); return; }
-  window.__rtActiveWired = true;
-  document.addEventListener('selectionchange', updateAllRichTextToolbars);
-}
-function updateAllRichTextToolbars() {
-  document.querySelectorAll('[data-rt-toolbar]').forEach(function (tb) {
-    var target = document.getElementById(tb.getAttribute('data-rt-toolbar'));
-    if (target) syncRichTextToolbar(tb, target);
-  });
-}
 async function editorUpload(key, folder) {
   try {
     const slot = document.getElementById('slot-' + key);
@@ -313,18 +227,21 @@ async function editorUpload(key, folder) {
     toast('Image uploaded ✓');
   } catch (e) { fail(e); }
 }
-function closeEditor() { document.getElementById('editor-modal').classList.remove('open'); }
+function closeEditor() {
+  destroyRichTextEditors();
+  document.getElementById('editor-modal').classList.remove('open');
+  editorCtx = null;
+}
 async function saveEditor() {
+  if (!editorCtx) return;
   const out = {};
   editorCtx.fields.forEach(function (f) {
     const el = document.getElementById('fld-' + f.key);
     if (!el) return;
     if (f.type === 'check') out[f.key] = el.checked;
     else if (f.type === 'richtext') {
-      var html = el.innerHTML.trim();
-      // Discard the empty-paragraph placeholder we seed the editor with.
-      if (html === '<p><br></p>' || html === '<br>') html = '';
-      out[f.key] = html;
+      var richTextEditor = editorCtx.richTextEditors[f.key];
+      out[f.key] = richTextEditor ? richTextEditor.getHTML() : '';
     }
     else if (f.type === 'gallery') { try { out[f.key] = JSON.parse(el.value || '[]'); } catch (e) { out[f.key] = []; } }
     else out[f.key] = el.value;
