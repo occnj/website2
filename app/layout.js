@@ -3,6 +3,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import CmsBridge from '@/components/CmsBridge';
 import ClosureBanner from '@/components/ClosureBanner';
+import PromotionalPopup from '@/components/PromotionalPopup';
 import { SiteDataProvider } from '@/components/SiteDataContext';
 import { getSiteSettings, getNavItems } from '@/lib/data';
 
@@ -35,6 +36,7 @@ export default async function RootLayout({ children }) {
           <ClosureBanner />
           {children}
           <Footer />
+          <PromotionalPopup />
         </SiteDataProvider>
         <CmsBridge />
       </body>

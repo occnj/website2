@@ -540,11 +540,36 @@ navigation: () => safe(async function () {
 // clearly named admin destination; navigation remains available separately.
 settings: () => safe(async function () {
   if (!DB.canManageUsers()) return needSetup('Only administrators can manage form delivery settings.');
-  const s = await DB.getFormSettings();
+  const [s, site] = await Promise.all([DB.getFormSettings(), DB.getSettings()]);
   return '<div class="panel"><div class="panel-head"><div><h3>Form email delivery</h3><div class="sub">Admin-only · controls where confidential submissions are delivered</div></div>' +
     '<button class="btn btn-sm btn-primary" onclick="saveFormRecipients()">Save</button></div><div class="panel-body">' +
     '<div class="form-group"><label class="form-label">Prayer request recipients</label><textarea class="form-textarea" id="form-prayer-recipients" placeholder="pastor@example.com, prayer@example.com">' + esc(s.prayer_recipients || '') + '</textarea><div class="sub" style="margin-top:4px">Comma-, space-, or line-separated addresses</div></div>' +
     '<div class="form-group"><label class="form-label">Regular form recipients</label><textarea class="form-textarea" id="form-regular-recipients" placeholder="office@example.com">' + esc(s.form_recipients || '') + '</textarea><div class="sub" style="margin-top:4px">Contact, baptism, dedication, and other non-prayer forms</div></div>' +
+    '</div></div>' +
+    '<div class="panel" style="margin-top:16px"><div class="panel-head"><div><h3>Website promotional popup</h3><div class="sub">Shown on the public website only · visitors can dismiss it · hidden for the rest of their session</div></div>' +
+    '<button class="btn btn-sm btn-primary" onclick="savePopupSettings()">Save Popup</button></div><div class="panel-body">' +
+    '<div class="form-group" style="flex-direction:row;align-items:center;gap:10px">' +
+    '<label class="toggle"><input type="checkbox" id="popup-enabled"' + (site.popup_enabled ? ' checked' : '') + '><span class="track"></span></label>' +
+    '<div><label class="form-label" for="popup-enabled">Show popup on the public website</label><div class="sub">The popup never appears inside Admin.</div></div></div>' +
+    '<div class="form-grid-2">' +
+    '<div class="form-group"><label class="form-label">Small label / eyebrow</label><input class="form-input" id="popup-eyebrow" placeholder="You’re invited" value="' + esc(site.popup_eyebrow || '') + '"></div>' +
+    '<div class="form-group"><label class="form-label">Delay before opening</label><input class="form-input" id="popup-delay" type="number" min="0" max="30" value="' + esc(site.popup_delay_seconds == null ? 2 : site.popup_delay_seconds) + '"><div class="sub" style="margin-top:4px">Seconds, from 0 to 30</div></div>' +
+    '</div>' +
+    '<div class="form-group"><label class="form-label">Headline</label><input class="form-input" id="popup-title" placeholder="Ready to take your next step?" value="' + esc(site.popup_title || '') + '"></div>' +
+    '<div class="form-group"><label class="form-label">Information / message</label><textarea class="form-textarea" id="popup-description" placeholder="Add the details visitors should know…">' + esc(site.popup_description || '') + '</textarea></div>' +
+    '<div class="form-group"><label class="form-label">Image</label>' +
+    '<div class="img-slot popup-image-slot" onclick="popupImageUpload()" id="popup-image-slot">' +
+    (site.popup_image_url ? '<img class="fill" src="' + esc(site.popup_image_url) + '" alt=""><div class="replace-hint">Click to replace</div>' : '<span>Click to upload popup image</span>') +
+    '</div><input type="hidden" id="popup-image" value="' + esc(site.popup_image_url || '') + '">' +
+    '<button type="button" class="btn btn-sm btn-outline" style="align-self:flex-start;margin-top:7px" onclick="clearPopupImage()">Remove image</button></div>' +
+    '<div class="form-grid-2">' +
+    '<div class="form-group"><label class="form-label">Primary button text</label><input class="form-input" id="popup-primary-label" placeholder="Learn More" value="' + esc(site.popup_primary_label || '') + '"></div>' +
+    '<div class="form-group"><label class="form-label">Primary button link</label><input class="form-input" id="popup-primary-url" placeholder="/plan-your-visit or https://…" value="' + esc(site.popup_primary_url || '') + '"></div>' +
+    '<div class="form-group"><label class="form-label">Secondary button text</label><input class="form-input" id="popup-secondary-label" placeholder="Optional" value="' + esc(site.popup_secondary_label || '') + '"></div>' +
+    '<div class="form-group"><label class="form-label">Secondary button link</label><input class="form-input" id="popup-secondary-url" placeholder="Optional" value="' + esc(site.popup_secondary_url || '') + '"></div>' +
+    '<div class="form-group"><label class="form-label">Accent color</label><input class="form-input" id="popup-accent" type="color" value="' + esc(/^#[0-9a-f]{6}$/i.test(site.popup_accent_color || '') ? site.popup_accent_color : '#00A4CC') + '"></div>' +
+    '</div>' +
+    '<div class="sub" style="margin-top:4px">Run <code>db/migrations-2026-08-promotional-popup.sql</code> once in Supabase before the first save.</div>' +
     '</div></div>';
 }),
 
@@ -573,7 +598,7 @@ faq: () => safe(async function () {
 
 // ---------------- MEDIA ----------------
 media: () => safe(async function () {
-  const folders = ['heroes', 'team', 'events', 'library'];
+  const folders = ['heroes', 'team', 'events', 'library', 'popups'];
   const all = [];
   for (const f of folders) {
     const { data } = await DB.client.storage.from('media').list(f, { limit: 60, sortBy: { column: 'created_at', order: 'desc' } });

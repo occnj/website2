@@ -348,6 +348,55 @@ async function saveFormRecipients() {
   } catch (e) { fail(e); }
 }
 
+async function popupImageUpload() {
+  try {
+    const slot = document.getElementById('popup-image-slot');
+    if (slot) slot.innerHTML = '<span>Uploading…</span>';
+    const url = await DB.pickAndUpload('popups');
+    if (!url) {
+      if (slot) slot.innerHTML = '<span>Click to upload popup image</span>';
+      return;
+    }
+    document.getElementById('popup-image').value = url;
+    if (slot) slot.innerHTML = '<img class="fill" src="' + esc(url) + '" alt=""><div class="replace-hint">Click to replace</div>';
+    toast('Popup image uploaded');
+  } catch (e) { fail(e); }
+}
+
+function clearPopupImage() {
+  document.getElementById('popup-image').value = '';
+  document.getElementById('popup-image-slot').innerHTML = '<span>Click to upload popup image</span>';
+}
+
+async function savePopupSettings() {
+  try {
+    var enabled = document.getElementById('popup-enabled').checked;
+    var title = document.getElementById('popup-title').value.trim();
+    var primaryLabel = document.getElementById('popup-primary-label').value.trim();
+    var primaryUrl = document.getElementById('popup-primary-url').value.trim();
+    var secondaryLabel = document.getElementById('popup-secondary-label').value.trim();
+    var secondaryUrl = document.getElementById('popup-secondary-url').value.trim();
+    if (enabled && !title) throw new Error('Add a popup headline before enabling it.');
+    if ((primaryLabel && !primaryUrl) || (!primaryLabel && primaryUrl)) throw new Error('Primary button text and link must both be filled in.');
+    if ((secondaryLabel && !secondaryUrl) || (!secondaryLabel && secondaryUrl)) throw new Error('Secondary button text and link must both be filled in.');
+
+    await DB.saveSettings({
+      popup_enabled: enabled,
+      popup_eyebrow: document.getElementById('popup-eyebrow').value.trim(),
+      popup_title: title,
+      popup_description: document.getElementById('popup-description').value.trim(),
+      popup_image_url: document.getElementById('popup-image').value,
+      popup_primary_label: primaryLabel,
+      popup_primary_url: primaryUrl,
+      popup_secondary_label: secondaryLabel,
+      popup_secondary_url: secondaryUrl,
+      popup_accent_color: document.getElementById('popup-accent').value,
+      popup_delay_seconds: Math.min(30, Math.max(0, Number(document.getElementById('popup-delay').value) || 0)),
+    }, 'settings.promotional_popup');
+    toast('Popup settings saved');
+  } catch (e) { fail(e); }
+}
+
 // ---------- FAQ ----------
 const FAQ_FIELDS = [
   { key: 'question', label: 'Question' },

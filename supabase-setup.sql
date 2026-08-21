@@ -34,7 +34,18 @@ create table site_settings (
   podcast_spotify_url text default '',
   calendar_url text default '',
   facebook_page_id text default '',
-  live_default_tab text default 'twitch' check (live_default_tab in ('twitch','youtube','facebook'))
+  live_default_tab text default 'twitch' check (live_default_tab in ('twitch','youtube','facebook')),
+  popup_enabled boolean default false,
+  popup_eyebrow text default '',
+  popup_title text default '',
+  popup_description text default '',
+  popup_image_url text default '',
+  popup_primary_label text default '',
+  popup_primary_url text default '',
+  popup_secondary_label text default '',
+  popup_secondary_url text default '',
+  popup_accent_color text default '#00A4CC',
+  popup_delay_seconds integer default 2
 );
 insert into site_settings (id, tagline, service_time, email)
 values (1, 'Know God. Find Hope. Make a Difference.', 'Sundays at 10:00 AM', 'info@oasisnj.net');
