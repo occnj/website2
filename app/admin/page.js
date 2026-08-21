@@ -9,6 +9,7 @@ import { SUPABASE_ANON_KEY, SUPABASE_URL } from '@/lib/supabase';
 const TITLES = {
   dashboard: 'Dashboard', pages: 'Pages', sermons: 'Sermons', events: 'Events',
   team: 'Leadership Team', ministries: 'Ministries & Posts', give: 'External Giving Link',
+  faq: 'FAQ — Plan Your Visit',
   navigation: 'Navigation & Site Info', settings: 'Settings',
   media: 'Media Library', users: 'Users & Roles',
 };
@@ -85,6 +86,7 @@ export default function AdminPage() {
             <button className="side-link" data-view="pages" data-role="content">Pages</button>
             <button className="side-link" data-view="sermons" data-role="content">Sermons</button>
             <button className="side-link" data-view="events">Events</button>
+            <button className="side-link" data-view="faq" data-role="content">FAQ</button>
             <button className="side-link" data-view="team" data-role="content">Team</button>
             <button className="side-link" data-view="ministries" data-role="content" style={{ display: 'none' }} data-show-if="not-events-only">Ministries</button>
             <button className="side-link" data-view="give" data-role="content">External Giving Link</button>

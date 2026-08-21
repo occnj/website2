@@ -58,14 +58,20 @@ export default function Header() {
   // (Ministries, About, etc.) get white floating nav; the solid bar returns on scroll.
   const floating = !scrolled;
 
+  const podcastUrl = settings && settings.podcast_nav_url ? settings.podcast_nav_url.trim() : '';
+
   const links = navItems && navItems.length
     ? [
         ...navItems
           .filter((n) => !REMOVED_NAV_LABELS.has((n.label || '').trim().toLowerCase()))
           .map((n) => ({ label: n.label, href: normalizeHref(n.href) })),
         { label: 'Prayer Request', href: '/prayer' },
+        ...(podcastUrl ? [{ label: 'Podcast', href: podcastUrl, external: true }] : []),
       ]
-    : STATIC_LINKS;
+    : [
+        ...STATIC_LINKS,
+        ...(podcastUrl ? [{ label: 'Podcast', href: podcastUrl, external: true }] : []),
+      ];
 
   return (
     <>
@@ -77,9 +83,10 @@ export default function Header() {
           <nav className="primary-nav">
             {links.map((link, i) => (
               <div className="nav-item" key={link.label}>
-                <Link href={link.href} className={'nav-link' + (pathname === link.href ? ' active' : '')}>
-                  {link.label}
-                </Link>
+                {link.external
+                  ? <a href={link.href} className="nav-link" target="_blank" rel="noopener noreferrer">{link.label}</a>
+                  : <Link href={link.href} className={'nav-link' + (pathname === link.href ? ' active' : '')}>{link.label}</Link>
+                }
               </div>
             ))}
           </nav>
@@ -100,9 +107,9 @@ export default function Header() {
       </header>
       <nav id="mobile-navigation" aria-label="Mobile navigation" className={'mobile-nav' + (mobileOpen ? ' open' : '')}>
         {links.map((link) => (
-          <Link href={link.href} key={link.label} className={pathname === link.href ? 'active' : ''} onClick={() => setMobileOpen(false)}>
-            {link.label}
-          </Link>
+          link.external
+            ? <a href={link.href} key={link.label} target="_blank" rel="noopener noreferrer" onClick={() => setMobileOpen(false)}>{link.label}</a>
+            : <Link href={link.href} key={link.label} className={pathname === link.href ? 'active' : ''} onClick={() => setMobileOpen(false)}>{link.label}</Link>
         ))}
         <div className="mobile-cta flex" style={{ gap: 12, flexWrap: 'wrap' }}>
           <SocialLinks settings={settings} className="mobile-social" />

@@ -592,6 +592,18 @@ navigation: () => safe(async function () {
     '<div class="form-group"><label class="form-label">Phone</label><input class="form-input" id="si-phone" value="' + esc(s.phone || '') + '"></div>' +
     '<div class="form-group"><label class="form-label">Email</label><input class="form-input" id="si-email" value="' + esc(s.email || '') + '"></div>' +
     '<div class="form-group"><label class="form-label">Service time</label><input class="form-input" id="si-service" value="' + esc(s.service_time || '') + '"></div>' +
+    '<div class="form-group" style="grid-column:1/-1"><label class="form-label">Podcast URL <span class="form-hint">— shown as "Podcast" in nav after Prayer Request; leave empty to hide</span></label><input class="form-input" id="si-podcast-nav" placeholder="https://podcasts.apple.com/…" value="' + esc(s.podcast_nav_url || '') + '"></div>' +
+    '</div>' +
+    '<div class="form-group" style="grid-column:1/-1"><label class="form-label" style="color:var(--red)">⚠️ Closure / Alert Notice <span class="form-hint">— shown as a red banner on the Contact page when not empty (e.g. "Church is closed this Sunday due to severe weather.")</span></label><input class="form-input" id="si-closure" placeholder="Leave empty to hide the banner" value="' + esc(s.closure_notice || '') + '"></div>' +
+    '<div class="form-group"><label class="form-label">Office hours <span class="form-hint">— one row per line, day and hours separated by a pipe: <code>Tuesday – Thursday | 10 AM – 4 PM</code></span></label>' +
+    '<textarea class="form-textarea" id="si-office-hours" style="font-family:monospace;font-size:.82rem;min-height:120px">' +
+    esc(((s.office_hours && Array.isArray(s.office_hours)) ? s.office_hours : [
+      {day:'Tuesday – Thursday',hours:'10 AM – 4 PM'},
+      {day:'Friday',hours:'10 AM – 2 PM'},
+      {day:'Sunday',hours:'9 AM – 12 PM'},
+      {day:'Monday / Saturday',hours:'Closed'},
+    ]).map(function(r){return r.day + ' | ' + r.hours;}).join('\n')) +
+    '</textarea></div>' +
     '<div style="grid-column:1/-1;padding:12px 0 2px"><h4 style="margin:0 0 4px">Social icons</h4><div class="sub">Enter the complete https:// URL. Facebook and Instagram icons appear in the desktop navigation, mobile menu, and footer after you save.</div></div>' +
     '<div class="form-group"><label class="form-label">Instagram URL</label><input class="form-input" id="si-instagram" placeholder="https://instagram.com/your-page" value="' + esc(s.instagram || '') + '"></div>' +
     '<div class="form-group"><label class="form-label">Facebook URL</label><input class="form-input" id="si-facebook" placeholder="https://facebook.com/your-page" value="' + esc(s.facebook || '') + '"></div>' +
@@ -629,6 +641,29 @@ settings: () => safe(async function () {
     '<button class="btn btn-sm btn-primary" onclick="saveFormRecipients()">Save</button></div><div class="panel-body">' +
     '<div class="form-group"><label class="form-label">Prayer request recipients</label><textarea class="form-textarea" id="form-prayer-recipients" placeholder="pastor@example.com, prayer@example.com">' + esc(s.prayer_recipients || '') + '</textarea><div class="sub" style="margin-top:4px">Comma-, space-, or line-separated addresses</div></div>' +
     '<div class="form-group"><label class="form-label">Regular form recipients</label><textarea class="form-textarea" id="form-regular-recipients" placeholder="office@example.com">' + esc(s.form_recipients || '') + '</textarea><div class="sub" style="margin-top:4px">Contact, baptism, dedication, and other non-prayer forms</div></div>' +
+    '</div></div>';
+}),
+
+// ---------------- FAQ ----------------
+faq: () => safe(async function () {
+  const items = await DB.list('faqs', { order: [['sort_order', 'asc']] });
+  return '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">' +
+    '<div><h2 style="margin:0">FAQs</h2><div class="sub">Shown on the Plan Your Visit page. Drag to reorder using ↑↓.</div></div>' +
+    '<button class="btn btn-primary" onclick="addFaq()">+ Add FAQ</button></div>' +
+    '<div class="panel"><div class="data-list">' +
+    (items.length ? items.map(function(f, i) {
+      return '<div class="data-row" style="' + (f.published ? '' : 'opacity:.5') + '">' +
+        '<div style="display:flex;flex-direction:column;flex-shrink:0">' +
+        '<button class="icon-btn" style="padding:2px" ' + (i === 0 ? 'disabled' : '') + ' onclick="moveRow(\'faqs\',\'' + f.id + '\',-1,\'faq\')">' + ICONS.up + '</button>' +
+        '<button class="icon-btn" style="padding:2px" ' + (i === items.length - 1 ? 'disabled' : '') + ' onclick="moveRow(\'faqs\',\'' + f.id + '\',1,\'faq\')">' + ICONS.down + '</button></div>' +
+        '<div class="row-main"><div class="row-title">' + esc(f.question) + '</div>' +
+        '<div class="row-sub" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:480px">' + esc(f.answer) + '</div></div>' +
+        '<span class="tag ' + (f.published ? 'tag-green' : 'tag-gray') + '" style="flex-shrink:0">' + (f.published ? 'Visible' : 'Hidden') + '</span>' +
+        '<div class="row-actions">' +
+        '<button class="icon-btn" title="Edit" onclick="editFaq(\'' + f.id + '\')">' + ICONS.edit + '</button>' +
+        '<button class="icon-btn" title="Delete" onclick="confirmAction(\'Delete this FAQ?\', function(){delFaq(\'' + f.id + '\')})">' + ICONS.trash + '</button>' +
+        '</div></div>';
+    }).join('') : '<div class="data-row"><div class="row-main" style="color:var(--gray-1)">No FAQs yet — add one above. Remember to run the migration first if the table doesn\'t exist.</div></div>') +
     '</div></div>';
 }),
 

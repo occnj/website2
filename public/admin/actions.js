@@ -307,12 +307,21 @@ async function toggleNav(id, visible) {
 }
 async function saveSiteInfo() {
   try {
+    // Parse pipe-separated office hours textarea into JSON array.
+    var ohRaw = document.getElementById('si-office-hours').value.trim();
+    var officeHours = ohRaw.split('\n').map(function(line) {
+      var parts = line.split('|');
+      return { day: (parts[0] || '').trim(), hours: (parts[1] || '').trim() };
+    }).filter(function(r) { return r.day; });
     await DB.saveSettings({
       tagline: document.getElementById('si-tagline').value,
       address: document.getElementById('si-address').value,
       phone: document.getElementById('si-phone').value,
       email: document.getElementById('si-email').value,
       service_time: document.getElementById('si-service').value,
+      podcast_nav_url: document.getElementById('si-podcast-nav').value,
+      closure_notice: document.getElementById('si-closure').value,
+      office_hours: officeHours,
       instagram: document.getElementById('si-instagram').value,
       facebook: document.getElementById('si-facebook').value,
       youtube: document.getElementById('si-youtube').value,
@@ -337,6 +346,34 @@ async function saveFormRecipients() {
     });
     toast('Form recipients saved');
   } catch (e) { fail(e); }
+}
+
+// ---------- FAQ ----------
+const FAQ_FIELDS = [
+  { key: 'question', label: 'Question' },
+  { key: 'answer', label: 'Answer', type: 'textarea' },
+  { key: 'published', label: 'Published', type: 'check', default: true, half: true },
+];
+function faqRowFrom(out, id) {
+  if (!out.question) throw new Error('Question is required');
+  return { id: id || undefined, question: out.question, answer: out.answer || '', published: out.published };
+}
+function addFaq() {
+  openEditor('Add FAQ', FAQ_FIELDS, {}, async function(out) {
+    await DB.save('faqs', faqRowFrom(out), 'faq.create', out.question);
+    toast('FAQ added'); go('faq');
+  });
+}
+async function editFaq(id) {
+  const f = (await DB.list('faqs', { eq: { id: id } }))[0];
+  openEditor('Edit FAQ', FAQ_FIELDS, f, async function(out) {
+    await DB.save('faqs', faqRowFrom(out, id), 'faq.update', out.question);
+    toast('Saved'); go('faq');
+  });
+}
+async function delFaq(id) {
+  try { await DB.del('faqs', id, 'faq.delete', id); toast('FAQ removed'); go('faq'); }
+  catch(e) { fail(e); }
 }
 
 // ---------- MEDIA ----------

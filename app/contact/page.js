@@ -17,8 +17,30 @@ export default async function ContactPage() {
     ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(settings.address)}`
     : null;
 
+  // Office hours — from DB (jsonb array) or fallback to defaults.
+  const officeHours = (settings && Array.isArray(settings.office_hours) && settings.office_hours.length)
+    ? settings.office_hours
+    : [
+        { day: 'Tuesday – Thursday', hours: '10 AM – 4 PM' },
+        { day: 'Friday',             hours: '10 AM – 2 PM' },
+        { day: 'Sunday',             hours: '9 AM – 12 PM' },
+        { day: 'Monday / Saturday',  hours: 'Closed' },
+      ];
+
+  const closureNotice = settings && settings.closure_notice ? settings.closure_notice.trim() : '';
+
   return (
     <>
+      {closureNotice ? (
+        <div style={{
+          background: '#7B2D2D', color: '#fff',
+          padding: '14px 24px', textAlign: 'center',
+          fontSize: '.92rem', fontWeight: 600, lineHeight: 1.5,
+          position: 'relative', zIndex: 200,
+        }}>
+          ⚠️ {closureNotice}
+        </div>
+      ) : null}
       <PageHero
         eyebrow="We'd Love to Hear From You"
         title={(hero && hero.title) || 'Get in Touch'}
@@ -60,10 +82,12 @@ export default async function ContactPage() {
 
                 <div className="office-hours">
                   <h4>Office Hours</h4>
-                  <div className="office-row"><span>Tuesday – Thursday</span><span>10 AM – 4 PM</span></div>
-                  <div className="office-row"><span>Friday</span><span>10 AM – 2 PM</span></div>
-                  <div className="office-row"><span>Sunday</span><span>9 AM – 12 PM</span></div>
-                  <div className="office-row"><span>Monday / Saturday</span><span>Closed</span></div>
+                  {officeHours.map((row, i) => (
+                    <div className="office-row" key={i}>
+                      <span>{row.day}</span>
+                      <span>{row.hours}</span>
+                    </div>
+                  ))}
                 </div>
 
                 <SocialLinks settings={settings} className="contact-social" />

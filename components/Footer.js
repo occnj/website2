@@ -55,7 +55,6 @@ export default function Footer() {
         </div>
         <div className="footer-bottom">
           <span>&copy; 2026 Oasis Christian Centre, Rahway, NJ. All rights reserved.</span>
-          <span>Built with care for the community.</span>
         </div>
       </div>
     </footer>

@@ -2,7 +2,7 @@ import Link from 'next/link';
 import './plan-your-visit.css';
 import PageHero from '@/components/PageHero';
 import FaqAccordion from '@/components/FaqAccordion';
-import { getPageHero, getSiteSettings } from '@/lib/data';
+import { getPageHero, getSiteSettings, getFaqs } from '@/lib/data';
 
 export const metadata = {
   title: 'Plan Your Visit — Oasis Christian Centre',
@@ -10,17 +10,8 @@ export const metadata = {
 };
 export const dynamic = 'force-dynamic';
 
-const VISIT_FAQS = [
-  { q: 'What should I wear?', a: "Come as you are, seriously. You'll see everything from jeans to business casual. We care far more about you being here than what you're wearing." },
-  { q: 'Is there parking?', a: 'Yes — free parking is available in our lot directly adjacent to the building. Street parking is also available on nearby roads. Look for our signage to guide you in.' },
-  { q: 'How long is the service?', a: 'Our Sunday services typically run about 75 minutes. You can expect worship music, announcements, and a message. We try to end on time so you can plan your day.' },
-  { q: 'Do I need to give money?', a: "Not at all. Giving is a personal act of worship for our members. As a first-time guest, please don't feel any pressure — just enjoy the service." },
-  { q: 'Is Oasis welcoming to everyone?', a: 'Absolutely. No matter your background, story, or season of life — you are welcome at Oasis. We believe every person matters and everyone belongs.' },
-  { q: 'What if I have more questions?', a: <>We&rsquo;d love to hear from you. Reach out via our <Link href="/contact" style={{ color: 'var(--blue)' }}>contact page</Link> or just show up Sunday and ask one of our welcome team members in person — they&rsquo;re the ones with the big smiles.</> },
-];
-
 export default async function PlanYourVisitPage() {
-  const [hero, settings] = await Promise.all([getPageHero('plan-your-visit'), getSiteSettings()]);
+  const [hero, settings, faqs] = await Promise.all([getPageHero('plan-your-visit'), getSiteSettings(), getFaqs()]);
   const address = settings && settings.address;
   const directionsUrl = address ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}` : null;
 
@@ -133,7 +124,7 @@ export default async function PlanYourVisitPage() {
         <div className="container-narrow">
           <p className="t-eyebrow text-center">FAQ</p>
           <h2 className="t-h2 text-center mt-2" style={{ marginBottom: 'var(--sp-5)' }}>Common Questions</h2>
-          <FaqAccordion items={VISIT_FAQS} />
+          <FaqAccordion items={faqs.map(f => ({ q: f.question, a: f.answer }))} />
         </div>
       </section>
 
