@@ -201,6 +201,7 @@
 .ministry-card-gradient {
   position: absolute;
   inset: 0;
+  /* fallback — overridden per-card by inline style using the ministry's overlay_color */
   background: linear-gradient(
     to top,
     rgba(10, 14, 20, .88) 0%,

@@ -43,6 +43,7 @@ export default async function MinistryPage({ params }) {
         title={ministry.name}
         description={ministry.description || ''}
         image={ministry.image_url || null}
+        overlayColor={ministry.overlay_color || null}
       />
 
       <section className="section">

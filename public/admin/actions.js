@@ -175,10 +175,10 @@ async function delTeamSection(id) {
 const MINISTRY_FIELDS = [
   { key: 'name', label: 'Ministry name', half: true, placeholder: 'e.g. WOW — Women of Worth' },
   { key: 'slug', label: 'URL slug', half: true, placeholder: 'e.g. wow-women', hint: 'leave blank to auto-generate; changing it later breaks existing links' },
-  { key: 'color', label: 'Accent color', half: true, placeholder: '#4A90E2 or var(--blue)', hint: 'hex or CSS var' },
-  { key: 'image_url', label: 'Hero image', type: 'image', folder: 'library' },
-  { key: 'description', label: 'Description', type: 'textarea' },
-  { key: 'published', label: 'Published (visible on About page)', type: 'check', default: true, half: true },
+  { key: 'color', label: 'Accent color', half: true, placeholder: '#4A90E2', hint: 'used for links and highlights' },
+  { key: 'overlay_color', label: 'Card/hero overlay color', half: true, placeholder: '#1A2835', hint: 'tint over the background image (hex)' },
+  { key: 'image_url', label: 'Background image', type: 'image', folder: 'library', hint: 'used on the card and the ministry page hero' },
+  { key: 'published', label: 'Published', type: 'check', default: true, half: true },
 ];
 function slugify(s) {
   return String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
@@ -186,6 +186,7 @@ function slugify(s) {
 function ministryRowFrom(out, id) {
   if (!out.name) throw new Error('Ministry name is required');
   const row = { id: id || undefined, name: out.name, color: out.color || 'var(--blue)',
+    overlay_color: out.overlay_color || null,
     description: out.description, image_url: out.image_url || null, published: out.published };
   // Slug is only set on create (or normalized if the admin typed one). On edit
   // we leave the existing slug untouched unless the admin explicitly changed it,
