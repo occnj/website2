@@ -159,7 +159,7 @@ function openEditor(title, fields, row, onSave) {
         try { block = (document.queryCommandValue('formatBlock') || '').toLowerCase(); } catch (_) {}
         if (block && block !== 'p' && block !== 'div' && block !== '') return;
         e.preventDefault();
-        document.execCommand('formatBlock', false, 'p');
+        document.execCommand('formatBlock', false, '<p>');
         // Insert a real line break that splits into two paragraphs.
         document.execCommand('insertParagraph', false, null);
       });
@@ -177,7 +177,7 @@ function openEditor(title, fields, row, onSave) {
         var u = prompt('Link URL:');
         if (u) document.execCommand('createLink', false, u);
       } else if (cmd.indexOf('formatBlock:') === 0) {
-        document.execCommand('formatBlock', false, cmd.split(':')[1]);
+        document.execCommand('formatBlock', false, '<' + cmd.split(':')[1] + '>');
       } else {
         document.execCommand(cmd, false, null);
       }
