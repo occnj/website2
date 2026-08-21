@@ -28,7 +28,7 @@
     "@eslint/eslintrc": "^3.3.6",
     "eslint": "^9.39.5",
     "eslint-config-next": "^15.5.18",
-    "jsdom": "^30.0.1",
+    "jsdom": "^26.1.0",
     "vitest": "^4.1.11"
   }
 }
