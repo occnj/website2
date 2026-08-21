@@ -31,16 +31,6 @@ export default async function ContactPage() {
 
   return (
     <>
-      {closureNotice ? (
-        <div style={{
-          background: '#7B2D2D', color: '#fff',
-          padding: '14px 24px', textAlign: 'center',
-          fontSize: '.92rem', fontWeight: 600, lineHeight: 1.5,
-          position: 'relative', zIndex: 200,
-        }}>
-          ⚠️ {closureNotice}
-        </div>
-      ) : null}
       <PageHero
         eyebrow="We'd Love to Hear From You"
         title={(hero && hero.title) || 'Get in Touch'}

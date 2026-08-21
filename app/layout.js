@@ -2,6 +2,7 @@ import './globals.css';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import CmsBridge from '@/components/CmsBridge';
+import ClosureBanner from '@/components/ClosureBanner';
 import { SiteDataProvider } from '@/components/SiteDataContext';
 import { getSiteSettings, getNavItems } from '@/lib/data';
 
@@ -31,6 +32,7 @@ export default async function RootLayout({ children }) {
       <body>
         <SiteDataProvider settings={settings} navItems={navItems}>
           <Header />
+          <ClosureBanner />
           {children}
           <Footer />
         </SiteDataProvider>

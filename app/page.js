@@ -57,10 +57,6 @@ export default async function HomePage() {
             </div>
           </div>
         </div>
-        <div className="hero-scroll">
-          <div className="scroll-line"></div>
-          <span>Scroll</span>
-        </div>
       </section>
 
       {/* ===== SERVICE INFO STRIP ===== */}
