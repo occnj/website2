@@ -426,11 +426,21 @@ async function editPage(pageId) {
         const fid = 'pb-' + bi + '-' + k;
         if (/image|photo/.test(k)) {
           const label = (b.block_key === 'hero' && k === 'image') ? 'Hero background image' : esc(k);
-          const hint = (b.block_key === 'hero' && k === 'image') ? ' <span class="form-hint">— shown behind the color overlay</span>' : '';
+          const hint = (b.block_key === 'hero' && k === 'image') ? ' <span class="form-hint">— fallback / poster when no video is set</span>' : '';
           return '<div class="form-group"><label class="form-label">' + label + hint + '</label>' +
             '<div class="img-slot" style="aspect-ratio:21/9" id="slot-' + fid + '" onclick="pageImgUpload(\'' + fid + '\')">' +
             (v ? '<img class="fill" src="' + esc(v) + '" alt=""><div class="replace-hint">Click to replace</div>' : '<span>Click to upload image</span>') +
             '</div><input type="hidden" id="' + fid + '" value="' + esc(v) + '"></div>';
+        }
+        if (k === 'video') {
+          return '<div class="form-group"><label class="form-label">Hero background video' +
+            ' <span class="form-hint">— MP4 or WebM, loops silently. Leave empty to use image only.</span></label>' +
+            '<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">' +
+            (v ? '<video src="' + esc(v) + '" style="height:60px;border-radius:4px;background:#000" muted playsinline></video>' : '') +
+            '<button type="button" class="btn btn-sm btn-outline" onclick="pageVideoUpload(\'' + fid + '\')">&#8679; Upload video</button>' +
+            (v ? '<button type="button" class="btn btn-sm btn-outline" style="color:var(--red)" onclick="document.getElementById(\'' + fid + '\').value=\'\';this.closest(\'.form-group\').querySelector(\'video\')&&this.closest(\'.form-group\').querySelector(\'video\').remove();this.remove()">Remove</button>' : '') +
+            '</div>' +
+            '<input type="hidden" id="' + fid + '" value="' + esc(v) + '"></div>';
         }
         const long = String(v).length > 70;
         return '<div class="form-group"><label class="form-label" style="text-transform:capitalize">' + esc(k) + '</label>' +
@@ -465,6 +475,36 @@ async function pageImgUpload(fid) {
     document.getElementById(fid).value = url;
     document.getElementById('slot-' + fid).innerHTML = '<img class="fill" src="' + esc(url) + '" alt=""><div class="replace-hint">Click to replace</div>';
     toast('Image uploaded');
+  } catch (e) { fail(e); }
+}
+async function pageVideoUpload(fid) {
+  try {
+    const inp = document.createElement('input');
+    inp.type = 'file';
+    inp.accept = 'video/mp4,video/webm,video/*';
+    inp.onchange = async function () {
+      const file = inp.files[0];
+      if (!file) return;
+      toast('Uploading video — this may take a moment…');
+      // Upload raw (no image compression) directly to Supabase storage.
+      const ext = file.name.split('.').pop().toLowerCase();
+      const name = 'hero-' + Date.now() + '.' + ext;
+      const { data, error } = await DB.client.storage.from('media').upload('heroes/' + name, file, { upsert: true, contentType: file.type });
+      if (error) { fail(error); return; }
+      const { data: pub } = DB.client.storage.from('media').getPublicUrl('heroes/' + name);
+      const url = pub.publicUrl;
+      document.getElementById(fid).value = url;
+      // Update the preview in place.
+      const fg = document.getElementById(fid).closest('.form-group');
+      const existing = fg.querySelector('video');
+      if (existing) { existing.src = url; } else {
+        const vEl = document.createElement('video');
+        vEl.src = url; vEl.style.cssText = 'height:60px;border-radius:4px;background:#000';
+        vEl.muted = true; fg.querySelector('div').prepend(vEl);
+      }
+      toast('Video uploaded ✓');
+    };
+    inp.click();
   } catch (e) { fail(e); }
 }
 async function savePage() {

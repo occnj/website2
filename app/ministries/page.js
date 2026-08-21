@@ -38,27 +38,25 @@ export default async function MinistriesPage() {
               Ministry pages coming soon — check back shortly.
             </p>
           ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 'var(--sp-4)' }}>
+            <div className="ministry-cards-grid">
               {ministries.map((m) => (
                 <Link
                   key={m.id}
                   href={`/ministries/${m.slug}`}
-                  className="ministry-card"
-                  style={{ borderTop: `4px solid ${m.color || 'var(--blue)'}`, textDecoration: 'none', color: 'inherit', display: 'flex', flexDirection: 'column', gap: 'var(--sp-2)', transition: 'box-shadow .18s, transform .18s' }}
+                  className="ministry-card-overlay"
+                  style={!m.image_url ? { background: m.color || 'var(--charcoal)' } : undefined}
                 >
                   {m.image_url && (
-                    <div style={{ margin: 'calc(var(--sp-4) * -1) calc(var(--sp-4) * -1) 0', aspectRatio: '16/7', overflow: 'hidden' }}>
-                      <img src={m.image_url} alt={m.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                    </div>
+                    <img className="ministry-card-bg" src={m.image_url} alt={m.name} />
                   )}
-                  <div className="ministry-card-top" style={{ marginTop: m.image_url ? 'var(--sp-3)' : 0 }}>
-                    <span className="ministry-card-dot" style={{ background: m.color || 'var(--blue)' }}></span>
-                    <span className="ministry-card-name">{m.name}</span>
+                  <div className="ministry-card-gradient" />
+                  <div className="ministry-card-body">
+                    <p className="ministry-card-name">{m.name}</p>
+                    {m.description && (
+                      <p className="ministry-card-desc">{m.description}</p>
+                    )}
+                    <span className="ministry-card-cta">Blog &amp; Updates →</span>
                   </div>
-                  {m.description && <p className="ministry-card-desc">{m.description}</p>}
-                  <span style={{ marginTop: 'auto', fontSize: '.8rem', fontWeight: 700, color: m.color || 'var(--blue)' }}>
-                    Blog & Updates →
-                  </span>
                 </Link>
               ))}
             </div>

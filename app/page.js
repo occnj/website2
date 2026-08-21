@@ -16,6 +16,7 @@ export default async function HomePage() {
   ]);
   const sermons = ytVideos.length ? ytVideos : dbSermons;
   const heroImage = (hero && hero.image) || asset('/images/hero-placeholder.svg');
+  const heroVideo = (hero && hero.video) || null;
   const heroTitle = (hero && hero.title) || 'You were made to belong here.';
   const heroIntro = (hero && hero.intro) ||
     "Oasis Christian Centre is a warm, Spirit-led community where everyone is welcome. Come as you are — no matter where you've been.";
@@ -31,7 +32,19 @@ export default async function HomePage() {
         <div className="hero-bg-pattern"></div>
         <div className="hero-photo-area">
           <div className="hero-photo-fade"></div>
-          <img src={heroImage} alt="Oasis Christian Centre congregation" />
+          {heroVideo ? (
+            <video
+              className="hero-video"
+              src={heroVideo}
+              autoPlay
+              muted
+              loop
+              playsInline
+              poster={heroImage}
+            />
+          ) : (
+            <img src={heroImage} alt="Oasis Christian Centre congregation" />
+          )}
         </div>
         <div className="hero-content-wrap">
           <div className="container">
