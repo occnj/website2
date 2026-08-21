@@ -282,6 +282,14 @@
   .involve-title { font-size: 1.3rem; }
   .involve-desc { display: none; }
   .involve-left { gap: var(--sp-3); }
+  /* On mobile the hero content sits much closer to the nav — no giant gap */
+  .hero-home { align-items: center; min-height: 100svh; }
+  .hero-content-wrap {
+    padding-top: calc(var(--header-h) + var(--sp-4));
+    padding-bottom: var(--sp-6);
+  }
+  .hero-headline { font-size: clamp(2.2rem, 9vw, 3.2rem); }
+  .hero-sub { font-size: .97rem; }
 }
 @media (max-width: 600px) {
   .steps-grid { grid-template-columns: 1fr; }
