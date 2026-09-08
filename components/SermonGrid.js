@@ -26,7 +26,7 @@ export default function SermonGrid({ sermons }) {
       <div className="series-tabs" aria-label="Filter messages by series">
         <button type="button" className={'series-tab' + (active === 'all' ? ' active' : '')} aria-pressed={active === 'all'} onClick={() => setActive('all')}>All</button>
         {series.map((s) => (
-          <button type="button" key={s} className={'series-tab' + (active === s ? ' active' : '')} aria-pressed={active === s} onClick={() => setActive(s)}>{s}</button>
+          <button type="button" key={s} data-cms-scope={`series-${s}`} className={'series-tab' + (active === s ? ' active' : '')} aria-pressed={active === s} onClick={() => setActive(s)}>{s}</button>
         ))}
       </div>
 
@@ -37,6 +37,7 @@ export default function SermonGrid({ sermons }) {
         {filtered.map((s) => (
           <a
             key={s.id}
+            data-cms-scope={`sermon-${s.id}`}
             className="sermon-card-full"
             href={`https://www.youtube.com/watch?v=${s.youtube_id}`}
             target="_blank"

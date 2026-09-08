@@ -10,9 +10,12 @@
   if (!ACTIVE) return;
 
   var BASE_PATH = '';
+  if (window.OASIS_EDITOR_ACTIVE) return;
+  window.OASIS_EDITOR_ACTIVE = true;
   var pagePath = location.pathname.indexOf(BASE_PATH) === 0 ? location.pathname.slice(BASE_PATH.length) : location.pathname;
   var pathParts = pagePath.split('/').filter(Boolean);
-  var slug = (pathParts.pop() || 'index').replace('.html', '');
+  var slug = (pathParts.join('/') || 'index').replace(/\.html$/, '');
+  var legacySlug = pathParts[pathParts.length - 1] || 'index';
   var COLORS = ['#0096C7', '#C8883A', '#4A8C6A', '#8B6BAE', '#1A2835', '#0d1f2d', '#F9F6F1', '#ffffff'];
 
   // ---------- store ----------
@@ -20,16 +23,19 @@
     // Next.js injects public Supabase configuration from deployment env.
     // Auth session is shared once a staff member signs in at /admin.
     var cfg = window.OASIS_CONFIG || {};
-    var sb = (cfg.SUPABASE_URL && cfg.SUPABASE_ANON_KEY && window.supabase)
-      ? window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY) : null;
+    var sb = window.OASIS_SUPABASE || ((cfg.SUPABASE_URL && cfg.SUPABASE_ANON_KEY && window.supabase)
+      ? window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY) : null);
     return {
       sb: sb,
       session: function () { return sb ? sb.auth.getSession().then(function (r) { return r.data.session; }) : Promise.resolve(null); },
       load: function () {
         if (sb) {
-          return sb.from('page_overrides').select('edits').eq('slug', slug).single()
-            .then(function (r) { return (r.data && r.data.edits) || localDraft() || {}; })
-            .catch(function () { return localDraft() || {}; });
+          return sb.from('page_overrides').select('edits').eq('slug', slug).maybeSingle()
+            .then(function (r) {
+              if (r.error) throw r.error;
+              if (!r.data && slug !== legacySlug) return sb.from('page_overrides').select('edits').eq('slug', legacySlug).maybeSingle();
+              return r;
+            }).then(function (r) { if (r.error) throw r.error; return localDraft() || (r.data && r.data.edits) || {}; });
         }
         return Promise.resolve(localDraft() || {});
       },
@@ -39,7 +45,7 @@
             return sb.from('page_overrides').upsert({ slug: slug, edits: edits, updated_at: new Date().toISOString(), updated_by: s.user.id })
               .then(function (r) { if (r.error) throw r.error; return 'live'; });
           }
-          localStorage.setItem('oasis_edits:' + slug, JSON.stringify(edits));
+          localStorage.setItem('oasis_draft:' + slug, JSON.stringify(edits));
           return 'local';
         });
       },
@@ -75,6 +81,7 @@
   var store = makeStore();
   var edits = {};
   var dirty = false;
+  var revision = 0, publishing = false, ready = false;
 
   // Share the same five-minute inactivity window as /admin. Activity in
   // either tab keeps the authenticated editing session alive.
@@ -113,7 +120,7 @@
   }
 
   function ensure(k) { edits[k] = edits[k] || {}; return edits[k]; }
-  function markDirty() { dirty = true; setStatus('Unsaved changes', 'warn'); localStorage.setItem('oasis_draft:' + slug, JSON.stringify(edits)); }
+  function markDirty() { dirty = true; revision++; setStatus('Unsaved changes', 'warn'); try { localStorage.setItem('oasis_draft:' + slug, JSON.stringify(edits)); } catch (e) { setStatus('Draft storage full — publish to save', 'warn'); } }
   var K = window.OASIS.keyFor;
 
   // ---------- styles ----------
@@ -167,11 +174,13 @@
       '<span class="pill" id="cms-page"></span>' +
       '<span class="grow"></span>' +
       '<span class="st"><span class="dot" id="cms-dot"></span><span id="cms-stmsg">All changes saved</span></span>' +
+      '<button class="b-ghost" id="cms-all-text">All text</button>' +
       '<button class="b-ghost" id="cms-exit">Exit</button>' +
       '<button class="b-pub" id="cms-pub">Publish</button>';
     document.body.appendChild(elBar);
     document.getElementById('cms-page').textContent = slug === 'index' ? 'Home' : slug.replace(/-/g, ' ');
     document.getElementById('cms-pub').onclick = publish;
+    document.getElementById('cms-all-text').onclick = openTextPanel;
     document.getElementById('cms-exit').onclick = function () {
       if (dirty && !confirm('You have unsaved changes. Leave the editor anyway?')) return;
       localStorage.removeItem('oasis_edit');
@@ -229,7 +238,7 @@
     var btns = '';
     if (sets.img.has(el)) btns += '<button data-a="replace">⤢ Replace image</button>';
     if (sets.link.has(el)) btns += '<button data-a="link">🔗 Edit link</button>';
-    if (sets.text.has(el) || sets.link.has(el)) btns += '<button data-a="edit">✎ Edit text</button>';
+    if (sets.text.has(el)) btns += '<button data-a="edit">✎ Edit text</button>';
     btns += '<button data-a="section">▤ Section ▾</button>';
     elHover.innerHTML = btns;
     Array.prototype.forEach.call(elHover.querySelectorAll('button'), function (b) {
@@ -245,7 +254,7 @@
 
   function hoverAction(a) {
     var el = hoverEl;
-    if (a === 'edit') startTextEdit(sets.text.has(el) ? el : (el.querySelector('*') || el));
+    if (a === 'edit' && sets.text.has(el)) startTextEdit(el);
     else if (a === 'replace') pickImage(el);
     else if (a === 'link') editLink(el);
     else if (a === 'section') openSectionMenu(nearestSection(el) || el);
@@ -254,6 +263,7 @@
   // ---------- text editing ----------
   function startTextEdit(el) {
     if (!el) return;
+    if (editingEl) editingEl.blur();
     editingEl = el;
     elHover.style.display = 'none';
     var before = el.innerHTML;
@@ -264,16 +274,20 @@
       el.removeAttribute('contenteditable');
       el.classList.remove('cms-editing');
       el.removeEventListener('blur', finish);
+      el.removeEventListener('input', rememberInput);
       el.removeEventListener('keydown', onKey);
       editingEl = null;
       var cleanHtml = window.OASIS.sanitizeHtml(el.innerHTML);
-      el.innerHTML = cleanHtml;
-      if (cleanHtml !== before) { ensure('text')[K(el)] = cleanHtml; markDirty(); }
+      if (el.innerHTML !== cleanHtml) el.innerHTML = cleanHtml;
+      if (cleanHtml !== before) { ensure('text')[K(el)] = cleanHtml; Object.keys(edits.copy || {}).forEach(function (key) { if (key.indexOf(K(el) + '::') === 0 || key.indexOf(K(el) + '>') === 0) delete edits.copy[key]; }); markDirty(); }
+      reclassify();
     }
     function onKey(e) {
-      if (e.key === 'Escape') { el.innerHTML = before; el.blur(); }
+      if (e.key === 'Escape') { el.innerHTML = before; ensure('text')[K(el)] = before; markDirty(); el.blur(); }
       if (e.key === 'Enter' && !e.shiftKey && /^(H[1-6]|SPAN|A|BUTTON|STRONG|LI)$/.test(el.tagName)) { e.preventDefault(); el.blur(); }
     }
+    el.addEventListener('input', rememberInput);
+    function rememberInput() { ensure('text')[K(el)] = window.OASIS.sanitizeHtml(el.innerHTML); markDirty(); }
     el.addEventListener('blur', finish);
     el.addEventListener('keydown', onKey);
   }
@@ -308,8 +322,9 @@
   function editLink(el) {
     openPop(el, function (pop) {
       pop.innerHTML = '<div class="lbl">Link destination</div>' +
-        '<input type="text" id="cms-href" value="' + (el.getAttribute('href') || '') + '" placeholder="about.html or https://…">' +
+        '<input type="text" id="cms-href" placeholder="/about or https://…">' +
         '<button id="cms-href-save">Save link</button>';
+      pop.querySelector('#cms-href').value = el.getAttribute('href') || '';
       pop.querySelector('#cms-href-save').onclick = function () {
         var v = window.OASIS.safeUrl(pop.querySelector('#cms-href').value);
         if (!v) { toast('Use a safe website, page, mailto, tel, or anchor link'); return; }
@@ -381,19 +396,65 @@
 
   // ---------- publish ----------
   function publish() {
+    if (!ready || publishing) return;
+    if (editingEl) editingEl.blur();
+    var snapshot = JSON.parse(JSON.stringify(edits)), savedRevision = revision;
+    publishing = true;
+    document.getElementById('cms-pub').disabled = true;
     setStatus('Publishing…', 'warn');
-    store.publish(edits).then(function (where) {
-      dirty = false;
-      setStatus(where === 'live' ? 'Published — live on the site' : 'Saved locally (sign in to publish live)');
+    store.publish(snapshot).then(function (where) {
+      if (revision === savedRevision) {
+        dirty = false;
+        if (where === 'live') localStorage.removeItem('oasis_draft:' + slug);
+        setStatus(where === 'live' ? 'Published — live on the site' : 'Saved locally (sign in to publish live)');
+      } else setStatus('New changes still need publishing', 'warn');
       toast(where === 'live' ? 'Published live ✓' : 'Saved locally ✓');
-    }).catch(function (e) { setStatus('Publish failed', 'warn'); toast('Publish failed: ' + (e.message || e)); });
+    }).catch(function (e) { setStatus('Publish failed — changes kept', 'warn'); toast('Publish failed: ' + (e.message || e)); })
+      .finally(function () { publishing = false; document.getElementById('cms-pub').disabled = false; });
+  }
+
+  function openTextPanel() {
+    if (editingEl) editingEl.blur();
+    var previous = document.getElementById('cms-text-panel');
+    if (previous) previous.remove();
+    var targets = window.OASIS.copyTargets();
+    var panel = document.createElement('div');
+    panel.id = 'cms-text-panel';
+    panel.style.cssText = 'position:fixed;inset:60px 12px 12px auto;width:min(560px,calc(100vw - 24px));overflow:auto;background:white;color:#12202c;padding:20px;z-index:100004;box-shadow:0 4px 30px #0005;border-radius:12px;font:14px system-ui';
+    panel.innerHTML = '<button type="button">Close</button><h2>All page text</h2><p>Edit any wording or punctuation, including hidden content, form hints and image descriptions. Alt-click a tab or menu on the page to open other content, then reopen this list. Publish when finished.</p><input type="search" placeholder="Find text…" style="width:100%;padding:10px;margin-bottom:12px"><div class="cms-text-rows"></div>';
+    panel.querySelector('button').onclick = function () { panel.remove(); };
+    var rows = panel.querySelector('.cms-text-rows');
+    window.OASIS.collect().sections.forEach(function (section) {
+      if (!edits.hidden || !edits.hidden[K(section)]) return;
+      var show = document.createElement('button');
+      show.type = 'button'; show.textContent = 'Show hidden section: ' + (section.getAttribute('data-screen-label') || section.id || section.tagName.toLowerCase());
+      show.onclick = function () { delete edits.hidden[K(section)]; section.style.display = ''; markDirty(); show.remove(); };
+      panel.insertBefore(show, rows);
+    });
+    targets.forEach(function (target) {
+      var label = document.createElement('label');
+      label.style.cssText = 'display:block;margin:0 0 14px';
+      var caption = document.createElement('div');
+      caption.textContent = target.attribute || target.el.tagName.toLowerCase();
+      var field = document.createElement('textarea');
+      field.value = target.get();
+      field.rows = Math.min(6, Math.max(2, Math.ceil(field.value.length / 65)));
+      field.style.cssText = 'width:100%;padding:8px;font:inherit;box-sizing:border-box';
+      field.oninput = function () { target.set(field.value); ensure('copy')[target.key] = field.value; markDirty(); };
+      label.append(caption, field); rows.appendChild(label);
+    });
+    panel.querySelector('input').oninput = function (event) {
+      var query = event.target.value.toLowerCase();
+      Array.prototype.forEach.call(rows.children, function (row) { row.hidden = !row.querySelector('textarea').value.toLowerCase().includes(query); });
+    };
+    document.body.appendChild(panel);
   }
 
   // ---------- global listeners ----------
   function wire() {
     document.addEventListener('mouseover', function (e) {
       if (editingEl) return;
-      if (e.target.closest('#cms-bar,#cms-hover,#cms-pop,#cms-toast')) return;
+      if (e.target.closest('#cms-bar,#cms-hover,#cms-pop,#cms-toast,#cms-text-panel')) return;
       var el = nearestEditable(e.target) || nearestSection(e.target);
       if (el) {
         var t = typeOf(el);
@@ -405,7 +466,8 @@
       if (e.target.classList) e.target.classList.remove('cms-hl', 'cms-hl-img');
     });
     document.addEventListener('click', function (e) {
-      if (e.target.closest('#cms-bar,#cms-hover,#cms-pop,#cms-toast')) return;
+      if (e.target.closest('#cms-bar,#cms-hover,#cms-pop,#cms-toast,#cms-text-panel')) return;
+      if (e.altKey && e.target.closest('button:not([type=submit]),summary')) return;
       var editable = e.target.closest('a,button');
       if (editable && !editingEl) { e.preventDefault(); e.stopPropagation(); } // block navigation in edit mode
       if (editingEl && !editingEl.contains(e.target)) return; // let blur handle it
@@ -413,9 +475,11 @@
       var el = nearestEditable(e.target);
       if (!el) { closePop(); return; }
       var t = typeOf(el);
-      if (t === 'text' || t === 'link') startTextEdit(sets.text.has(el) ? el : el);
+      if (t === 'text') startTextEdit(el);
+      else if (t === 'link') editLink(el);
       else if (t === 'img') pickImage(el);
     }, true);
+    document.addEventListener('submit', function (e) { e.preventDefault(); e.stopPropagation(); toast('Exit the editor to submit forms'); }, true);
     // drag-drop images onto image slots
     document.addEventListener('dragover', function (e) { var el = nearestEditableImg(e.target); if (el) e.preventDefault(); });
     document.addEventListener('drop', function (e) {
@@ -425,7 +489,7 @@
         setStatus('Uploading image…', 'warn');
         store.upload(e.dataTransfer.files[0]).then(function (url) {
           window.OASIS.applyImage(el, url); ensure('img')[K(el)] = url; markDirty(); toast('Image updated');
-        });
+        }).catch(function (error) { setStatus('Upload failed', 'warn'); toast(error.message || 'Upload failed'); });
       }
     });
     window.addEventListener('scroll', function () { if (hoverEl && !editingEl) showHover(hoverEl); }, true);
@@ -440,14 +504,26 @@
     injectCSS();
     buildChrome();
     reclassify();
+    document.getElementById('cms-pub').disabled = true;
+    setStatus('Loading saved content…');
     store.load().then(function (loaded) {
       edits = loaded || {};
       window.OASIS.applyEdits(edits);
       reclassify();
       wire();
-      setStatus('All changes saved');
+      ready = true;
+      document.getElementById('cms-pub').disabled = false;
+      dirty = !!localDraft();
+      setStatus(dirty ? 'Recovered unpublished draft' : 'All changes saved', dirty ? 'warn' : undefined);
+      var observer = new MutationObserver(function (records) {
+        if (!window.document || editingEl || document.getElementById('cms-text-panel')) return;
+        if (!records.some(function (r) { var el = r.target.nodeType === 1 ? r.target : r.target.parentElement; return el && !el.closest('#cms-bar,#cms-hover,#cms-pop,#cms-toast,#cms-text-panel'); })) return;
+        observer.disconnect(); window.OASIS.applyEdits(edits); reclassify();
+        observer.observe(document.body, { childList: true, subtree: true, characterData: true });
+      });
+      observer.observe(document.body, { childList: true, subtree: true, characterData: true });
       toast('Editor ready — hover anything to edit');
-    });
+    }).catch(function (error) { setStatus('Could not load saved content — reload to retry', 'warn'); toast(error.message || 'Load failed'); });
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { setTimeout(boot, 400); });
   else setTimeout(boot, 400);

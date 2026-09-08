@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import TextVariants from './TextVariants';
 
 function LifeEventForm({ kind }) {
   const isBaptism = kind === 'baptism';
@@ -8,8 +9,8 @@ function LifeEventForm({ kind }) {
 
   async function submit(event) {
     event.preventDefault();
-    const form = new FormData(event.currentTarget);
-    const fields = Object.fromEntries(form.entries());
+    const form = event.currentTarget;
+    const fields = Object.fromEntries(new FormData(form).entries());
     setState({ sending: true, sent: false, error: '' });
     try {
       const response = await fetch('/api/contact', {
@@ -27,7 +28,7 @@ function LifeEventForm({ kind }) {
       const result = await response.json();
       if (!response.ok || !result.ok) throw new Error(result.error || 'Submission failed.');
       setState({ sending: false, sent: true, error: '' });
-      event.currentTarget.reset();
+      form.reset();
     } catch (error) {
       setState({ sending: false, sent: false, error: error.message || 'Please try again.' });
     }
@@ -46,10 +47,10 @@ function LifeEventForm({ kind }) {
       <div className="form-group"><label className="form-label" htmlFor={`${kind}-preferred`}>{isBaptism ? 'Preferred Baptism Date' : 'Preferred Sunday'}</label><input id={`${kind}-preferred`} name="preferredDate" className="form-input" placeholder="Tell us what works for you" /></div>
       <div className="form-group"><label className="form-label" htmlFor={`${kind}-notes`}>Notes</label><textarea id={`${kind}-notes`} name="message" className="form-textarea" style={{ minHeight: 90 }} /></div>
       <button type="submit" disabled={state.sending || state.sent} className={isBaptism ? 'btn btn-primary full-w' : 'btn btn-amber full-w'} style={{ justifyContent: 'center' }}>
-        {state.sending ? 'Sending…' : state.sent ? 'Submitted!' : isBaptism ? 'Submit Registration' : 'Submit Request'}
+        <TextVariants id={`${kind}-submit`} active={state.sending ? 'sending' : state.sent ? 'sent' : 'idle'} variants={{ sending: 'Sending…', sent: 'Submitted!', idle: isBaptism ? 'Submit Registration' : 'Submit Request' }} />
       </button>
       {state.error && <p role="alert" style={{ color: 'var(--red)', marginTop: 12 }}>{state.error}</p>}
-      {state.sent && <p role="status" style={{ color: 'var(--green)', marginTop: 12 }}>Thank you. Our team will contact you.</p>}
+      <p hidden={!state.sent} data-cms-scope={`${kind}-success`} role="status" style={{ color: 'var(--green)', marginTop: 12 }}>Thank you. Our team will contact you.</p>
     </form>
   );
 }

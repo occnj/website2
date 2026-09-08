@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import TextVariants from './TextVariants';
 
 export default function ContactForm() {
   const [sending, setSending] = useState(false);
@@ -97,7 +98,7 @@ export default function ContactForm() {
           style={{ justifyContent: 'center', padding: 16, background: sent ? '#4A8C6A' : undefined }}
           disabled={sending || sent}
         >
-          {sending ? 'Sending...' : sent ? 'Message Sent!' : 'Send Message'}
+          <TextVariants id="contact-submit" active={sending ? 'sending' : sent ? 'sent' : 'idle'} variants={{ sending: 'Sending...', sent: 'Message Sent!', idle: 'Send Message' }} />
         </button>
 
         {error && (
@@ -106,11 +107,9 @@ export default function ContactForm() {
           </div>
         )}
 
-        {sent && (
-          <div role="status" className="success-msg" style={{ display: 'block' }}>
+        <div role="status" data-cms-scope="contact-success" className="success-msg" hidden={!sent} style={{ display: sent ? 'block' : 'none' }}>
             Your message was sent! We&rsquo;ll be in touch within one business day.
           </div>
-        )}
 
         <p style={{ textAlign: 'center', fontSize: '.78rem', color: 'var(--gray-1)', marginTop: 'var(--sp-3)' }}>
           Need prayer? <a href="/prayer" style={{ color: 'var(--blue)', fontWeight: 600 }}>Submit a prayer request →</a>

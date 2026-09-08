@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import TextVariants from './TextVariants';
 
 export default function PrayerForm() {
   const [sending, setSending] = useState(false);
@@ -42,18 +43,10 @@ export default function PrayerForm() {
     }
   }
 
-  if (sent) {
-    return (
-      <div className="form-card" style={{ textAlign: 'center' }}>
-        <div style={{ fontSize: '2.5rem', marginBottom: 'var(--sp-2)' }}>🙏</div>
-        <h2 style={{ fontFamily: 'var(--font-head)', fontSize: '1.5rem', fontWeight: 700, marginBottom: 'var(--sp-2)' }}>Your request has been received.</h2>
-        <p className="t-body t-muted">Our prayer team will stand with you. You are not alone — we&rsquo;re praying.</p>
-      </div>
-    );
-  }
 
   return (
-    <div className="form-card">
+    <>
+    <div hidden={sent} className="form-card">
       <h2 style={{ fontFamily: 'var(--font-head)', fontSize: '1.5rem', fontWeight: 700, marginBottom: 'var(--sp-1)' }}>Prayer Request</h2>
       <p className="t-small t-muted" style={{ marginBottom: 'var(--sp-4)' }}>
         Share what&rsquo;s on your heart. Our dedicated prayer team reads every request and will personally pray over your situation.
@@ -99,7 +92,7 @@ export default function PrayerForm() {
           style={{ justifyContent: 'center', padding: 16 }}
           disabled={sending}
         >
-          {sending ? 'Sending...' : 'Submit Prayer Request'}
+          <TextVariants id="prayer-submit" active={sending ? 'sending' : 'idle'} variants={{ sending: 'Sending...', idle: 'Submit Prayer Request' }} />
         </button>
 
         {error && (
@@ -109,5 +102,11 @@ export default function PrayerForm() {
         )}
       </form>
     </div>
+    <div hidden={!sent} data-cms-scope="prayer-success" className="form-card" style={{ textAlign: 'center' }}>
+        <div style={{ fontSize: '2.5rem', marginBottom: 'var(--sp-2)' }}>🙏</div>
+        <h2 style={{ fontFamily: 'var(--font-head)', fontSize: '1.5rem', fontWeight: 700, marginBottom: 'var(--sp-2)' }}>Your request has been received.</h2>
+        <p className="t-body t-muted">Our prayer team will stand with you. You are not alone — we&rsquo;re praying.</p>
+      </div>
+    </>
   );
 }

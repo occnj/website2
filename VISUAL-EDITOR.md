@@ -52,3 +52,16 @@ home hero is `.hero-home` with a CSS-background overlay (no `<img>`), so uploads
 were skipped. The generic override layer now targets the actual element by path.
 The form-based **Fields** editor in Admin still works alongside this for structured
 content (events, sermons, team, settings).
+
+## September 2026 reliability update
+
+Use **All text** in the visual editor to search and edit wording, punctuation,
+hidden content, form placeholders, dropdown labels, and image descriptions.
+Form confirmation and livestream state wording is included. Alt-click a tab or
+menu to operate it, then reopen All text for any newly rendered content. Forms
+cannot submit while editing. All text also offers buttons to restore hidden sections.
+
+Drafts recover after reload. Publishing is disabled if existing content could not
+be loaded; reload to retry rather than overwriting saved changes. A successful
+publish clears its draft only if no newer edits were made while saving.
+See `docs/visual-editor-audit-2026-09-08.md` for verification and boundaries.

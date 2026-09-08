@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import TextVariants from './TextVariants';
 import { TWITCH_CHANNEL_URL } from './TwitchEmbed';
 import { isServiceWindowNow } from '@/lib/serviceWindow';
 
@@ -25,19 +26,16 @@ export default function LiveBanner() {
       <div className="container">
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 'var(--sp-3)', flexWrap: 'wrap' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-2)', color: '#fff' }}>
-            {live ? (
-              <>
+            <span hidden={!live} data-cms-scope="live-banner-live">
                 <span className="live-badge"><span className="live-dot"></span>Live Now</span>
                 <span style={{ fontSize: '.9rem', fontWeight: 500 }}>Sunday Service is streaming live right now</span>
-              </>
-            ) : (
-              <span style={{ fontSize: '.9rem', fontWeight: 500, opacity: .85 }}>
+              </span>
+              <span hidden={live} data-cms-scope="live-banner-offline" style={{ fontSize: '.9rem', fontWeight: 500, opacity: .85 }}>
                 We stream live every Sunday at 10:00 AM EST
               </span>
-            )}
           </div>
           <a href={TWITCH_CHANNEL_URL} target="_blank" rel="noopener" className="btn btn-ghost btn-sm">
-            {live ? 'Join the Stream →' : 'Watch on Twitch →'}
+            <TextVariants id="live-banner-link" active={live ? 'live' : 'offline'} variants={{ live: 'Join the Stream →', offline: 'Watch on Twitch →' }} />
           </a>
         </div>
       </div>

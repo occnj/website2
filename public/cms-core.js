@@ -9,27 +9,34 @@
 // ============================================================
 (function () {
   var ROOT_SKIP = 'SCRIPT,STYLE,NOSCRIPT,SVG,PATH,IFRAME';
+  var UI = '#cms-bar,#cms-pop,#cms-hover,#cms-toast,#cms-text-panel,.cms-ctrl';
+  var keys = new WeakMap();
+  var knownText = new WeakSet();
 
   // ---- stable key from an element's position in the tree ----
-  function keyFor(el) {
+  function keyFor(el, legacy) {
     if (!el || el.nodeType !== 1) return null;
+    if (!legacy && keys.has(el)) return keys.get(el);
     if (el.hasAttribute('data-cms')) return el.getAttribute('data-cms');
     var parts = [];
     var node = el;
     while (node && node.nodeType === 1 && node.tagName !== 'BODY' && node.tagName !== 'HTML') {
+      if (!legacy && node.hasAttribute('data-cms-scope')) { parts.unshift('scope:' + node.getAttribute('data-cms-scope')); break; }
       var seg = node.tagName.toLowerCase();
       var p = node.parentNode;
       if (p && p.children) {
         var same = [];
         for (var i = 0; i < p.children.length; i++) {
-          if (p.children[i].tagName === node.tagName) same.push(p.children[i]);
+          if (!p.children[i].matches(UI + ',.cms-added') && p.children[i].tagName === node.tagName) same.push(p.children[i]);
         }
         if (same.length > 1) seg += ':' + (same.indexOf(node) + 1);
       }
       parts.unshift(seg);
       node = node.parentNode;
     }
-    return parts.join('>');
+    var key = parts.join('>');
+    if (!legacy) keys.set(el, key);
+    return key;
   }
 
   // ---- which elements are editable ----
@@ -64,27 +71,39 @@
     return false;
   }
   function onlyInlineChildren(el) {
-    for (var c = el.firstElementChild; c; c = c.nextElementSibling) {
-      if (INLINE_SAFE.indexOf(c.tagName.toUpperCase()) === -1) return false;
-    }
-    return true;
+    return Array.prototype.every.call(el.children, function (c) {
+      return !c.hasAttribute('data-cms-scope') && !c.hidden && INLINE_SAFE.split(',').indexOf(c.tagName) !== -1 && onlyInlineChildren(c);
+    });
   }
   function isTextBlock(el) {
-    var tag = el.tagName.toUpperCase();
-    if (ROOT_SKIP.indexOf(tag) !== -1) return false;
-    if (!visibleText(el)) return false;
-    if (el.closest('#cms-bar,#cms-pop,#cms-hover,.cms-ctrl')) return false;
-    // classic text tags: always editable as a unit (same as before)
-    if (CLASSIC_TEXT.indexOf(tag) !== -1) return true;
-    // generic containers: any direct visible text is editable. This includes
-    // mixed wrappers, so text is never silently skipped because a layout
-    // container also contains another element.
-    if (GENERIC_TEXT.indexOf(tag) !== -1) {
-      if (hasDirectText(el)) return true;
-      if (onlyInlineChildren(el) && el.firstElementChild) return true;
-      return false;
-    }
-    return false;
+    if (el.closest(UI + ',script,style,noscript,svg,iframe,select,textarea')) return false;
+    return !!visibleText(el) && onlyInlineChildren(el) &&
+      (hasDirectText(el) || el.children.length > 0);
+  }
+
+  // Direct text nodes preserve layout, links, and React event handlers.
+  // Also exposes hidden copy and form hints through the editor's All text panel.
+  function copyTargets() {
+    var targets = [];
+    Array.prototype.forEach.call(document.body.querySelectorAll('*'), function (el) {
+      if (el.closest(UI + ',script,style,noscript,svg,iframe')) return;
+      var n = 0;
+      Array.prototype.forEach.call(el.childNodes, function (node) {
+        if (node.nodeType !== 3) return;
+        var key = keyFor(el) + '::text:' + n++;
+        if (!node.nodeValue.trim() && !knownText.has(node)) return;
+        knownText.add(node);
+        if (el.tagName === 'OPTION' && !el.hasAttribute('value')) el.setAttribute('value', el.value);
+        targets.push({ key: key, el: el, get: function () { return node.nodeValue; }, set: function (v) { if (node.nodeValue !== v) node.nodeValue = v; } });
+      });
+      ['placeholder', 'aria-label', 'title', 'alt'].forEach(function (attr) {
+        if (!el.hasAttribute(attr)) return;
+        targets.push({ key: keyFor(el) + '::' + attr, el: el, attribute: attr,
+          get: function () { return el.getAttribute(attr); },
+          set: function (v) { if (el.getAttribute(attr) !== v) el.setAttribute(attr, v); } });
+      });
+    });
+    return targets;
   }
 
   function collect() {
@@ -101,19 +120,19 @@
 
     // images / placeholders
     Array.prototype.slice.call(document.querySelectorAll(IMG_SEL)).forEach(function (el) {
-      if (el.closest('#cms-bar,#cms-pop')) return;
+      if (el.closest(UI)) return;
       // skip a placeholder that merely wraps a deeper placeholder
       images.push(el);
     });
 
     // links (for href editing)
     Array.prototype.slice.call(document.querySelectorAll(LINK_SEL)).forEach(function (el) {
-      links.push(el);
+      if (!el.closest(UI)) links.push(el);
     });
 
     // sections
     Array.prototype.slice.call(document.querySelectorAll(SECTION_SEL)).forEach(function (el) {
-      if (el.closest('#cms-bar')) return;
+      if (el.closest(UI)) return;
       sections.push(el);
     });
 
@@ -124,7 +143,8 @@
   function applyImage(el, url) {
     if (!url) return;
     if (el.tagName === 'IMG') {
-      el.src = url;
+      if (el.getAttribute('src') !== url) el.src = url;
+      el.removeAttribute('srcset');
     } else {
       el.style.backgroundImage = 'url("' + url + '")';
       el.style.backgroundSize = 'cover';
@@ -145,7 +165,7 @@
       Array.prototype.slice.call(node.attributes).forEach(function (attr) {
         var name = attr.name.toLowerCase();
         var value = attr.value.trim().toLowerCase();
-        if (name.indexOf('on') === 0 || name === 'srcdoc' || ((name === 'href' || name === 'src') && value.indexOf('javascript:') === 0)) {
+        if (name.indexOf('on') === 0 || name === 'srcdoc' || ((name === 'href' || name === 'src' || name === 'xlink:href') && !safeUrl(value))) {
           node.removeAttribute(attr.name);
         }
       });
@@ -155,7 +175,7 @@
 
   function safeUrl(url) {
     var value = String(url || '').trim();
-    if (!value || /^(javascript|data|vbscript):/i.test(value)) return '';
+    if (!value || /[\u0000-\u0020]/.test(value.replace(/ /g, '')) || (/^[a-z][a-z0-9+.-]*:/i.test(value) && !/^(https?:|mailto:|tel:)/i.test(value))) return '';
     return value;
   }
 
@@ -163,13 +183,12 @@
   function applyEdits(edits) {
     if (!edits) return;
     var byKey = {};
-    var all = collect();
-    function index(list) { list.forEach(function (el) { var k = keyFor(el); if (k) (byKey[k] = byKey[k] || []).push(el); }); }
-    index(all.texts); index(all.images); index(all.links); index(all.sections);
+    function index(list) { list.forEach(function (el) { var k = keyFor(el); if (k) (byKey[k] = byKey[k] || []).push(el); var old = keyFor(el, true); if (old && old !== k) (byKey[old] = byKey[old] || []).push(el); }); }
+    index(Array.prototype.filter.call(document.body.querySelectorAll('*'), function (el) { return !el.closest(UI); }));
 
     function each(map, fn) { if (map) Object.keys(map).forEach(function (k) { (byKey[k] || []).forEach(function (el) { fn(el, map[k]); }); }); }
 
-    each(edits.text, function (el, html) { el.innerHTML = sanitizeHtml(html); });
+    each(edits.text, function (el, html) { var clean = sanitizeHtml(html); if (el.innerHTML !== clean) el.innerHTML = clean; });
     each(edits.img, function (el, url) { applyImage(el, url); });
     each(edits.href, function (el, url) { var safe = safeUrl(url); if (safe) el.setAttribute('href', safe); });
     each(edits.style, function (el, s) {
@@ -184,12 +203,17 @@
         var host = (byKey[ck] || [])[0];
         if (!host) return;
         edits.added[ck].forEach(function (b) {
-          if (host.querySelector('[data-cms="' + b.id + '"]')) return;
+          if (Array.prototype.some.call(host.querySelectorAll('[data-cms]'), function (el) { return el.getAttribute('data-cms') === b.id; })) return;
           var node = buildBlock(b);
           host.appendChild(node);
+          if (edits.text && Object.prototype.hasOwnProperty.call(edits.text, b.id)) node.innerHTML = sanitizeHtml(edits.text[b.id]);
+          if (edits.img && edits.img[b.id]) applyImage(node, edits.img[b.id]);
         });
       });
     }
+    copyTargets().forEach(function (target) {
+      if (edits.copy && Object.prototype.hasOwnProperty.call(edits.copy, target.key)) target.set(edits.copy[target.key]);
+    });
   }
 
   function buildBlock(b) {
@@ -212,6 +236,7 @@
 
   window.OASIS = window.OASIS || {};
   window.OASIS.keyFor = keyFor;
+  window.OASIS.copyTargets = copyTargets;
   window.OASIS.collect = collect;
   window.OASIS.applyEdits = applyEdits;
   window.OASIS.applyImage = applyImage;

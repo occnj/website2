@@ -47,13 +47,13 @@ export default function EventsList({ events }) {
         const showMonthHeading = monthLabel && monthLabel !== lastMonth;
         lastMonth = monthLabel;
         return (
-          <div key={e.id}>
+          <div key={e.id} data-cms-scope={`event-${e.id}`}>
             {showMonthHeading && (
               <div style={{ fontFamily: 'var(--font-head)', fontSize: '.75rem', fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--gray-1)', marginBottom: 'var(--sp-2)', marginTop: 'var(--sp-4)' }}>
                 {monthLabel}
               </div>
             )}
-            <div className="event-full" data-cat={e.category || 'community'}>
+            <div className="event-full" data-cms-scope={`event-body-${e.id}`} data-cat={e.category || 'community'}>
               <div className="event-date-col">
                 <div className="month">{d ? d.toLocaleString('en-US', { month: 'short' }) : ''}</div>
                 <div className="day">{d ? String(d.getDate()).padStart(2, '0') : ''}</div>
