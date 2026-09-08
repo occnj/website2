@@ -400,8 +400,13 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
   height: 2px;
   background: var(--charcoal);
   border-radius: 2px;
-  transition: all .2s;
+  transition: transform .2s, opacity .2s;
+  transform-origin: center;
 }
+/* Hamburger turns into an X when the menu is open */
+.nav-toggle.active span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.nav-toggle.active span:nth-child(2) { opacity: 0; }
+.nav-toggle.active span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
 
 /* Mobile nav drawer */
 .mobile-nav {
