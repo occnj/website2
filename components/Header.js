@@ -51,6 +51,15 @@ export default function Header() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
+  // Lock background scroll while the mobile menu is open so the page behind
+  // the drawer can't move.
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = prev; };
+  }, [mobileOpen]);
+
   // Site-wide floating header: the bar is transparent at the top of every page
   // so the logo + nav float over the content/hero, and fades to a solid bar as
   // soon as the user scrolls (keeps links readable on light pages). The Give
