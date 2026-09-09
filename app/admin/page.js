@@ -72,10 +72,7 @@ export default function AdminPage() {
             </div>
             <button className="btn btn-primary" type="button" style={{ width: '100%', justifyContent: 'center' }} onClick={() => window.__adminUpdatePassword && window.__adminUpdatePassword()}>Set New Password</button>
           </div>
-          <div className="supabase-note" id="supabase-note">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="#3ECF8E"><path d="M13 2 3 14h8l-1 8L21 10h-8z"></path></svg>
-            Secured by Supabase Auth
-          </div>
+          <div className="supabase-note" id="supabase-note"></div>
         </div>
       </div>
 

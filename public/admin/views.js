@@ -295,14 +295,22 @@ dashboard: () => safe(async function () {
 // ---------------- PAGES ----------------
 pages: () => safe(async function () {
   const pages = await DB.list('pages', { order: [['slug', 'asc']] });
-  return '<div class="panel"><div class="panel-head"><div><h3>Site pages</h3><div class="sub">Edit each page\u2019s text, images and SEO</div></div></div><div class="data-list">' +
+  return '<div class="panel"><div class="panel-head"><div><h3>Site pages</h3><div class="sub">Edit each page\u2019s text, images and SEO</div></div></div><div class="panel-body"><div class="page-card-grid">' +
     pages.map(function (p) {
-      return '<div class="data-row"><div class="row-thumb-sq" style="display:grid;place-items:center;color:var(--gray-2)">' + ICONS.pages + '</div>' +
-        '<div class="row-main"><div class="row-title">' + esc(p.title) + '</div><div class="row-sub">/' + (p.slug === 'index' ? '' : esc(p.slug)) + '</div></div>' +
-        '<span class="tag ' + (p.published ? 'tag-green' : 'tag-gray') + '" style="margin-right:8px">' + (p.published ? 'Published' : 'Hidden') + '</span>' +
-        '<button class="btn btn-sm btn-outline" onclick="editPage(\'' + p.id + '\')">Fields</button>' +
-        '<a class="btn btn-sm btn-primary" href="' + (p.slug === 'index' ? '/?edit=1' : p.slug === 'life-events' ? '/events?edit=1' : '/' + encodeURIComponent(p.slug) + '?edit=1') + '" target="_blank">Visual edit ↗</a></div>';
-    }).join('') + '</div></div>';
+      var url = p.slug === 'index' ? '/?edit=1' : p.slug === 'life-events' ? '/events?edit=1' : '/' + encodeURIComponent(p.slug) + '?edit=1';
+      return '<div class="page-card">' +
+        '<span class="tag ' + (p.published ? 'tag-green' : 'tag-gray') + ' page-card-badge">' + (p.published ? 'Published' : 'Hidden') + '</span>' +
+        '<div class="page-card-body">' +
+          '<div class="page-card-icon">' + ICONS.pages + '</div>' +
+          '<div class="page-card-title">' + esc(p.title) + '</div>' +
+          '<div class="page-card-slug">/' + (p.slug === 'index' ? '' : esc(p.slug)) + '</div>' +
+        '</div>' +
+        '<div class="page-card-actions">' +
+          '<button class="btn btn-sm btn-outline" onclick="editPage(\'' + p.id + '\')">Fields</button>' +
+          '<a class="btn btn-sm btn-primary" href="' + url + '" target="_blank">Visual edit \u2197</a>' +
+        '</div>' +
+      '</div>';
+    }).join('') + '</div></div></div>';
 }),
 
 // ---------------- SERMONS ----------------
