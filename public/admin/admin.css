@@ -225,6 +225,44 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
 .media-item .thumb img { width: 100%; height: 100%; object-fit: cover; }
 .media-item .meta { padding: 7px 10px; font-size: .7rem; color: var(--gray-1); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
+/* --- SITE PAGES CARD GRID --- */
+.page-card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+.page-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: #fff;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow .15s;
+  overflow: hidden;
+}
+.page-card:hover { box-shadow: var(--shadow-md); }
+.page-card-badge { position: absolute; top: 12px; left: 12px; }
+.page-card-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 6px;
+  padding: 46px 16px 20px;
+}
+.page-card-icon { width: 40px; height: 40px; color: var(--gray-2); }
+.page-card-icon svg { width: 100%; height: 100%; }
+.page-card-title { font-family: var(--font-head); font-weight: 600; font-size: 1rem; line-height: 1.25; word-break: break-word; }
+.page-card-slug { font-size: .76rem; color: var(--gray-1); }
+.page-card-actions {
+  display: flex;
+  gap: 8px;
+  padding: 14px 16px;
+  border-top: 1px solid var(--border);
+  background: var(--off-white);
+}
+.page-card-actions .btn { flex: 1; justify-content: center; }
+
 /* --- PAGE EDITOR LAYOUT --- */
 .editor-layout { display: grid; grid-template-columns: 1fr 300px; gap: 20px; align-items: start; }
 .editor-side { display: flex; flex-direction: column; gap: 16px; position: sticky; top: 80px; }
@@ -261,6 +299,7 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
 .login-card .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
 .login-card .brand img { height: 44px; }
 .supabase-note { display: flex; align-items: center; gap: 8px; justify-content: center; margin-top: 18px; font-size: .72rem; color: var(--gray-1); }
+.supabase-note:empty { display: none; }
 
 /* --- RESPONSIVE --- */
 .sidebar-backdrop { display: none; position: fixed; inset: 0; background: rgba(26,40,53,.45); z-index: 45; }
