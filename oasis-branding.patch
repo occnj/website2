@@ -1,0 +1,132 @@
+diff --git a/app/globals.css b/app/globals.css
+index accc12e..a52e5a5 100644
+--- a/app/globals.css
++++ b/app/globals.css
+@@ -11,8 +11,8 @@
+   --blue-light: #E8F6FC;
+   --charcoal:   #1A2835;
+   --charcoal-2: #2D3E4E;
+-  --amber:      #C8883A;
+-  --amber-light:#FBF3E8;
++  --amber:      #f05123;
++  --amber-light:#FDE8E0;
+   --white:      #F9F8F6;
+   --off-white:  #F2F1EF;
+   --gray-1:     #6B7A8A;
+@@ -128,7 +128,7 @@ button { cursor: pointer; font-family: inherit; border: none; background: none;
+   color: #fff;
+   box-shadow: 0 2px 12px rgba(200,136,58,.25);
+ }
+-.btn-amber:hover { background: #b57830; transform: translateY(-1px); }
++.btn-amber:hover { background: #d4431a; transform: translateY(-1px); }
+ .btn-ghost {
+   background: rgba(255,255,255,.12);
+   color: #fff;
+@@ -508,7 +508,7 @@ button { cursor: pointer; font-family: inherit; border: none; background: none;
+   text-transform: uppercase;
+ }
+ .tag-blue { background: var(--blue-light); color: var(--blue-dark); }
+-.tag-amber { background: var(--amber-light); color: #9a5f1a; }
++.tag-amber { background: var(--amber-light); color: #b33b18; }
+ .tag-gray { background: var(--off-white); color: var(--gray-1); }
+ .tag-green { background: #EDF7F0; color: #2D6B4A; }
+ 
+diff --git a/app/page.js b/app/page.js
+index 550c3eb..4eb8f3f 100644
+--- a/app/page.js
++++ b/app/page.js
+@@ -131,7 +131,7 @@ export default async function HomePage() {
+             <div>
+               <p className="t-eyebrow" style={{ color: 'var(--amber)' }}>Get Involved</p>
+               <h2 style={{ fontFamily: 'var(--font-head)', fontSize: 'clamp(2.2rem,4.5vw,3.5rem)', fontWeight: 700, lineHeight: 1.05, letterSpacing: '-.025em', color: '#fff', marginTop: 'var(--sp-2)' }}>
+-                See how God can use<br />your gifts to make an<br /><em style={{ fontStyle: 'italic', color: 'var(--blue)' }}>eternal impact.</em>
++                See how God can use<br />your gifts to make an<br /><em style={{ fontStyle: 'italic', color: 'var(--amber)' }}>eternal impact.</em>
+               </h2>
+             </div>
+             <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
+diff --git a/public/admin/admin.css b/public/admin/admin.css
+index f6bd9f0..544f5ca 100644
+--- a/public/admin/admin.css
++++ b/public/admin/admin.css
+@@ -9,8 +9,8 @@
+   --blue-light: #E8F6FC;
+   --charcoal:   #1A2835;
+   --charcoal-2: #2D3E4E;
+-  --amber:      #C8883A;
+-  --amber-light:#FBF3E8;
++  --amber:      #f05123;
++  --amber-light:#FDE8E0;
+   --white:      #F9F8F6;
+   --off-white:  #F2F1EF;
+   --gray-1:     #6B7A8A;
+@@ -118,7 +118,7 @@ button { cursor: pointer; font-family: inherit; border: none; background: none;
+ .btn-primary { background: var(--blue); color: #fff; }
+ .btn-primary:hover { background: var(--blue-dark); }
+ .btn-amber { background: var(--amber); color: #fff; }
+-.btn-amber:hover { background: #b57830; }
++.btn-amber:hover { background: #d4431a; }
+ .btn-outline { border: 1.5px solid var(--border); color: var(--charcoal); background: #fff; }
+ .btn-outline:hover { border-color: var(--blue); color: var(--blue); }
+ .btn-danger-ghost { color: var(--red); }
+@@ -172,7 +172,7 @@ button { cursor: pointer; font-family: inherit; border: none; background: none;
+ /* --- TAGS / STATUS --- */
+ .tag { display: inline-flex; align-items: center; gap: 5px; padding: 2px 10px; border-radius: 100px; font-size: .68rem; font-weight: 600; letter-spacing: .03em; text-transform: uppercase; }
+ .tag-blue { background: var(--blue-light); color: var(--blue-dark); }
+-.tag-amber { background: var(--amber-light); color: #9a5f1a; }
++.tag-amber { background: var(--amber-light); color: #b33b18; }
+ .tag-gray { background: var(--off-white); color: var(--gray-1); }
+ .tag-green { background: #E7F4EC; color: var(--green); }
+ .dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+@@ -225,6 +225,44 @@ button { cursor: pointer; font-family: inherit; border: none; background: none;
+ .media-item .thumb img { width: 100%; height: 100%; object-fit: cover; }
+ .media-item .meta { padding: 7px 10px; font-size: .7rem; color: var(--gray-1); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+ 
++/* --- SITE PAGES CARD GRID --- */
++.page-card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
++.page-card {
++  position: relative;
++  display: flex;
++  flex-direction: column;
++  border: 1px solid var(--border);
++  border-radius: var(--radius-md);
++  background: #fff;
++  box-shadow: var(--shadow-sm);
++  transition: box-shadow .15s;
++  overflow: hidden;
++}
++.page-card:hover { box-shadow: var(--shadow-md); }
++.page-card-badge { position: absolute; top: 12px; left: 12px; }
++.page-card-body {
++  flex: 1;
++  display: flex;
++  flex-direction: column;
++  align-items: center;
++  justify-content: center;
++  text-align: center;
++  gap: 6px;
++  padding: 46px 16px 20px;
++}
++.page-card-icon { width: 40px; height: 40px; color: var(--gray-2); }
++.page-card-icon svg { width: 100%; height: 100%; }
++.page-card-title { font-family: var(--font-head); font-weight: 600; font-size: 1rem; line-height: 1.25; word-break: break-word; }
++.page-card-slug { font-size: .76rem; color: var(--gray-1); }
++.page-card-actions {
++  display: flex;
++  gap: 8px;
++  padding: 14px 16px;
++  border-top: 1px solid var(--border);
++  background: var(--off-white);
++}
++.page-card-actions .btn { flex: 1; justify-content: center; }
++
+ /* --- PAGE EDITOR LAYOUT --- */
+ .editor-layout { display: grid; grid-template-columns: 1fr 300px; gap: 20px; align-items: start; }
+ .editor-side { display: flex; flex-direction: column; gap: 16px; position: sticky; top: 80px; }
+@@ -261,6 +299,7 @@ button { cursor: pointer; font-family: inherit; border: none; background: none;
+ .login-card .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
+ .login-card .brand img { height: 44px; }
+ .supabase-note { display: flex; align-items: center; gap: 8px; justify-content: center; margin-top: 18px; font-size: .72rem; color: var(--gray-1); }
++.supabase-note:empty { display: none; }
+ 
+ /* --- RESPONSIVE --- */
+ .sidebar-backdrop { display: none; position: fixed; inset: 0; background: rgba(26,40,53,.45); z-index: 45; }
