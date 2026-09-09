@@ -179,16 +179,79 @@
     return value;
   }
 
+  // ---- content fingerprint used to recover edits after a redesign ----
+  // DOM-path keys break when a page is restructured (a paragraph moves, a new
+  // wrapper div is inserted, a section is re-nested). When the editor records a
+  // text/copy edit it also stores the ORIGINAL text under edits.sig[key]. On
+  // apply, if a key no longer resolves to an element, we look for an unclaimed
+  // element whose current text still matches that signature and heal onto it.
+  // edits.text / edits.copy formats are unchanged, so old published rows (which
+  // simply have no sig) keep working exactly as before.
+  function sig(text) {
+    return String(text == null ? '' : text).replace(/\s+/g, ' ').trim();
+  }
+
   // ---- apply a whole saved overrides object ----
+  // Returns a report: { healed:[{key,preview}], orphaned:[{key,preview,reason}] }
+  // so the visual editor can tell staff which saved edits could not be placed
+  // after a redesign. On the public site the return value is simply ignored.
   function applyEdits(edits) {
-    if (!edits) return;
+    var report = { healed: [], orphaned: [] };
+    if (!edits) return report;
     var byKey = {};
+    var claimed = new WeakSet(); // elements already matched by an exact key
     function index(list) { list.forEach(function (el) { var k = keyFor(el); if (k) (byKey[k] = byKey[k] || []).push(el); var old = keyFor(el, true); if (old && old !== k) (byKey[old] = byKey[old] || []).push(el); }); }
     index(Array.prototype.filter.call(document.body.querySelectorAll('*'), function (el) { return !el.closest(UI); }));
 
-    function each(map, fn) { if (map) Object.keys(map).forEach(function (k) { (byKey[k] || []).forEach(function (el) { fn(el, map[k]); }); }); }
+    function preview(html) {
+      var t = String(html == null ? '' : html).replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+      return t.length > 60 ? t.slice(0, 57) + '…' : t;
+    }
+
+    // Recover a text/copy target whose key no longer resolves, by matching the
+    // saved original content against an as-yet-unclaimed element. Returns the
+    // healed element (and marks it claimed) or null if nothing safely matches.
+    function recover(key, signatures, readCurrent, intended) {
+      if (!signatures || !Object.prototype.hasOwnProperty.call(signatures, key)) {
+        report.orphaned.push({ key: key, preview: preview(intended), reason: 'no-signature' });
+        if (window.console) console.warn('[OASIS] orphaned edit has no signature to recover from:', key);
+        return null;
+      }
+      var want = sig(signatures[key]);
+      if (!want) { report.orphaned.push({ key: key, preview: preview(intended), reason: 'no-signature' }); return null; }
+      var hit = null, ambiguous = false, seen = new WeakSet();
+      Object.keys(byKey).forEach(function (k) {
+        byKey[k].forEach(function (el) {
+          if (seen.has(el)) return; // same element is indexed under current + legacy keys
+          seen.add(el);
+          if (claimed.has(el)) return;
+          // Only consider genuine text blocks, so an ancestor whose textContent
+          // merely CONTAINS the wording is not treated as a rival match.
+          if (!isTextBlock(el)) return;
+          if (sig(readCurrent(el)) !== want) return;
+          if (hit && hit !== el) ambiguous = true; else hit = el;
+        });
+      });
+      if (!hit || ambiguous) { // don't guess when several elements share the text
+        report.orphaned.push({ key: key, preview: preview(intended), reason: ambiguous ? 'ambiguous' : 'not-found' });
+        if (ambiguous && window.console) console.warn('[OASIS] orphaned edit not healed (ambiguous match):', key);
+        else if (window.console) console.warn('[OASIS] orphaned edit could not be recovered:', key);
+        return null;
+      }
+      claimed.add(hit);
+      report.healed.push({ key: key, preview: preview(intended) });
+      return hit;
+    }
+
+    function each(map, fn) { if (map) Object.keys(map).forEach(function (k) { (byKey[k] || []).forEach(function (el) { claimed.add(el); fn(el, map[k]); }); }); }
 
     each(edits.text, function (el, html) { var clean = sanitizeHtml(html); if (el.innerHTML !== clean) el.innerHTML = clean; });
+    // Heal any text edits whose DOM-path key no longer resolves.
+    if (edits.text) Object.keys(edits.text).forEach(function (k) {
+      if ((byKey[k] || []).length) return;
+      var el = recover(k, edits.sig, function (n) { return n.textContent; }, edits.text[k]);
+      if (el) { var clean = sanitizeHtml(edits.text[k]); if (el.innerHTML !== clean) el.innerHTML = clean; }
+    });
     each(edits.img, function (el, url) { applyImage(el, url); });
     each(edits.href, function (el, url) { var safe = safeUrl(url); if (safe) el.setAttribute('href', safe); });
     each(edits.style, function (el, s) {
@@ -211,9 +274,36 @@
         });
       });
     }
-    copyTargets().forEach(function (target) {
-      if (edits.copy && Object.prototype.hasOwnProperty.call(edits.copy, target.key)) target.set(edits.copy[target.key]);
-    });
+    if (edits.copy) {
+      var targets = copyTargets();
+      var byTargetKey = {};
+      targets.forEach(function (t) { (byTargetKey[t.key] = byTargetKey[t.key] || []).push(t); });
+      Object.keys(edits.copy).forEach(function (k) {
+        var matches = byTargetKey[k];
+        if (matches && matches.length) { matches.forEach(function (t) { t.set(edits.copy[k]); claimed.add(t.el); }); return; }
+        // Orphaned copy target: recover by matching saved original text against
+        // an unclaimed target's current value (skip attribute targets — their
+        // content is not uniquely identifying enough to heal safely).
+        if (!edits.sig || !Object.prototype.hasOwnProperty.call(edits.sig, k)) {
+          report.orphaned.push({ key: k, preview: preview(edits.copy[k]), reason: 'no-signature' });
+          return;
+        }
+        var want = sig(edits.sig[k]);
+        if (!want) { report.orphaned.push({ key: k, preview: preview(edits.copy[k]), reason: 'no-signature' }); return; }
+        var hit = null, ambiguous = false;
+        targets.forEach(function (t) {
+          if (t.attribute || claimed.has(t.el)) return;
+          if (sig(t.get()) !== want) return;
+          if (hit && hit !== t) ambiguous = true; else hit = t;
+        });
+        if (hit && !ambiguous) { hit.set(edits.copy[k]); claimed.add(hit.el); report.healed.push({ key: k, preview: preview(edits.copy[k]) }); }
+        else {
+          report.orphaned.push({ key: k, preview: preview(edits.copy[k]), reason: ambiguous ? 'ambiguous' : 'not-found' });
+          if (window.console) console.warn('[OASIS] orphaned copy edit not recovered:', k);
+        }
+      });
+    }
+    return report;
   }
 
   function buildBlock(b) {

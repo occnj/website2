@@ -131,7 +131,7 @@ export default async function HomePage() {
             <div>
               <p className="t-eyebrow" style={{ color: 'var(--amber)' }}>Get Involved</p>
               <h2 style={{ fontFamily: 'var(--font-head)', fontSize: 'clamp(2.2rem,4.5vw,3.5rem)', fontWeight: 700, lineHeight: 1.05, letterSpacing: '-.025em', color: '#fff', marginTop: 'var(--sp-2)' }}>
-                See how God can use<br />your gifts to make an<br /><em style={{ fontStyle: 'italic', color: 'var(--blue)' }}>eternal impact.</em>
+                See how God can use<br />your gifts to make an<br /><em style={{ fontStyle: 'italic', color: 'var(--amber)' }}>eternal impact.</em>
               </h2>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>

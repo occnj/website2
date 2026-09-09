@@ -121,3 +121,125 @@ describe('publishing and dynamic records', () => {
     dom.window.close();
   });
 });
+
+describe('orphan recovery across redesigns', () => {
+  it('heals a text edit onto a moved/re-nested element via its saved signature', () => {
+    const dom = page(fixture), { OASIS, document } = dom.window;
+    const p = document.querySelectorAll('p')[1]; // "Second paragraph."
+    const key = OASIS.keyFor(p);
+    const edits = { text: { [key]: 'Second, edited.' }, sig: { [key]: 'Second paragraph.' } };
+    // Redesigned page: an extra wrapper div is inserted and paragraph order shifts,
+    // so the original DOM-path key no longer resolves.
+    const redesigned = page('<section><div class="wrap"><div class="inner"><p>Welcome to Oasis. Everyone belongs!</p><p>Second paragraph.</p></div></div></section>');
+    expect((edits.text[key] && redesigned.window.OASIS.keyFor(redesigned.window.document.querySelectorAll('p')[1]))).not.toBe(key);
+    redesigned.window.OASIS.applyEdits(edits);
+    const healed = [...redesigned.window.document.querySelectorAll('p')].find(n => n.textContent === 'Second, edited.');
+    expect(healed).toBeTruthy();
+    dom.window.close(); redesigned.window.close();
+  });
+
+  it('does not heal when the signature is ambiguous (two elements share the text)', () => {
+    const key = 'section>p:9'; // deliberately non-resolving key
+    const edits = { text: { [key]: 'CHANGED' }, sig: { [key]: 'Repeated' } };
+    const dom = page('<section><p>Repeated</p><p>Repeated</p></section>');
+    dom.window.OASIS.applyEdits(edits);
+    expect([...dom.window.document.querySelectorAll('p')].filter(n => n.textContent === 'CHANGED')).toHaveLength(0);
+    dom.window.close();
+  });
+
+  it('prefers an exact key match and never double-applies to a signature sibling', () => {
+    const dom = page('<section><p>Alpha</p><p>Beta</p></section>');
+    const { OASIS, document } = dom.window;
+    const beta = document.querySelectorAll('p')[1];
+    const key = OASIS.keyFor(beta);
+    // Same signature present, but the exact key still resolves — heal must be a no-op.
+    const edits = { text: { [key]: 'Beta edited' }, sig: { [key]: 'Beta' } };
+    OASIS.applyEdits(edits);
+    expect(document.querySelectorAll('p')[0].textContent).toBe('Alpha');
+    expect(document.querySelectorAll('p')[1].textContent).toBe('Beta edited');
+    dom.window.close();
+  });
+
+  it('legacy published rows without signatures keep working unchanged', () => {
+    const dom = page(fixture), { OASIS, document } = dom.window;
+    const p = document.querySelector('p');
+    const edits = { text: { [OASIS.keyFor(p)]: 'No sig, still applies.' } };
+    const fresh = page(fixture);
+    fresh.window.OASIS.applyEdits(edits);
+    expect(fresh.window.document.querySelector('p').textContent).toBe('No sig, still applies.');
+    dom.window.close(); fresh.window.close();
+  });
+
+  it('heals an orphaned copy (direct-text) edit by signature', () => {
+    const key = 'section>div>span::text:0';
+    const edits = { copy: { [key]: 'Recovered copy.' }, sig: { [key]: 'Find me' } };
+    const dom = page('<section><article><span>Find me</span></article></section>');
+    dom.window.OASIS.applyEdits(edits);
+    expect(dom.window.document.querySelector('span').textContent).toBe('Recovered copy.');
+    dom.window.close();
+  });
+});
+
+describe('applyEdits report', () => {
+  it('returns healed and orphaned entries with previews and reasons', () => {
+    const key1 = 'section>p:1', key2 = 'section>p:9';
+    const edits = {
+      text: { [key1]: 'Healed value', [key2]: 'Lost value' },
+      sig: { [key1]: 'Movable', [key2]: 'Gone from page' },
+    };
+    // Only the first signature's text still exists (moved into a wrapper).
+    const dom = page('<section><div class="w"><p>Movable</p></div></section>');
+    const report = dom.window.OASIS.applyEdits(edits);
+    expect(report.healed.map(h => h.key)).toContain(key1);
+    expect(report.healed[0].preview).toBe('Healed value');
+    expect(report.orphaned.map(o => o.key)).toContain(key2);
+    expect(report.orphaned.find(o => o.key === key2).reason).toBe('not-found');
+    dom.window.close();
+  });
+
+  it('reports ambiguous matches as orphaned, not healed', () => {
+    const key = 'x>y:5';
+    const edits = { text: { [key]: 'CHANGED' }, sig: { [key]: 'Repeated' } };
+    const dom = page('<section><p>Repeated</p><p>Repeated</p></section>');
+    const report = dom.window.OASIS.applyEdits(edits);
+    expect(report.healed).toHaveLength(0);
+    expect(report.orphaned[0].reason).toBe('ambiguous');
+    dom.window.close();
+  });
+
+  it('reports an edit with no signature as no-signature when its key is gone', () => {
+    const edits = { text: { 'gone>p:2': 'Value' } }; // no sig map at all
+    const dom = page('<section><p>Something else</p></section>');
+    const report = dom.window.OASIS.applyEdits(edits);
+    expect(report.orphaned[0].reason).toBe('no-signature');
+    dom.window.close();
+  });
+
+  it('an empty edits object yields an empty report and does not throw', () => {
+    const dom = page('<section><p>Hi</p></section>');
+    const report = dom.window.OASIS.applyEdits({});
+    expect(report).toEqual({ healed: [], orphaned: [] });
+    dom.window.close();
+  });
+});
+
+describe('editor surfaces orphans on load', () => {
+  it('shows a clickable warning and lists un-placed edits in a panel', async () => {
+    const dom = page(fixture), { document } = dom.window;
+    const key = 'ghost>p:3';
+    const loaded = { text: { [key]: 'This copy moved away' }, sig: { [key]: 'Nonexistent original wording' } };
+    const sb = {
+      auth: { getSession: async () => ({ data: { session: null } }) },
+      from: () => ({ select: () => ({ eq: () => ({ maybeSingle: async () => ({ data: { edits: loaded }, error: null }) }) }) }),
+    };
+    await boot(dom, sb);
+    const status = document.querySelector('#cms-stmsg');
+    expect(status.textContent).toContain('could not be placed');
+    status.click();
+    const panel = document.querySelector('#cms-text-panel');
+    expect(panel).toBeTruthy();
+    expect(panel.textContent).toContain('This copy moved away');
+    expect(panel.textContent).toContain('no longer on the page');
+    dom.window.close();
+  });
+});

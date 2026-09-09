@@ -8,7 +8,8 @@
     "start": "next start -p 5900",
     "test": "vitest run",
     "lint": "eslint .",
-    "security:scan": "node scripts/check-secrets.mjs"
+    "security:scan": "node scripts/check-secrets.mjs",
+    "smoke:publish": "node scripts/smoke-publish.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.4",

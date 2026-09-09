@@ -1,0 +1,886 @@
+diff --git a/STAFF-EDITING-GUIDE.md b/STAFF-EDITING-GUIDE.md
+new file mode 100644
+index 0000000..85f86e6
+--- /dev/null
++++ b/STAFF-EDITING-GUIDE.md
+@@ -0,0 +1,160 @@
++# Editing the Oasis website — a guide for staff
++
++This is for anyone on the church team who needs to change wording, images, or
++links on the website. You don't need to know anything technical. If you can use
++a word processor, you can do this.
++
++Take your time, and remember: **nothing you type goes live until you click
++Publish.** You can't break anything just by looking around.
++
++---
++
++## 1. Sign in
++
++1. Go to the website address followed by `/admin` (for example
++   `oasischurch.org/admin`).
++2. Enter your **Username or email** and **Password**, then click **Sign In**.
++3. If you've forgotten your password, click **Forgot password?** and follow the
++   email instructions.
++
++If you don't have a login, ask whoever manages the site to create one for you.
++Only accounts set up as an **owner, admin, or editor** are allowed to publish
++changes — see "If your changes won't save" near the end if you run into trouble.
++
++---
++
++## 2. Two ways to edit a page
++
++Once signed in, click **Pages** in the left-hand menu. Each page appears as a
++card. Every card has two buttons at the bottom:
++
++- **Fields** — a simple form for the structured parts of a page (the page title,
++  main image, and the SEO description that shows up in Google). Use this when you
++  want to change one specific, labelled thing.
++- **Visual edit ↗** — opens the *real* page in a new tab with editing turned on.
++  This is the one to use for changing wording anywhere on the page. It's the
++  recommended way to edit text.
++
++The green **Published** badge in the top-left corner of each card tells you the
++page is live on the site. A grey **Hidden** badge means it isn't.
++
++---
++
++## 3. Editing text (the Visual editor)
++
++After you click **Visual edit ↗**, the page opens with a dark bar across the top.
++That bar is your control strip — it shows whether your work is saved and has the
++**Publish** button.
++
++To change wording:
++
++1. **Move your mouse over any text.** It will highlight to show it's editable.
++2. **Click it** and start typing, just like in a document. You can edit almost
++   anything you can see — headings, paragraphs, buttons, even addresses and
++   phone numbers.
++3. **Click somewhere else** when you're done with that piece.
++
++Other things you can do:
++
++- **Change a picture:** click the image (or drag a photo file straight onto it)
++  and choose a new one. It uploads and replaces automatically.
++- **Change where a button goes:** hover the button and use the **🔗 Edit link**
++  option, then type the new web address.
++- **Find every bit of text at once:** use the **All text** button in the top bar.
++  This opens a searchable list of all wording on the page — handy for fixing a
++  phrase when you're not sure where it is, or for editing hidden text like form
++  confirmation messages.
++
++A note on forms: while you're editing, the page's forms (contact, prayer, etc.)
++**can't actually be submitted** — that's on purpose, so you can safely edit their
++wording. You'll see "Exit the editor to submit forms" if you try.
++
++---
++
++## 4. Saving your work — click Publish
++
++Look at the top bar. It always tells you the current state:
++
++| What it says | What it means |
++|---|---|
++| **All changes saved** | Nothing new to publish. |
++| **Unsaved changes** | You've made edits that aren't live yet. |
++| **Publishing…** | Your click is being saved. |
++| **Published — live on the site** | Done! Your change is now public. |
++| **Saved locally (sign in to publish live)** | See the warning below. |
++
++**To make your edits public, click the Publish button in the top bar.** Wait for
++it to say **Published — live on the site**. That's the only step that changes the
++real website.
++
++> ⚠️ **Important:** If Publish says *"Saved locally (sign in to publish live)"*
++> instead of *"Published — live on the site,"* your change did **not** go public —
++> it was only saved on your own computer. This usually means your login session
++> expired. Sign in again at `/admin` and re-publish. (See the troubleshooting
++> section.)
++
++You don't have to finish everything in one sitting. If you close the tab with
++unsaved edits, the editor keeps a private draft on your computer and offers to
++restore it next time — you'll see **"Recovered unpublished draft."** But a draft
++is only on that one computer until you Publish, so publish when you're happy.
++
++---
++
++## 5. If you see "saved edits could not be placed"
++
++Occasionally, after the website's design has been updated, you might open a page
++and see an amber message like **"2 saved edits could not be placed — click to
++review."**
++
++Here's what that means, in plain terms: an edit that was saved earlier no longer
++lines up with the page because the page's layout changed. **Nothing is lost.**
++
++1. **Click the message.** A panel opens listing each edit that couldn't be
++   placed, showing you exactly what the wording was and why it didn't fit.
++2. Find that spot on the page and **re-type the change**, the normal way.
++3. **Publish.**
++
++It's a rare housekeeping task, not an error you caused. If it happens a lot after
++a redesign, let the site manager know.
++
++---
++
++## 6. A few sensible habits
++
++- **Read before you publish.** Whatever's on screen is exactly what the public
++  will see. Double-check spelling and that you edited the right spot.
++- **One change at a time is fine.** You can publish after every small edit, or do
++  several and publish once — either way works.
++- **The editor signs you out after 5 minutes of inactivity** for security. If you
++  step away and come back, you may need to sign in again. Your unpublished work is
++  kept as a draft, so you won't lose it — just re-publish after signing back in.
++- **When in doubt, don't publish.** Leaving something as an unpublished draft is
++  completely safe. Ask for a second pair of eyes.
++
++---
++
++## 7. Troubleshooting
++
++**"I clicked Publish but it says 'Saved locally'."**
++Your session expired or you're not signed in as a publishing role. Go to `/admin`,
++sign in again, return to the page (`Visual edit ↗`), and click Publish. If it
++still won't publish live, your account may not have editor permissions — ask the
++site manager to check your role.
++
++**"My change isn't showing on the real website."**
++Make sure the top bar said **Published — live on the site** (not "Saved
++locally"). If it did, try refreshing the public page. If it's still not there,
++note the page and what you changed, and tell the site manager.
++
++**"I accidentally changed the wrong thing."**
++If you haven't published yet, just fix it back or close the tab without
++publishing. If you already published, edit it again to the correct wording and
++publish once more.
++
++**"An image won't upload."**
++You'll see "Upload failed." Try a smaller file or a standard format (JPG or PNG).
++If it keeps failing, tell the site manager.
++
++**Still stuck?** Write down the page, what you were doing, and any message you
++saw on screen, and pass it to whoever manages the website. That detail makes it
++much easier to help you quickly.
+diff --git a/VISUAL-EDITOR.md b/VISUAL-EDITOR.md
+index fa09c58..b5b6424 100644
+--- a/VISUAL-EDITOR.md
++++ b/VISUAL-EDITOR.md
+@@ -65,3 +65,44 @@ Drafts recover after reload. Publishing is disabled if existing content could no
+ be loaded; reload to retry rather than overwriting saved changes. A successful
+ publish clears its draft only if no newer edits were made while saving.
+ See `docs/visual-editor-audit-2026-09-08.md` for verification and boundaries.
++
++## Surviving a page redesign (orphan recovery)
++
++Every edit is keyed by the element's DOM path, which changes if a page is later
++restructured (a paragraph moves, a wrapper `<div>` is added, a section is
++re-nested). To keep edits from silently vanishing, the editor now also stores the
++**original text** of each edited element. When the public site loads and a key no
++longer resolves, `cms-core.js` looks for an element whose current text still
++matches that saved original and re-applies the edit there.
++
++- Recovery is **conservative**: if two elements share the same text, or nothing
++  matches, the edit is left unapplied rather than guessing wrong.
++- When you open a page with `?edit=1`, any edits that could not be placed are
++  surfaced in the editor status bar ("N saved edits could not be placed — click
++  to review"). Clicking it opens a panel listing each un-placed edit, its saved
++  value, and why it could not be matched. Nothing is lost: the values are shown
++  so you can find the matching text on the page and re-enter it, then publish.
++  (The same events are also logged to the browser console as `[OASIS] orphaned…`.)
++- Old published rows created before this change simply have no signature and keep
++  working exactly as before — the `edits.text` / `edits.copy` format is unchanged.
++
++## Verifying the live publish path (smoke test)
++
++The automated tests exercise publish logic against a store stub, so the real
++auth → RLS → write → public-read chain is confirmed separately with a one-off
++script that uses a throwaway slug (`__smoke/…`) and cleans up after itself — it
++never writes to a real page.
++
++```
++NEXT_PUBLIC_SUPABASE_URL=…            # already in your deployment env
++NEXT_PUBLIC_SUPABASE_ANON_KEY=…       # already in your deployment env
++OASIS_SMOKE_EMAIL=staff@example.org   # a real staff login (owner/admin/editor)
++OASIS_SMOKE_PASSWORD=…
++npm run smoke:publish
++```
++
++It checks, in order: an unauthenticated write is rejected by RLS; a staff member
++can sign in; the authenticated upsert is accepted; the anon/public client reads
++the same content back; and the throwaway row is deleted. Exit code 0 means the
++live publish path works end to end. Run it once after any change to the
++`page_overrides` table, its RLS policies, or the Supabase keys.
+diff --git a/app/admin/page.js b/app/admin/page.js
+index ab5529f..fcd3342 100644
+--- a/app/admin/page.js
++++ b/app/admin/page.js
+@@ -72,10 +72,7 @@ export default function AdminPage() {
+             </div>
+             <button className="btn btn-primary" type="button" style={{ width: '100%', justifyContent: 'center' }} onClick={() => window.__adminUpdatePassword && window.__adminUpdatePassword()}>Set New Password</button>
+           </div>
+-          <div className="supabase-note" id="supabase-note">
+-            <svg width="14" height="14" viewBox="0 0 24 24" fill="#3ECF8E"><path d="M13 2 3 14h8l-1 8L21 10h-8z"></path></svg>
+-            Secured by Supabase Auth
+-          </div>
++          <div className="supabase-note" id="supabase-note"></div>
+         </div>
+       </div>
+ 
+diff --git a/app/globals.css b/app/globals.css
+index accc12e..a52e5a5 100644
+--- a/app/globals.css
++++ b/app/globals.css
+@@ -11,8 +11,8 @@
+   --blue-light: #E8F6FC;
+   --charcoal:   #1A2835;
+   --charcoal-2: #2D3E4E;
+-  --amber:      #C8883A;
+-  --amber-light:#FBF3E8;
++  --amber:      #f05123;
++  --amber-light:#FDE8E0;
+   --white:      #F9F8F6;
+   --off-white:  #F2F1EF;
+   --gray-1:     #6B7A8A;
+@@ -128,7 +128,7 @@ button { cursor: pointer; font-family: inherit; border: none; background: none;
+   color: #fff;
+   box-shadow: 0 2px 12px rgba(200,136,58,.25);
+ }
+-.btn-amber:hover { background: #b57830; transform: translateY(-1px); }
++.btn-amber:hover { background: #d4431a; transform: translateY(-1px); }
+ .btn-ghost {
+   background: rgba(255,255,255,.12);
+   color: #fff;
+@@ -508,7 +508,7 @@ button { cursor: pointer; font-family: inherit; border: none; background: none;
+   text-transform: uppercase;
+ }
+ .tag-blue { background: var(--blue-light); color: var(--blue-dark); }
+-.tag-amber { background: var(--amber-light); color: #9a5f1a; }
++.tag-amber { background: var(--amber-light); color: #b33b18; }
+ .tag-gray { background: var(--off-white); color: var(--gray-1); }
+ .tag-green { background: #EDF7F0; color: #2D6B4A; }
+ 
+diff --git a/app/page.js b/app/page.js
+index 550c3eb..4eb8f3f 100644
+--- a/app/page.js
++++ b/app/page.js
+@@ -131,7 +131,7 @@ export default async function HomePage() {
+             <div>
+               <p className="t-eyebrow" style={{ color: 'var(--amber)' }}>Get Involved</p>
+               <h2 style={{ fontFamily: 'var(--font-head)', fontSize: 'clamp(2.2rem,4.5vw,3.5rem)', fontWeight: 700, lineHeight: 1.05, letterSpacing: '-.025em', color: '#fff', marginTop: 'var(--sp-2)' }}>
+-                See how God can use<br />your gifts to make an<br /><em style={{ fontStyle: 'italic', color: 'var(--blue)' }}>eternal impact.</em>
++                See how God can use<br />your gifts to make an<br /><em style={{ fontStyle: 'italic', color: 'var(--amber)' }}>eternal impact.</em>
+               </h2>
+             </div>
+             <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
+diff --git a/package.json b/package.json
+index fa182ed..602f519 100644
+--- a/package.json
++++ b/package.json
+@@ -8,7 +8,8 @@
+     "start": "next start -p 5900",
+     "test": "vitest run",
+     "lint": "eslint .",
+-    "security:scan": "node scripts/check-secrets.mjs"
++    "security:scan": "node scripts/check-secrets.mjs",
++    "smoke:publish": "node scripts/smoke-publish.mjs"
+   },
+   "dependencies": {
+     "@supabase/supabase-js": "^2.45.4",
+diff --git a/public/admin/admin.css b/public/admin/admin.css
+index f6bd9f0..544f5ca 100644
+--- a/public/admin/admin.css
++++ b/public/admin/admin.css
+@@ -9,8 +9,8 @@
+   --blue-light: #E8F6FC;
+   --charcoal:   #1A2835;
+   --charcoal-2: #2D3E4E;
+-  --amber:      #C8883A;
+-  --amber-light:#FBF3E8;
++  --amber:      #f05123;
++  --amber-light:#FDE8E0;
+   --white:      #F9F8F6;
+   --off-white:  #F2F1EF;
+   --gray-1:     #6B7A8A;
+@@ -118,7 +118,7 @@ button { cursor: pointer; font-family: inherit; border: none; background: none;
+ .btn-primary { background: var(--blue); color: #fff; }
+ .btn-primary:hover { background: var(--blue-dark); }
+ .btn-amber { background: var(--amber); color: #fff; }
+-.btn-amber:hover { background: #b57830; }
++.btn-amber:hover { background: #d4431a; }
+ .btn-outline { border: 1.5px solid var(--border); color: var(--charcoal); background: #fff; }
+ .btn-outline:hover { border-color: var(--blue); color: var(--blue); }
+ .btn-danger-ghost { color: var(--red); }
+@@ -172,7 +172,7 @@ button { cursor: pointer; font-family: inherit; border: none; background: none;
+ /* --- TAGS / STATUS --- */
+ .tag { display: inline-flex; align-items: center; gap: 5px; padding: 2px 10px; border-radius: 100px; font-size: .68rem; font-weight: 600; letter-spacing: .03em; text-transform: uppercase; }
+ .tag-blue { background: var(--blue-light); color: var(--blue-dark); }
+-.tag-amber { background: var(--amber-light); color: #9a5f1a; }
++.tag-amber { background: var(--amber-light); color: #b33b18; }
+ .tag-gray { background: var(--off-white); color: var(--gray-1); }
+ .tag-green { background: #E7F4EC; color: var(--green); }
+ .dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+@@ -225,6 +225,44 @@ button { cursor: pointer; font-family: inherit; border: none; background: none;
+ .media-item .thumb img { width: 100%; height: 100%; object-fit: cover; }
+ .media-item .meta { padding: 7px 10px; font-size: .7rem; color: var(--gray-1); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+ 
++/* --- SITE PAGES CARD GRID --- */
++.page-card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
++.page-card {
++  position: relative;
++  display: flex;
++  flex-direction: column;
++  border: 1px solid var(--border);
++  border-radius: var(--radius-md);
++  background: #fff;
++  box-shadow: var(--shadow-sm);
++  transition: box-shadow .15s;
++  overflow: hidden;
++}
++.page-card:hover { box-shadow: var(--shadow-md); }
++.page-card-badge { position: absolute; top: 12px; left: 12px; }
++.page-card-body {
++  flex: 1;
++  display: flex;
++  flex-direction: column;
++  align-items: center;
++  justify-content: center;
++  text-align: center;
++  gap: 6px;
++  padding: 46px 16px 20px;
++}
++.page-card-icon { width: 40px; height: 40px; color: var(--gray-2); }
++.page-card-icon svg { width: 100%; height: 100%; }
++.page-card-title { font-family: var(--font-head); font-weight: 600; font-size: 1rem; line-height: 1.25; word-break: break-word; }
++.page-card-slug { font-size: .76rem; color: var(--gray-1); }
++.page-card-actions {
++  display: flex;
++  gap: 8px;
++  padding: 14px 16px;
++  border-top: 1px solid var(--border);
++  background: var(--off-white);
++}
++.page-card-actions .btn { flex: 1; justify-content: center; }
++
+ /* --- PAGE EDITOR LAYOUT --- */
+ .editor-layout { display: grid; grid-template-columns: 1fr 300px; gap: 20px; align-items: start; }
+ .editor-side { display: flex; flex-direction: column; gap: 16px; position: sticky; top: 80px; }
+@@ -261,6 +299,7 @@ button { cursor: pointer; font-family: inherit; border: none; background: none;
+ .login-card .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
+ .login-card .brand img { height: 44px; }
+ .supabase-note { display: flex; align-items: center; gap: 8px; justify-content: center; margin-top: 18px; font-size: .72rem; color: var(--gray-1); }
++.supabase-note:empty { display: none; }
+ 
+ /* --- RESPONSIVE --- */
+ .sidebar-backdrop { display: none; position: fixed; inset: 0; background: rgba(26,40,53,.45); z-index: 45; }
+diff --git a/public/admin/views.js b/public/admin/views.js
+index 62cffe7..f08a699 100644
+--- a/public/admin/views.js
++++ b/public/admin/views.js
+@@ -295,14 +295,22 @@ dashboard: () => safe(async function () {
+ // ---------------- PAGES ----------------
+ pages: () => safe(async function () {
+   const pages = await DB.list('pages', { order: [['slug', 'asc']] });
+-  return '<div class="panel"><div class="panel-head"><div><h3>Site pages</h3><div class="sub">Edit each page\u2019s text, images and SEO</div></div></div><div class="data-list">' +
++  return '<div class="panel"><div class="panel-head"><div><h3>Site pages</h3><div class="sub">Edit each page\u2019s text, images and SEO</div></div></div><div class="panel-body"><div class="page-card-grid">' +
+     pages.map(function (p) {
+-      return '<div class="data-row"><div class="row-thumb-sq" style="display:grid;place-items:center;color:var(--gray-2)">' + ICONS.pages + '</div>' +
+-        '<div class="row-main"><div class="row-title">' + esc(p.title) + '</div><div class="row-sub">/' + (p.slug === 'index' ? '' : esc(p.slug)) + '</div></div>' +
+-        '<span class="tag ' + (p.published ? 'tag-green' : 'tag-gray') + '" style="margin-right:8px">' + (p.published ? 'Published' : 'Hidden') + '</span>' +
+-        '<button class="btn btn-sm btn-outline" onclick="editPage(\'' + p.id + '\')">Fields</button>' +
+-        '<a class="btn btn-sm btn-primary" href="' + (p.slug === 'index' ? '/?edit=1' : p.slug === 'life-events' ? '/events?edit=1' : '/' + encodeURIComponent(p.slug) + '?edit=1') + '" target="_blank">Visual edit ↗</a></div>';
+-    }).join('') + '</div></div>';
++      var url = p.slug === 'index' ? '/?edit=1' : p.slug === 'life-events' ? '/events?edit=1' : '/' + encodeURIComponent(p.slug) + '?edit=1';
++      return '<div class="page-card">' +
++        '<span class="tag ' + (p.published ? 'tag-green' : 'tag-gray') + ' page-card-badge">' + (p.published ? 'Published' : 'Hidden') + '</span>' +
++        '<div class="page-card-body">' +
++          '<div class="page-card-icon">' + ICONS.pages + '</div>' +
++          '<div class="page-card-title">' + esc(p.title) + '</div>' +
++          '<div class="page-card-slug">/' + (p.slug === 'index' ? '' : esc(p.slug)) + '</div>' +
++        '</div>' +
++        '<div class="page-card-actions">' +
++          '<button class="btn btn-sm btn-outline" onclick="editPage(\'' + p.id + '\')">Fields</button>' +
++          '<a class="btn btn-sm btn-primary" href="' + url + '" target="_blank">Visual edit \u2197</a>' +
++        '</div>' +
++      '</div>';
++    }).join('') + '</div></div></div>';
+ }),
+ 
+ // ---------------- SERMONS ----------------
+diff --git a/public/cms-core.js b/public/cms-core.js
+index c2eeccc..33dd3a3 100644
+--- a/public/cms-core.js
++++ b/public/cms-core.js
+@@ -179,16 +179,79 @@
+     return value;
+   }
+ 
++  // ---- content fingerprint used to recover edits after a redesign ----
++  // DOM-path keys break when a page is restructured (a paragraph moves, a new
++  // wrapper div is inserted, a section is re-nested). When the editor records a
++  // text/copy edit it also stores the ORIGINAL text under edits.sig[key]. On
++  // apply, if a key no longer resolves to an element, we look for an unclaimed
++  // element whose current text still matches that signature and heal onto it.
++  // edits.text / edits.copy formats are unchanged, so old published rows (which
++  // simply have no sig) keep working exactly as before.
++  function sig(text) {
++    return String(text == null ? '' : text).replace(/\s+/g, ' ').trim();
++  }
++
+   // ---- apply a whole saved overrides object ----
++  // Returns a report: { healed:[{key,preview}], orphaned:[{key,preview,reason}] }
++  // so the visual editor can tell staff which saved edits could not be placed
++  // after a redesign. On the public site the return value is simply ignored.
+   function applyEdits(edits) {
+-    if (!edits) return;
++    var report = { healed: [], orphaned: [] };
++    if (!edits) return report;
+     var byKey = {};
++    var claimed = new WeakSet(); // elements already matched by an exact key
+     function index(list) { list.forEach(function (el) { var k = keyFor(el); if (k) (byKey[k] = byKey[k] || []).push(el); var old = keyFor(el, true); if (old && old !== k) (byKey[old] = byKey[old] || []).push(el); }); }
+     index(Array.prototype.filter.call(document.body.querySelectorAll('*'), function (el) { return !el.closest(UI); }));
+ 
+-    function each(map, fn) { if (map) Object.keys(map).forEach(function (k) { (byKey[k] || []).forEach(function (el) { fn(el, map[k]); }); }); }
++    function preview(html) {
++      var t = String(html == null ? '' : html).replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
++      return t.length > 60 ? t.slice(0, 57) + '…' : t;
++    }
++
++    // Recover a text/copy target whose key no longer resolves, by matching the
++    // saved original content against an as-yet-unclaimed element. Returns the
++    // healed element (and marks it claimed) or null if nothing safely matches.
++    function recover(key, signatures, readCurrent, intended) {
++      if (!signatures || !Object.prototype.hasOwnProperty.call(signatures, key)) {
++        report.orphaned.push({ key: key, preview: preview(intended), reason: 'no-signature' });
++        if (window.console) console.warn('[OASIS] orphaned edit has no signature to recover from:', key);
++        return null;
++      }
++      var want = sig(signatures[key]);
++      if (!want) { report.orphaned.push({ key: key, preview: preview(intended), reason: 'no-signature' }); return null; }
++      var hit = null, ambiguous = false, seen = new WeakSet();
++      Object.keys(byKey).forEach(function (k) {
++        byKey[k].forEach(function (el) {
++          if (seen.has(el)) return; // same element is indexed under current + legacy keys
++          seen.add(el);
++          if (claimed.has(el)) return;
++          // Only consider genuine text blocks, so an ancestor whose textContent
++          // merely CONTAINS the wording is not treated as a rival match.
++          if (!isTextBlock(el)) return;
++          if (sig(readCurrent(el)) !== want) return;
++          if (hit && hit !== el) ambiguous = true; else hit = el;
++        });
++      });
++      if (!hit || ambiguous) { // don't guess when several elements share the text
++        report.orphaned.push({ key: key, preview: preview(intended), reason: ambiguous ? 'ambiguous' : 'not-found' });
++        if (ambiguous && window.console) console.warn('[OASIS] orphaned edit not healed (ambiguous match):', key);
++        else if (window.console) console.warn('[OASIS] orphaned edit could not be recovered:', key);
++        return null;
++      }
++      claimed.add(hit);
++      report.healed.push({ key: key, preview: preview(intended) });
++      return hit;
++    }
++
++    function each(map, fn) { if (map) Object.keys(map).forEach(function (k) { (byKey[k] || []).forEach(function (el) { claimed.add(el); fn(el, map[k]); }); }); }
+ 
+     each(edits.text, function (el, html) { var clean = sanitizeHtml(html); if (el.innerHTML !== clean) el.innerHTML = clean; });
++    // Heal any text edits whose DOM-path key no longer resolves.
++    if (edits.text) Object.keys(edits.text).forEach(function (k) {
++      if ((byKey[k] || []).length) return;
++      var el = recover(k, edits.sig, function (n) { return n.textContent; }, edits.text[k]);
++      if (el) { var clean = sanitizeHtml(edits.text[k]); if (el.innerHTML !== clean) el.innerHTML = clean; }
++    });
+     each(edits.img, function (el, url) { applyImage(el, url); });
+     each(edits.href, function (el, url) { var safe = safeUrl(url); if (safe) el.setAttribute('href', safe); });
+     each(edits.style, function (el, s) {
+@@ -211,9 +274,36 @@
+         });
+       });
+     }
+-    copyTargets().forEach(function (target) {
+-      if (edits.copy && Object.prototype.hasOwnProperty.call(edits.copy, target.key)) target.set(edits.copy[target.key]);
+-    });
++    if (edits.copy) {
++      var targets = copyTargets();
++      var byTargetKey = {};
++      targets.forEach(function (t) { (byTargetKey[t.key] = byTargetKey[t.key] || []).push(t); });
++      Object.keys(edits.copy).forEach(function (k) {
++        var matches = byTargetKey[k];
++        if (matches && matches.length) { matches.forEach(function (t) { t.set(edits.copy[k]); claimed.add(t.el); }); return; }
++        // Orphaned copy target: recover by matching saved original text against
++        // an unclaimed target's current value (skip attribute targets — their
++        // content is not uniquely identifying enough to heal safely).
++        if (!edits.sig || !Object.prototype.hasOwnProperty.call(edits.sig, k)) {
++          report.orphaned.push({ key: k, preview: preview(edits.copy[k]), reason: 'no-signature' });
++          return;
++        }
++        var want = sig(edits.sig[k]);
++        if (!want) { report.orphaned.push({ key: k, preview: preview(edits.copy[k]), reason: 'no-signature' }); return; }
++        var hit = null, ambiguous = false;
++        targets.forEach(function (t) {
++          if (t.attribute || claimed.has(t.el)) return;
++          if (sig(t.get()) !== want) return;
++          if (hit && hit !== t) ambiguous = true; else hit = t;
++        });
++        if (hit && !ambiguous) { hit.set(edits.copy[k]); claimed.add(hit.el); report.healed.push({ key: k, preview: preview(edits.copy[k]) }); }
++        else {
++          report.orphaned.push({ key: k, preview: preview(edits.copy[k]), reason: ambiguous ? 'ambiguous' : 'not-found' });
++          if (window.console) console.warn('[OASIS] orphaned copy edit not recovered:', k);
++        }
++      });
++    }
++    return report;
+   }
+ 
+   function buildBlock(b) {
+diff --git a/public/editor.js b/public/editor.js
+index f8f573c..ca23234 100644
+--- a/public/editor.js
++++ b/public/editor.js
+@@ -81,6 +81,7 @@
+   var store = makeStore();
+   var edits = {};
+   var dirty = false;
++  var lastOrphans = [];
+   var revision = 0, publishing = false, ready = false;
+ 
+   // Share the same five-minute inactivity window as /admin. Activity in
+@@ -123,6 +124,17 @@
+   function markDirty() { dirty = true; revision++; setStatus('Unsaved changes', 'warn'); try { localStorage.setItem('oasis_draft:' + slug, JSON.stringify(edits)); } catch (e) { setStatus('Draft storage full — publish to save', 'warn'); } }
+   var K = window.OASIS.keyFor;
+ 
++  // Record the ORIGINAL text for a key the first time it is edited, so the
++  // public site can heal the edit onto the right element if a later redesign
++  // shifts its DOM path. Only the pre-edit content is a reliable fingerprint,
++  // so we never overwrite an existing signature.
++  function recordSig(key, originalText) {
++    var s = String(originalText == null ? '' : originalText).replace(/\s+/g, ' ').trim();
++    if (!s) return;
++    var sigs = ensure('sig');
++    if (!Object.prototype.hasOwnProperty.call(sigs, key)) sigs[key] = s;
++  }
++
+   // ---------- styles ----------
+   function injectCSS() {
+     var s = document.createElement('style');
+@@ -267,6 +279,7 @@
+     editingEl = el;
+     elHover.style.display = 'none';
+     var before = el.innerHTML;
++    recordSig(K(el), el.textContent);
+     el.setAttribute('contenteditable', 'true');
+     el.classList.add('cms-editing');
+     el.focus();
+@@ -413,6 +426,26 @@
+       .finally(function () { publishing = false; document.getElementById('cms-pub').disabled = false; });
+   }
+ 
++  function showOrphans() {
++    var previous = document.getElementById('cms-text-panel');
++    if (previous) previous.remove();
++    var panel = document.createElement('div');
++    panel.id = 'cms-text-panel';
++    panel.style.cssText = 'position:fixed;inset:60px 12px 12px auto;width:min(560px,calc(100vw - 24px));overflow:auto;background:white;color:#12202c;padding:20px;z-index:100004;box-shadow:0 4px 30px #0005;border-radius:12px;font:14px system-ui';
++    var reasonText = { 'ambiguous': 'the same wording appears more than once, so it was not safe to guess', 'not-found': 'the original wording is no longer on the page', 'no-signature': 'this edit predates change-tracking and cannot be auto-placed' };
++    var html = '<button type="button">Close</button><h2>Edits that could not be placed</h2>' +
++      '<p>The page changed since these were saved, so they were not applied automatically. Find the matching text on the page and re-enter it, then publish. Nothing was lost — the old values are shown below.</p>';
++    lastOrphans.forEach(function (o) {
++      html += '<div style="border:1px solid #e3e8ec;border-radius:8px;padding:12px;margin:0 0 12px">' +
++        '<div style="font-weight:600;margin-bottom:4px">' + (o.preview ? escapeHtml(o.preview) : '(empty)') + '</div>' +
++        '<div style="font-size:.8rem;color:#7a8791">Why: ' + (reasonText[o.reason] || o.reason) + '</div></div>';
++    });
++    panel.innerHTML = html;
++    panel.querySelector('button').onclick = function () { panel.remove(); };
++    document.body.appendChild(panel);
++  }
++  function escapeHtml(s) { var d = document.createElement('div'); d.textContent = String(s == null ? '' : s); return d.innerHTML; }
++
+   function openTextPanel() {
+     if (editingEl) editingEl.blur();
+     var previous = document.getElementById('cms-text-panel');
+@@ -440,7 +473,8 @@
+       field.value = target.get();
+       field.rows = Math.min(6, Math.max(2, Math.ceil(field.value.length / 65)));
+       field.style.cssText = 'width:100%;padding:8px;font:inherit;box-sizing:border-box';
+-      field.oninput = function () { target.set(field.value); ensure('copy')[target.key] = field.value; markDirty(); };
++      var originalValue = target.get();
++      field.oninput = function () { recordSig(target.key, originalValue); target.set(field.value); ensure('copy')[target.key] = field.value; markDirty(); };
+       label.append(caption, field); rows.appendChild(label);
+     });
+     panel.querySelector('input').oninput = function (event) {
+@@ -508,13 +542,22 @@
+     setStatus('Loading saved content…');
+     store.load().then(function (loaded) {
+       edits = loaded || {};
+-      window.OASIS.applyEdits(edits);
++      var report = window.OASIS.applyEdits(edits);
+       reclassify();
+       wire();
+       ready = true;
+       document.getElementById('cms-pub').disabled = false;
+       dirty = !!localDraft();
+-      setStatus(dirty ? 'Recovered unpublished draft' : 'All changes saved', dirty ? 'warn' : undefined);
++      if (report && report.orphaned && report.orphaned.length) {
++        lastOrphans = report.orphaned;
++        var n = report.orphaned.length;
++        setStatus(n + ' saved edit' + (n > 1 ? 's' : '') + ' could not be placed — click to review', 'warn');
++        var msg = document.getElementById('cms-stmsg');
++        if (msg) { msg.style.cursor = 'pointer'; msg.title = 'Some previously saved edits no longer match the page and were not applied'; msg.onclick = showOrphans; }
++        toast(n + ' saved edit' + (n > 1 ? 's' : '') + ' could not be placed after a page change');
++      } else {
++        setStatus(dirty ? 'Recovered unpublished draft' : 'All changes saved', dirty ? 'warn' : undefined);
++      }
+       var observer = new MutationObserver(function (records) {
+         if (!window.document || editingEl || document.getElementById('cms-text-panel')) return;
+         if (!records.some(function (r) { var el = r.target.nodeType === 1 ? r.target : r.target.parentElement; return el && !el.closest('#cms-bar,#cms-hover,#cms-pop,#cms-toast,#cms-text-panel'); })) return;
+diff --git a/scripts/smoke-publish.mjs b/scripts/smoke-publish.mjs
+new file mode 100644
+index 0000000..7177420
+--- /dev/null
++++ b/scripts/smoke-publish.mjs
+@@ -0,0 +1,113 @@
++#!/usr/bin/env node
++// ============================================================
++// Oasis CMS — visual-editor publish smoke test (live Supabase)
++//
++// Closes the one gap the automated tests can't: they use a store
++// stub, so the real auth -> RLS -> write -> public read chain has
++// never been exercised end to end. This script does exactly that
++// against a live project, using a THROWAWAY slug so it can never
++// touch real church copy, and it cleans up after itself.
++//
++// What it verifies, in order:
++//   1. A staff member can authenticate (email + password).
++//   2. RLS lets that authenticated role UPSERT into page_overrides.
++//   3. The anon (public) client can then READ the row back — proving
++//      the live site would actually apply the edit.
++//   4. An UNAUTHENTICATED write is REJECTED by RLS (negative check).
++//   5. Cleanup: the throwaway row is deleted.
++//
++// Usage:
++//   NEXT_PUBLIC_SUPABASE_URL=... \
++//   NEXT_PUBLIC_SUPABASE_ANON_KEY=... \
++//   OASIS_SMOKE_EMAIL=staff@example.org \
++//   OASIS_SMOKE_PASSWORD=... \
++//   node scripts/smoke-publish.mjs
++//
++// Exit code 0 = all checks passed. Non-zero = a check failed.
++// Nothing here writes to a real page slug; the slug is namespaced
++// under "__smoke/" and deleted at the end (and best-effort on error).
++// ============================================================
++import { createClient } from '@supabase/supabase-js';
++
++const URL = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
++const ANON =
++  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
++  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
++const EMAIL = process.env.OASIS_SMOKE_EMAIL || '';
++const PASSWORD = process.env.OASIS_SMOKE_PASSWORD || '';
++
++function need(name, value) {
++  if (!value) { console.error(`✗ missing required env var: ${name}`); process.exitCode = 2; return false; }
++  return true;
++}
++const ok =
++  [['NEXT_PUBLIC_SUPABASE_URL', URL], ['NEXT_PUBLIC_SUPABASE_ANON_KEY', ANON],
++   ['OASIS_SMOKE_EMAIL', EMAIL], ['OASIS_SMOKE_PASSWORD', PASSWORD]]
++  .map(([n, v]) => need(n, v)).every(Boolean);
++if (!ok) {
++  console.error('\nSet the four variables above (the two NEXT_PUBLIC_* are already in your deployment env).');
++  process.exit(2);
++}
++
++// A slug that is obviously not a real page and is easy to spot / purge.
++const SLUG = `__smoke/${new Date().toISOString().replace(/[:.]/g, '-')}`;
++const MARKER = `smoke-${Math.random().toString(36).slice(2)}`;
++
++let failures = 0;
++function pass(msg) { console.log(`✓ ${msg}`); }
++function fail(msg, err) { failures++; console.error(`✗ ${msg}${err ? ' — ' + (err.message || err) : ''}`); }
++
++async function main() {
++  const anonClient = createClient(URL, ANON, { auth: { persistSession: false } });
++
++  // ---- 4 (set up first, before we authenticate): anon write must be denied ----
++  // Done on a separate anon client so the later authed client is clean.
++  {
++    const probe = createClient(URL, ANON, { auth: { persistSession: false } });
++    const { error } = await probe.from('page_overrides')
++      .upsert({ slug: SLUG + '-anon', edits: { text: { x: 'should not persist' } } });
++    if (error) pass('unauthenticated write is rejected by RLS (negative check)');
++    else { fail('unauthenticated write was NOT rejected — RLS is not protecting page_overrides'); }
++  }
++
++  // ---- 1: authenticate as staff ----
++  const staff = createClient(URL, ANON, { auth: { persistSession: false } });
++  const { data: auth, error: authErr } =
++    await staff.auth.signInWithPassword({ email: EMAIL, password: PASSWORD });
++  if (authErr || !auth?.user) { fail('staff authentication', authErr); return; }
++  pass(`authenticated as ${auth.user.email}`);
++
++  // ---- 2: authenticated upsert ----
++  const payload = {
++    slug: SLUG,
++    edits: { text: { 'smoke>p:1': MARKER }, sig: { 'smoke>p:1': 'original' } },
++    updated_at: new Date().toISOString(),
++    updated_by: auth.user.id,
++  };
++  const { error: writeErr } = await staff.from('page_overrides').upsert(payload);
++  if (writeErr) { fail('authenticated upsert into page_overrides (check the "staff write" RLS role)', writeErr); }
++  else pass('authenticated upsert accepted by RLS');
++
++  // ---- 3: public read-back returns exactly what we wrote ----
++  const { data: readData, error: readErr } =
++    await anonClient.from('page_overrides').select('edits').eq('slug', SLUG).maybeSingle();
++  if (readErr) fail('public read-back', readErr);
++  else if (!readData) fail('public read-back returned no row (public read policy missing?)');
++  else if (readData.edits?.text?.['smoke>p:1'] !== MARKER) fail('public read-back returned different content than written');
++  else pass('public (anon) client reads the published edit back intact');
++
++  // ---- 5: cleanup ----
++  const { error: delErr } = await staff.from('page_overrides').delete().eq('slug', SLUG);
++  if (delErr) fail(`cleanup delete (please remove slug "${SLUG}" manually)`, delErr);
++  else pass('throwaway row deleted');
++
++  await staff.auth.signOut().catch(() => {});
++}
++
++main()
++  .catch((err) => fail('unexpected error', err))
++  .finally(() => {
++    console.log('');
++    if (failures) { console.error(`SMOKE TEST FAILED (${failures} check${failures > 1 ? 's' : ''}).`); process.exit(1); }
++    console.log('SMOKE TEST PASSED — the live publish path works end to end.');
++  });
+diff --git a/tests/cms.test.js b/tests/cms.test.js
+index b3af336..ad515fb 100644
+--- a/tests/cms.test.js
++++ b/tests/cms.test.js
+@@ -121,3 +121,125 @@ describe('publishing and dynamic records', () => {
+     dom.window.close();
+   });
+ });
++
++describe('orphan recovery across redesigns', () => {
++  it('heals a text edit onto a moved/re-nested element via its saved signature', () => {
++    const dom = page(fixture), { OASIS, document } = dom.window;
++    const p = document.querySelectorAll('p')[1]; // "Second paragraph."
++    const key = OASIS.keyFor(p);
++    const edits = { text: { [key]: 'Second, edited.' }, sig: { [key]: 'Second paragraph.' } };
++    // Redesigned page: an extra wrapper div is inserted and paragraph order shifts,
++    // so the original DOM-path key no longer resolves.
++    const redesigned = page('<section><div class="wrap"><div class="inner"><p>Welcome to Oasis. Everyone belongs!</p><p>Second paragraph.</p></div></div></section>');
++    expect((edits.text[key] && redesigned.window.OASIS.keyFor(redesigned.window.document.querySelectorAll('p')[1]))).not.toBe(key);
++    redesigned.window.OASIS.applyEdits(edits);
++    const healed = [...redesigned.window.document.querySelectorAll('p')].find(n => n.textContent === 'Second, edited.');
++    expect(healed).toBeTruthy();
++    dom.window.close(); redesigned.window.close();
++  });
++
++  it('does not heal when the signature is ambiguous (two elements share the text)', () => {
++    const key = 'section>p:9'; // deliberately non-resolving key
++    const edits = { text: { [key]: 'CHANGED' }, sig: { [key]: 'Repeated' } };
++    const dom = page('<section><p>Repeated</p><p>Repeated</p></section>');
++    dom.window.OASIS.applyEdits(edits);
++    expect([...dom.window.document.querySelectorAll('p')].filter(n => n.textContent === 'CHANGED')).toHaveLength(0);
++    dom.window.close();
++  });
++
++  it('prefers an exact key match and never double-applies to a signature sibling', () => {
++    const dom = page('<section><p>Alpha</p><p>Beta</p></section>');
++    const { OASIS, document } = dom.window;
++    const beta = document.querySelectorAll('p')[1];
++    const key = OASIS.keyFor(beta);
++    // Same signature present, but the exact key still resolves — heal must be a no-op.
++    const edits = { text: { [key]: 'Beta edited' }, sig: { [key]: 'Beta' } };
++    OASIS.applyEdits(edits);
++    expect(document.querySelectorAll('p')[0].textContent).toBe('Alpha');
++    expect(document.querySelectorAll('p')[1].textContent).toBe('Beta edited');
++    dom.window.close();
++  });
++
++  it('legacy published rows without signatures keep working unchanged', () => {
++    const dom = page(fixture), { OASIS, document } = dom.window;
++    const p = document.querySelector('p');
++    const edits = { text: { [OASIS.keyFor(p)]: 'No sig, still applies.' } };
++    const fresh = page(fixture);
++    fresh.window.OASIS.applyEdits(edits);
++    expect(fresh.window.document.querySelector('p').textContent).toBe('No sig, still applies.');
++    dom.window.close(); fresh.window.close();
++  });
++
++  it('heals an orphaned copy (direct-text) edit by signature', () => {
++    const key = 'section>div>span::text:0';
++    const edits = { copy: { [key]: 'Recovered copy.' }, sig: { [key]: 'Find me' } };
++    const dom = page('<section><article><span>Find me</span></article></section>');
++    dom.window.OASIS.applyEdits(edits);
++    expect(dom.window.document.querySelector('span').textContent).toBe('Recovered copy.');
++    dom.window.close();
++  });
++});
++
++describe('applyEdits report', () => {
++  it('returns healed and orphaned entries with previews and reasons', () => {
++    const key1 = 'section>p:1', key2 = 'section>p:9';
++    const edits = {
++      text: { [key1]: 'Healed value', [key2]: 'Lost value' },
++      sig: { [key1]: 'Movable', [key2]: 'Gone from page' },
++    };
++    // Only the first signature's text still exists (moved into a wrapper).
++    const dom = page('<section><div class="w"><p>Movable</p></div></section>');
++    const report = dom.window.OASIS.applyEdits(edits);
++    expect(report.healed.map(h => h.key)).toContain(key1);
++    expect(report.healed[0].preview).toBe('Healed value');
++    expect(report.orphaned.map(o => o.key)).toContain(key2);
++    expect(report.orphaned.find(o => o.key === key2).reason).toBe('not-found');
++    dom.window.close();
++  });
++
++  it('reports ambiguous matches as orphaned, not healed', () => {
++    const key = 'x>y:5';
++    const edits = { text: { [key]: 'CHANGED' }, sig: { [key]: 'Repeated' } };
++    const dom = page('<section><p>Repeated</p><p>Repeated</p></section>');
++    const report = dom.window.OASIS.applyEdits(edits);
++    expect(report.healed).toHaveLength(0);
++    expect(report.orphaned[0].reason).toBe('ambiguous');
++    dom.window.close();
++  });
++
++  it('reports an edit with no signature as no-signature when its key is gone', () => {
++    const edits = { text: { 'gone>p:2': 'Value' } }; // no sig map at all
++    const dom = page('<section><p>Something else</p></section>');
++    const report = dom.window.OASIS.applyEdits(edits);
++    expect(report.orphaned[0].reason).toBe('no-signature');
++    dom.window.close();
++  });
++
++  it('an empty edits object yields an empty report and does not throw', () => {
++    const dom = page('<section><p>Hi</p></section>');
++    const report = dom.window.OASIS.applyEdits({});
++    expect(report).toEqual({ healed: [], orphaned: [] });
++    dom.window.close();
++  });
++});
++
++describe('editor surfaces orphans on load', () => {
++  it('shows a clickable warning and lists un-placed edits in a panel', async () => {
++    const dom = page(fixture), { document } = dom.window;
++    const key = 'ghost>p:3';
++    const loaded = { text: { [key]: 'This copy moved away' }, sig: { [key]: 'Nonexistent original wording' } };
++    const sb = {
++      auth: { getSession: async () => ({ data: { session: null } }) },
++      from: () => ({ select: () => ({ eq: () => ({ maybeSingle: async () => ({ data: { edits: loaded }, error: null }) }) }) }),
++    };
++    await boot(dom, sb);
++    const status = document.querySelector('#cms-stmsg');
++    expect(status.textContent).toContain('could not be placed');
++    status.click();
++    const panel = document.querySelector('#cms-text-panel');
++    expect(panel).toBeTruthy();
++    expect(panel.textContent).toContain('This copy moved away');
++    expect(panel.textContent).toContain('no longer on the page');
++    dom.window.close();
++  });
++});

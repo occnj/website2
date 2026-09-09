@@ -81,6 +81,7 @@
   var store = makeStore();
   var edits = {};
   var dirty = false;
+  var lastOrphans = [];
   var revision = 0, publishing = false, ready = false;
 
   // Share the same five-minute inactivity window as /admin. Activity in
@@ -122,6 +123,17 @@
   function ensure(k) { edits[k] = edits[k] || {}; return edits[k]; }
   function markDirty() { dirty = true; revision++; setStatus('Unsaved changes', 'warn'); try { localStorage.setItem('oasis_draft:' + slug, JSON.stringify(edits)); } catch (e) { setStatus('Draft storage full — publish to save', 'warn'); } }
   var K = window.OASIS.keyFor;
+
+  // Record the ORIGINAL text for a key the first time it is edited, so the
+  // public site can heal the edit onto the right element if a later redesign
+  // shifts its DOM path. Only the pre-edit content is a reliable fingerprint,
+  // so we never overwrite an existing signature.
+  function recordSig(key, originalText) {
+    var s = String(originalText == null ? '' : originalText).replace(/\s+/g, ' ').trim();
+    if (!s) return;
+    var sigs = ensure('sig');
+    if (!Object.prototype.hasOwnProperty.call(sigs, key)) sigs[key] = s;
+  }
 
   // ---------- styles ----------
   function injectCSS() {
@@ -267,6 +279,7 @@
     editingEl = el;
     elHover.style.display = 'none';
     var before = el.innerHTML;
+    recordSig(K(el), el.textContent);
     el.setAttribute('contenteditable', 'true');
     el.classList.add('cms-editing');
     el.focus();
@@ -413,6 +426,26 @@
       .finally(function () { publishing = false; document.getElementById('cms-pub').disabled = false; });
   }
 
+  function showOrphans() {
+    var previous = document.getElementById('cms-text-panel');
+    if (previous) previous.remove();
+    var panel = document.createElement('div');
+    panel.id = 'cms-text-panel';
+    panel.style.cssText = 'position:fixed;inset:60px 12px 12px auto;width:min(560px,calc(100vw - 24px));overflow:auto;background:white;color:#12202c;padding:20px;z-index:100004;box-shadow:0 4px 30px #0005;border-radius:12px;font:14px system-ui';
+    var reasonText = { 'ambiguous': 'the same wording appears more than once, so it was not safe to guess', 'not-found': 'the original wording is no longer on the page', 'no-signature': 'this edit predates change-tracking and cannot be auto-placed' };
+    var html = '<button type="button">Close</button><h2>Edits that could not be placed</h2>' +
+      '<p>The page changed since these were saved, so they were not applied automatically. Find the matching text on the page and re-enter it, then publish. Nothing was lost — the old values are shown below.</p>';
+    lastOrphans.forEach(function (o) {
+      html += '<div style="border:1px solid #e3e8ec;border-radius:8px;padding:12px;margin:0 0 12px">' +
+        '<div style="font-weight:600;margin-bottom:4px">' + (o.preview ? escapeHtml(o.preview) : '(empty)') + '</div>' +
+        '<div style="font-size:.8rem;color:#7a8791">Why: ' + (reasonText[o.reason] || o.reason) + '</div></div>';
+    });
+    panel.innerHTML = html;
+    panel.querySelector('button').onclick = function () { panel.remove(); };
+    document.body.appendChild(panel);
+  }
+  function escapeHtml(s) { var d = document.createElement('div'); d.textContent = String(s == null ? '' : s); return d.innerHTML; }
+
   function openTextPanel() {
     if (editingEl) editingEl.blur();
     var previous = document.getElementById('cms-text-panel');
@@ -440,7 +473,8 @@
       field.value = target.get();
       field.rows = Math.min(6, Math.max(2, Math.ceil(field.value.length / 65)));
       field.style.cssText = 'width:100%;padding:8px;font:inherit;box-sizing:border-box';
-      field.oninput = function () { target.set(field.value); ensure('copy')[target.key] = field.value; markDirty(); };
+      var originalValue = target.get();
+      field.oninput = function () { recordSig(target.key, originalValue); target.set(field.value); ensure('copy')[target.key] = field.value; markDirty(); };
       label.append(caption, field); rows.appendChild(label);
     });
     panel.querySelector('input').oninput = function (event) {
@@ -508,13 +542,22 @@
     setStatus('Loading saved content…');
     store.load().then(function (loaded) {
       edits = loaded || {};
-      window.OASIS.applyEdits(edits);
+      var report = window.OASIS.applyEdits(edits);
       reclassify();
       wire();
       ready = true;
       document.getElementById('cms-pub').disabled = false;
       dirty = !!localDraft();
-      setStatus(dirty ? 'Recovered unpublished draft' : 'All changes saved', dirty ? 'warn' : undefined);
+      if (report && report.orphaned && report.orphaned.length) {
+        lastOrphans = report.orphaned;
+        var n = report.orphaned.length;
+        setStatus(n + ' saved edit' + (n > 1 ? 's' : '') + ' could not be placed — click to review', 'warn');
+        var msg = document.getElementById('cms-stmsg');
+        if (msg) { msg.style.cursor = 'pointer'; msg.title = 'Some previously saved edits no longer match the page and were not applied'; msg.onclick = showOrphans; }
+        toast(n + ' saved edit' + (n > 1 ? 's' : '') + ' could not be placed after a page change');
+      } else {
+        setStatus(dirty ? 'Recovered unpublished draft' : 'All changes saved', dirty ? 'warn' : undefined);
+      }
       var observer = new MutationObserver(function (records) {
         if (!window.document || editingEl || document.getElementById('cms-text-panel')) return;
         if (!records.some(function (r) { var el = r.target.nodeType === 1 ? r.target : r.target.parentElement; return el && !el.closest('#cms-bar,#cms-hover,#cms-pop,#cms-toast,#cms-text-panel'); })) return;
