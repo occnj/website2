@@ -568,3 +568,88 @@ async function savePage() {
     toast('Published — live on the site');
   } catch (e) { fail(e); }
 }
+
+// ---------- ABOUT PAGE CONTENT (beliefs / values / hub cards) ----------
+const BELIEF_FIELDS = [
+  { key: 'title', label: 'Title' },
+  { key: 'scripture', label: 'Bible verses', type: 'textarea', hint: 'Shown on the card. Separate references with ·' },
+  { key: 'content', label: 'Full statement', type: 'textarea', hint: 'Shown in the pop-up when someone taps the card.' },
+  { key: 'published', label: 'Published', type: 'check', default: true, half: true },
+];
+function beliefRowFrom(out, id) {
+  if (!out.title) throw new Error('Title is required');
+  if (!out.content) throw new Error('Full statement is required');
+  return { id: id || undefined, title: out.title, scripture: out.scripture || '', content: out.content, published: out.published };
+}
+function addBelief() {
+  openEditor('Add belief', BELIEF_FIELDS, {}, async function (out) {
+    await DB.save('beliefs', beliefRowFrom(out), 'belief.create', out.title);
+    toast('Belief added'); go('beliefs');
+  });
+}
+async function editBelief(id) {
+  const b = (await DB.list('beliefs', { eq: { id: id } }))[0];
+  openEditor('Edit belief', BELIEF_FIELDS, b, async function (out) {
+    await DB.save('beliefs', beliefRowFrom(out, id), 'belief.update', out.title);
+    toast('Saved'); go('beliefs');
+  });
+}
+async function delBelief(id) {
+  try { await DB.del('beliefs', id, 'belief.delete', id); toast('Belief removed'); go('beliefs'); }
+  catch (e) { fail(e); }
+}
+
+const VALUE_FIELDS = [
+  { key: 'title', label: 'Title' },
+  { key: 'description', label: 'Description', type: 'textarea' },
+  { key: 'published', label: 'Published', type: 'check', default: true, half: true },
+];
+function valueRowFrom(out, id) {
+  if (!out.title) throw new Error('Title is required');
+  return { id: id || undefined, title: out.title, description: out.description || '', published: out.published };
+}
+function addValue() {
+  openEditor('Add value', VALUE_FIELDS, {}, async function (out) {
+    await DB.save('core_values', valueRowFrom(out), 'value.create', out.title);
+    toast('Value added'); go('values');
+  });
+}
+async function editValue(id) {
+  const v = (await DB.list('core_values', { eq: { id: id } }))[0];
+  openEditor('Edit value', VALUE_FIELDS, v, async function (out) {
+    await DB.save('core_values', valueRowFrom(out, id), 'value.update', out.title);
+    toast('Saved'); go('values');
+  });
+}
+async function delValue(id) {
+  try { await DB.del('core_values', id, 'value.delete', id); toast('Value removed'); go('values'); }
+  catch (e) { fail(e); }
+}
+
+const HUBCARD_FIELDS = [
+  { key: 'title', label: 'Title' },
+  { key: 'description', label: 'Description', type: 'textarea' },
+  { key: 'href', label: 'Link', hint: 'An anchor on the About page (e.g. #our-values) or any page path.' },
+  { key: 'published', label: 'Published', type: 'check', default: true, half: true },
+];
+function hubCardRowFrom(out, id) {
+  if (!out.title) throw new Error('Title is required');
+  return { id: id || undefined, title: out.title, description: out.description || '', href: out.href || '', published: out.published };
+}
+function addHubCard() {
+  openEditor('Add card', HUBCARD_FIELDS, {}, async function (out) {
+    await DB.save('about_hub_cards', hubCardRowFrom(out), 'hubcard.create', out.title);
+    toast('Card added'); go('hubcards');
+  });
+}
+async function editHubCard(id) {
+  const c = (await DB.list('about_hub_cards', { eq: { id: id } }))[0];
+  openEditor('Edit card', HUBCARD_FIELDS, c, async function (out) {
+    await DB.save('about_hub_cards', hubCardRowFrom(out, id), 'hubcard.update', out.title);
+    toast('Saved'); go('hubcards');
+  });
+}
+async function delHubCard(id) {
+  try { await DB.del('about_hub_cards', id, 'hubcard.delete', id); toast('Card removed'); go('hubcards'); }
+  catch (e) { fail(e); }
+}

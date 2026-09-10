@@ -4,7 +4,8 @@ import '../leadership/leadership.css';
 import '../ministries/ministries.css';
 import PageHero from '@/components/PageHero';
 import AboutSubnav from '@/components/AboutSubnav';
-import { getPageHero, getTeamMembers, getTeamSections, getMinistries } from '@/lib/data';
+import BeliefsGrid from '@/components/BeliefsGrid';
+import { getPageHero, getTeamMembers, getTeamSections, getMinistries, getBeliefs, getCoreValues, getAboutHubCards } from '@/lib/data';
 
 export const metadata = {
   title: 'About Us — Oasis Christian Centre',
@@ -34,6 +35,7 @@ const BELIEFS = [
   ['Eternal Destiny', 'John 3:16 · Matthew 25:31–46 · Revelation 20:11–15', 'God created people to exist forever. We will either exist eternally separated from God by sin, or eternally with God through forgiveness and salvation. Heaven and Hell are real places of eternal existence.'],
   ['The Church', 'Matthew 16:16–18 · Ephesians 1:22–23 · 1 Corinthians 12:12–13', 'The church is composed of all who have experienced new birth through faith in Christ. The local church is an indispensable part of God’s plan — for worship, prayer, fellowship, teaching, ministry, and world evangelism. We believe in the spiritual unity of all true believers in the Lord Jesus Christ.'],
   ['Marriage', 'Mark 10:6–9', 'Oasis Christian Centre believes in the sanctity of marriage between one man and one woman, as established by God at creation. Married people are expected to maintain their marriage vows to each other.'],
+  ['Sexuality & Gender', 'Deuteronomy 23:1 · 1 Corinthians 6:18 · 1 Thessalonians 4:3 · Romans 1:26–27 · Proverbs 5:3–5, 8–13; 7:21–27 · Galatians 5:19 · Exodus 20:14 · Deuteronomy 5:18 · Matthew 5:27; 19:18 · Luke 18:20 · Romans 13:9 · James 2:11 · Leviticus 20:10–21 · 1 Corinthians 10:8; 6:18 · Jude 7', 'We believe sexuality and the divinely prescribed boundaries for its expression are covered clearly in the Holy Scriptures, which limit sexual expression to the marital relationship of one man with one woman. Homosexual acts, adultery, bestiality, and all forms of fornication are categorically condemned in the Holy Scriptures. We believe that sexuality is assigned by God at conception, male or female, whatever that may be, and the Holy Scriptures does not permit an individual to alter their sexual identity physically or otherwise.'],
 ];
 
 
@@ -65,9 +67,27 @@ function buildTeamGroups(team, sections) {
 }
 
 export default async function AboutPage() {
-  const [hero, team, sections, ministries] = await Promise.all([
+  const [hero, team, sections, ministries, dbBeliefs, dbValues, dbHubCards] = await Promise.all([
     getPageHero('about'), getTeamMembers(), getTeamSections(), getMinistries(),
+    getBeliefs(), getCoreValues(), getAboutHubCards(),
   ]);
+
+  // Fall back to the hardcoded copy whenever a table is empty or missing, so the
+  // page never renders blank if the migration hasn't been run yet.
+  const beliefs = dbBeliefs.length
+    ? dbBeliefs
+    : BELIEFS.map(([title, scripture, content]) => ({ title, scripture, content }));
+  const values = dbValues.length
+    ? dbValues
+    : VALUES.map(([title, description]) => ({ title, description }));
+  const hubCards = dbHubCards.length
+    ? dbHubCards
+    : [
+        { title: 'Our Values', description: 'The 10 convictions that shape everything we do at Oasis.', href: '#our-values' },
+        { title: 'Our Beliefs', description: 'What we believe about God, Scripture, salvation, and the church.', href: '#our-beliefs' },
+        { title: 'Leadership', description: 'Meet the pastoral team and ministry leaders who serve Oasis.', href: '#leadership' },
+        { title: 'Ministries', description: 'From women to youth to missions — see all the ways we serve.', href: '#ministries' },
+      ];
 
   // Group team members into admin-defined sections. Members are matched to a
   // section by their `grouping` label. Sections come pre-sorted; any member
@@ -125,26 +145,13 @@ export default async function AboutPage() {
           <p className="t-eyebrow text-center">Explore</p>
           <h2 className="t-h2 text-center mt-2" style={{ marginBottom: 'var(--sp-5)' }}>Get to know us</h2>
           <div className="hub-grid">
-            <a href="#our-values" className="hub-card">
-              <div className="hub-card-num">01</div>
-              <div className="hub-card-title">Our Values</div>
-              <div className="hub-card-desc">The 10 convictions that shape everything we do at Oasis.</div>
-            </a>
-            <a href="#our-beliefs" className="hub-card">
-              <div className="hub-card-num">02</div>
-              <div className="hub-card-title">Our Beliefs</div>
-              <div className="hub-card-desc">What we believe about God, Scripture, salvation, and the church.</div>
-            </a>
-            <a href="#leadership" className="hub-card">
-              <div className="hub-card-num">03</div>
-              <div className="hub-card-title">Leadership</div>
-              <div className="hub-card-desc">Meet the pastoral team and ministry leaders who serve Oasis.</div>
-            </a>
-            <a href="#ministries" className="hub-card">
-              <div className="hub-card-num">04</div>
-              <div className="hub-card-title">Ministries</div>
-              <div className="hub-card-desc">From women to youth to missions — see all the ways we serve.</div>
-            </a>
+            {hubCards.map((c, i) => (
+              <a href={c.href || '#'} className="hub-card" key={c.id || c.title}>
+                <div className="hub-card-num">{String(i + 1).padStart(2, '0')}</div>
+                <div className="hub-card-title">{c.title}</div>
+                <div className="hub-card-desc">{c.description}</div>
+              </a>
+            ))}
           </div>
         </div>
       </section>
@@ -158,11 +165,11 @@ export default async function AboutPage() {
             <p className="t-body t-muted mt-3">Our values direct the culture of Oasis. They define who we are. These values are so critical to our mission that we will adjust anything to achieve and maintain them.</p>
           </div>
           <div className="values-grid">
-            {VALUES.map(([title, desc], i) => (
-              <div className="value-card" key={title}>
+            {values.map((v, i) => (
+              <div className="value-card" key={v.id || v.title}>
                 <div className="value-num">{String(i + 1).padStart(2, '0')}</div>
-                <div className="value-title">{title}</div>
-                <div className="value-desc">{desc}</div>
+                <div className="value-title">{v.title}</div>
+                <div className="value-desc">{v.description}</div>
               </div>
             ))}
           </div>
@@ -193,17 +200,7 @@ export default async function AboutPage() {
             </div>
           </div>
 
-          <div style={{ maxWidth: 900, margin: '0 auto' }}>
-            {BELIEFS.map(([label, scripture, text]) => (
-              <div className="belief-item" key={label}>
-                <div>
-                  <div className="belief-label">{label}</div>
-                  <div className="belief-scripture">{scripture}</div>
-                </div>
-                <div className="belief-text">{text}</div>
-              </div>
-            ))}
-          </div>
+          <BeliefsGrid items={beliefs} />
         </div>
       </section>
 

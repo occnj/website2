@@ -629,6 +629,75 @@ users: () => safe(async function () {
     }).join('') : '<div class="data-row"><div class="row-main" style="color:var(--gray-1)">No activity yet.</div></div>') +
     '</div></div>';
 }),
+
+// ---------------- ABOUT: BELIEFS ----------------
+beliefs: () => safe(async function () {
+  const items = await DB.list('beliefs', { order: [['sort_order', 'asc']] });
+  return '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">' +
+    '<div><h2 style="margin:0">What we believe</h2><div class="sub">Cards on the About page. The card shows the title and verses; the full statement opens in a pop-up. Reorder with \u2191\u2193.</div></div>' +
+    '<button class="btn btn-primary" onclick="addBelief()">+ Add belief</button></div>' +
+    '<div class="panel"><div class="data-list">' +
+    (items.length ? items.map(function (b, i) {
+      return '<div class="data-row" style="' + (b.published ? '' : 'opacity:.5') + '">' +
+        '<div style="display:flex;flex-direction:column;flex-shrink:0">' +
+        '<button class="icon-btn" style="padding:2px" ' + (i === 0 ? 'disabled' : '') + ' onclick="moveRow(\'beliefs\',\'' + b.id + '\',-1,\'beliefs\')">' + ICONS.up + '</button>' +
+        '<button class="icon-btn" style="padding:2px" ' + (i === items.length - 1 ? 'disabled' : '') + ' onclick="moveRow(\'beliefs\',\'' + b.id + '\',1,\'beliefs\')">' + ICONS.down + '</button></div>' +
+        '<div class="row-main"><div class="row-title">' + esc(b.title) + '</div>' +
+        '<div class="row-sub" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:480px">' + esc(b.scripture || b.content) + '</div></div>' +
+        '<span class="tag ' + (b.published ? 'tag-green' : 'tag-gray') + '" style="flex-shrink:0">' + (b.published ? 'Visible' : 'Hidden') + '</span>' +
+        '<div class="row-actions">' +
+        '<button class="icon-btn" title="Edit" onclick="editBelief(\'' + b.id + '\')">' + ICONS.edit + '</button>' +
+        '<button class="icon-btn" title="Delete" onclick="confirmAction(\'Delete this belief?\', function(){delBelief(\'' + b.id + '\')})">' + ICONS.trash + '</button>' +
+        '</div></div>';
+    }).join('') : '<div class="data-row"><div class="row-main" style="color:var(--gray-1)">Nothing here yet. If you expected the existing beliefs to be listed, run the About content migration first.</div></div>') +
+    '</div></div>';
+}),
+
+// ---------------- ABOUT: VALUES ("What defines us") ----------------
+values: () => safe(async function () {
+  const items = await DB.list('core_values', { order: [['sort_order', 'asc']] });
+  return '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">' +
+    '<div><h2 style="margin:0">What defines us</h2><div class="sub">The numbered values on the About page. Numbering follows this order \u2014 reorder with \u2191\u2193.</div></div>' +
+    '<button class="btn btn-primary" onclick="addValue()">+ Add value</button></div>' +
+    '<div class="panel"><div class="data-list">' +
+    (items.length ? items.map(function (v, i) {
+      return '<div class="data-row" style="' + (v.published ? '' : 'opacity:.5') + '">' +
+        '<div style="display:flex;flex-direction:column;flex-shrink:0">' +
+        '<button class="icon-btn" style="padding:2px" ' + (i === 0 ? 'disabled' : '') + ' onclick="moveRow(\'core_values\',\'' + v.id + '\',-1,\'values\')">' + ICONS.up + '</button>' +
+        '<button class="icon-btn" style="padding:2px" ' + (i === items.length - 1 ? 'disabled' : '') + ' onclick="moveRow(\'core_values\',\'' + v.id + '\',1,\'values\')">' + ICONS.down + '</button></div>' +
+        '<div class="row-main"><div class="row-title">' + String(i + 1).padStart(2, '0') + ' \u00b7 ' + esc(v.title) + '</div>' +
+        '<div class="row-sub" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:480px">' + esc(v.description) + '</div></div>' +
+        '<span class="tag ' + (v.published ? 'tag-green' : 'tag-gray') + '" style="flex-shrink:0">' + (v.published ? 'Visible' : 'Hidden') + '</span>' +
+        '<div class="row-actions">' +
+        '<button class="icon-btn" title="Edit" onclick="editValue(\'' + v.id + '\')">' + ICONS.edit + '</button>' +
+        '<button class="icon-btn" title="Delete" onclick="confirmAction(\'Delete this value?\', function(){delValue(\'' + v.id + '\')})">' + ICONS.trash + '</button>' +
+        '</div></div>';
+    }).join('') : '<div class="data-row"><div class="row-main" style="color:var(--gray-1)">Nothing here yet. Run the About content migration to import the existing values.</div></div>') +
+    '</div></div>';
+}),
+
+// ---------------- ABOUT: HUB CARDS ("Get to know us") ----------------
+hubcards: () => safe(async function () {
+  const items = await DB.list('about_hub_cards', { order: [['sort_order', 'asc']] });
+  return '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">' +
+    '<div><h2 style="margin:0">Get to know us</h2><div class="sub">The numbered link cards near the top of the About page. Reorder with \u2191\u2193.</div></div>' +
+    '<button class="btn btn-primary" onclick="addHubCard()">+ Add card</button></div>' +
+    '<div class="panel"><div class="data-list">' +
+    (items.length ? items.map(function (c, i) {
+      return '<div class="data-row" style="' + (c.published ? '' : 'opacity:.5') + '">' +
+        '<div style="display:flex;flex-direction:column;flex-shrink:0">' +
+        '<button class="icon-btn" style="padding:2px" ' + (i === 0 ? 'disabled' : '') + ' onclick="moveRow(\'about_hub_cards\',\'' + c.id + '\',-1,\'hubcards\')">' + ICONS.up + '</button>' +
+        '<button class="icon-btn" style="padding:2px" ' + (i === items.length - 1 ? 'disabled' : '') + ' onclick="moveRow(\'about_hub_cards\',\'' + c.id + '\',1,\'hubcards\')">' + ICONS.down + '</button></div>' +
+        '<div class="row-main"><div class="row-title">' + String(i + 1).padStart(2, '0') + ' \u00b7 ' + esc(c.title) + '</div>' +
+        '<div class="row-sub" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:480px">' + esc(c.description) + ' \u2014 ' + esc(c.href) + '</div></div>' +
+        '<span class="tag ' + (c.published ? 'tag-green' : 'tag-gray') + '" style="flex-shrink:0">' + (c.published ? 'Visible' : 'Hidden') + '</span>' +
+        '<div class="row-actions">' +
+        '<button class="icon-btn" title="Edit" onclick="editHubCard(\'' + c.id + '\')">' + ICONS.edit + '</button>' +
+        '<button class="icon-btn" title="Delete" onclick="confirmAction(\'Delete this card?\', function(){delHubCard(\'' + c.id + '\')})">' + ICONS.trash + '</button>' +
+        '</div></div>';
+    }).join('') : '<div class="data-row"><div class="row-main" style="color:var(--gray-1)">Nothing here yet. Run the About content migration to import the existing cards.</div></div>') +
+    '</div></div>';
+}),
 };
 
 window.VIEWS = VIEWS;

@@ -90,6 +90,9 @@ export default function AdminPage() {
             <button className="side-link" data-view="sermons" data-role="content">Sermons</button>
             <button className="side-link" data-view="events">Events</button>
             <button className="side-link" data-view="faq" data-role="content">FAQ</button>
+            <button className="side-link" data-view="hubcards" data-role="content">About · Get to know us</button>
+            <button className="side-link" data-view="values" data-role="content">About · What defines us</button>
+            <button className="side-link" data-view="beliefs" data-role="content">About · What we believe</button>
             <button className="side-link" data-view="team" data-role="content">Team</button>
             <button className="side-link" data-view="ministries" data-role="content" style={{ display: 'none' }} data-show-if="not-events-only">Ministries</button>
             <button className="side-link" data-view="give" data-role="content">External Giving Link</button>
