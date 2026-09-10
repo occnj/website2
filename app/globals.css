@@ -716,7 +716,20 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
   .header-cta { gap: var(--sp-1); }
   .header-give { padding: 8px 16px; }
   .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
-  .info-strip-inner { flex-direction: column; gap: var(--sp-2); align-items: flex-start; padding: 0 var(--sp-3); }
+  /* Info strip on mobile: a 2-up grid rather than one tall column. The vertical
+     rules only make sense in a horizontal row, so they are hidden here — left in
+     a column they render as stray lines with large gaps around them. The final
+     button spans both columns and centres beneath the grid. */
+  .info-strip-inner {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--sp-3) var(--sp-2);
+    align-items: start;
+    justify-content: stretch;
+    padding: 0 var(--sp-3);
+  }
+  .info-strip-inner .info-div { display: none; }
+  .info-strip-inner > .btn { grid-column: 1 / -1; justify-self: center; margin-top: var(--sp-1); }
   .footer-grid { flex-direction: column; gap: var(--sp-4); }
   .footer-brand, .footer-col { flex: none; width: 100%; }
   .footer-bottom { flex-direction: column; text-align: center; }

@@ -77,6 +77,9 @@
   color: #fff;
   margin-bottom: var(--sp-3);
   max-width: 620px;
+  /* Distribute the words evenly across lines instead of filling each line to
+     the edge, which is what strands a short word like "is." on a line alone. */
+  text-wrap: balance;
 }
 .hero-headline em {
   font-style: italic;

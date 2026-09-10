@@ -69,35 +69,35 @@ export default async function HomePage() {
                 <span>8:30 AM</span>
               </div>
             </div>
-            <div style={{ width: 1, height: 36, background: 'rgba(255,255,255,.1)' }}></div>
+            <div className="info-div" style={{ width: 1, height: 36, background: 'rgba(255,255,255,.1)' }}></div>
             <div className="info-item">
               <div className="info-item-text">
                 <strong>Sunday Service</strong>
                 <span>10:00 AM</span>
               </div>
             </div>
-            <div style={{ width: 1, height: 36, background: 'rgba(255,255,255,.1)' }}></div>
+            <div className="info-div" style={{ width: 1, height: 36, background: 'rgba(255,255,255,.1)' }}></div>
             <div className="info-item">
               <div className="info-item-text">
                 <strong>Sunday Service</strong>
                 <span>11:30 AM</span>
               </div>
             </div>
-            {address ? <><div style={{ width: 1, height: 36, background: 'rgba(255,255,255,.1)' }}></div>
+            {address ? <><div className="info-div" style={{ width: 1, height: 36, background: 'rgba(255,255,255,.1)' }}></div>
             <a className="info-item" href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`} target="_blank" rel="noopener noreferrer">
               <div className="info-item-text">
                 <strong>{address}</strong>
                 <span>Get Directions →</span>
               </div>
             </a></> : null}
-            <div style={{ width: 1, height: 36, background: 'rgba(255,255,255,.1)' }}></div>
+            <div className="info-div" style={{ width: 1, height: 36, background: 'rgba(255,255,255,.1)' }}></div>
             <div className="info-item">
               <div className="info-item-text">
                 <strong>Kids & Youth</strong>
                 <span>Nursery through High School</span>
               </div>
             </div>
-            <div style={{ width: 1, height: 36, background: 'rgba(255,255,255,.1)' }}></div>
+            <div className="info-div" style={{ width: 1, height: 36, background: 'rgba(255,255,255,.1)' }}></div>
             <Link href="/plan-your-visit" className="btn btn-ghost btn-sm">First time? →</Link>
           </div>
         </div>
