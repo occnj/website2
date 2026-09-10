@@ -298,8 +298,11 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
   display: flex;
   align-items: center;
 }
-.header-logo img { height: 46px; width: auto; }
+.header-logo img { height: 56px; width: auto; }
 .logo-mobile { display: none; }
+.logo-dark { display: none; }
+.site-header.scrolled .logo-light { display: none; }
+.site-header.scrolled .logo-dark { display: block; }
 @media (max-width: 767px) {
   .logo-desktop { display: none; }
   .logo-mobile { display: block; }
@@ -769,6 +772,6 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
 @media (max-width: 480px) {
   .container, .container-narrow { padding: 0 var(--sp-2); }
   .header-inner { padding: 0 var(--sp-2); }
-  .logo-desktop { height: 38px; }
+  .logo-desktop { height: 44px; }
   .info-strip-inner { padding: 0; }
 }
