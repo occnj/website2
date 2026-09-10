@@ -579,7 +579,7 @@ const BELIEF_FIELDS = [
 function beliefRowFrom(out, id) {
   if (!out.title) throw new Error('Title is required');
   if (!out.content) throw new Error('Full statement is required');
-  return { id: id || undefined, title: out.title, scripture: out.scripture || '', content: out.content, published: out.published };
+  return { id: id || undefined, title: out.title, scripture: out.scripture || '', body: out.content || '', content: out.content || '', published: out.published };
 }
 function addBelief() {
   openEditor('Add belief', BELIEF_FIELDS, {}, async function (out) {

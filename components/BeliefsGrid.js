@@ -67,7 +67,7 @@ export default function BeliefsGrid({ items }) {
             </button>
             <h3 className="belief-modal-title" id="belief-modal-title">{open.title}</h3>
             {open.scripture ? <p className="belief-modal-scripture">{open.scripture}</p> : null}
-            <p className="belief-modal-text">{open.content}</p>
+            <p className="belief-modal-text">{open.content || open.body}</p>
           </div>
         </div>
       ) : null}
