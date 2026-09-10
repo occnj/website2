@@ -14,6 +14,10 @@ export default async function PlanYourVisitPage() {
   const [hero, settings, faqs] = await Promise.all([getPageHero('plan-your-visit'), getSiteSettings(), getFaqs()]);
   const address = settings && settings.address;
   const directionsUrl = address ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}` : null;
+  // Google's `output=embed` map needs no API key. Falls back to the street
+  // address so the map still renders if the admin setting is ever blank.
+  const mapQuery = address || '2052 St Georges Ave, Rahway, NJ 07065';
+  const mapEmbedUrl = `https://www.google.com/maps?q=${encodeURIComponent(mapQuery)}&output=embed`;
 
   return (
     <>
@@ -136,19 +140,27 @@ export default async function PlanYourVisitPage() {
               <h2 className="t-h2 mt-2">We&rsquo;re in the heart of Rahway</h2>
               <div style={{ marginTop: 'var(--sp-3)', display: 'flex', flexDirection: 'column', gap: 12 }}>
                 {address ? <div style={{ fontSize: '.95rem', padding: '12px 0', borderBottom: '1px solid var(--border)' }}><strong>{address}</strong></div> : null}
-                {settings && settings.service_time ? <div style={{ fontSize: '.95rem', padding: '12px 0', borderBottom: '1px solid var(--border)' }}>{settings.service_time}</div> : null}
-                {settings && settings.phone ? <div style={{ fontSize: '.95rem', padding: '12px 0', borderBottom: '1px solid var(--border)' }}><a href={`tel:${settings.phone}`}>{settings.phone}</a></div> : null}
-                {settings && settings.email ? <div style={{ fontSize: '.95rem', padding: '12px 0' }}><a href={`mailto:${settings.email}`}>{settings.email}</a></div> : null}
+                {settings && settings.phone ? <div style={{ fontSize: '.95rem', padding: '12px 0' }}><a href={`tel:${settings.phone}`}>{settings.phone}</a></div> : null}
               </div>
-              <div style={{ marginTop: 'var(--sp-4)', display: 'flex', gap: 'var(--sp-2)', flexWrap: 'wrap' }}>
-                {directionsUrl ? <a href={directionsUrl} target="_blank" rel="noopener noreferrer" className="btn btn-primary">Get Directions</a> : null}
-                <Link href="/contact" className="btn btn-secondary">Contact Us</Link>
-              </div>
+              {directionsUrl ? <div style={{ marginTop: 'var(--sp-4)' }}>
+                <a href={directionsUrl} target="_blank" rel="noopener noreferrer" className="btn btn-primary">Get Directions</a>
+              </div> : null}
             </div>
-            {directionsUrl ? <a href={directionsUrl} target="_blank" rel="noopener noreferrer" className="map-placeholder img-placeholder" style={{ minHeight: 300, borderRadius: 'var(--radius-lg)' }}>
-              <svg width="40" height="40" viewBox="0 0 40 40" fill="none"><rect x="4" y="4" width="32" height="32" rx="4" stroke="#9BABB6" strokeWidth="1.5" /><path d="M12 28l5-10 6 6 4-8" stroke="#9BABB6" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /><circle cx="28" cy="14" r="3" stroke="#9BABB6" strokeWidth="1.5" /></svg>
-              <span>Open directions<br />{address}</span>
-            </a> : null}
+            <div className="map-embed" style={{ minHeight: 320, borderRadius: 'var(--radius-lg)', overflow: 'hidden' }}>
+              <iframe
+                title="Map to Oasis Christian Centre, 2052 St Georges Ave, Rahway, NJ 07065"
+                src={mapEmbedUrl}
+                width="100%"
+                height="100%"
+                style={{ border: 0, display: 'block', minHeight: 320 }}
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                allowFullScreen
+              />
+            </div>
+          </div>
+          <div style={{ marginTop: 'var(--sp-5)', display: 'flex', justifyContent: 'center' }}>
+            <Link href="/contact" className="btn btn-secondary">Contact Us</Link>
           </div>
         </div>
       </section>
