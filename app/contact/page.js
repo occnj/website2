@@ -2,8 +2,7 @@ import Link from 'next/link';
 import './contact.css';
 import PageHero from '@/components/PageHero';
 import ContactForm from '@/components/ContactForm';
-import SocialLinks from '@/components/SocialLinks';
-import { getPageHero, getSiteSettings } from '@/lib/data';
+import { getPageHero } from '@/lib/data';
 
 export const metadata = {
   title: 'Contact — Oasis Christian Centre',
@@ -12,22 +11,7 @@ export const metadata = {
 export const dynamic = 'force-dynamic';
 
 export default async function ContactPage() {
-  const [hero, settings] = await Promise.all([getPageHero('contact'), getSiteSettings()]);
-  const directionsUrl = settings && settings.address
-    ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(settings.address)}`
-    : null;
-
-  // Office hours — from DB (jsonb array) or fallback to defaults.
-  const officeHours = (settings && Array.isArray(settings.office_hours) && settings.office_hours.length)
-    ? settings.office_hours
-    : [
-        { day: 'Tuesday – Thursday', hours: '10 AM – 4 PM' },
-        { day: 'Friday',             hours: '10 AM – 2 PM' },
-        { day: 'Sunday',             hours: '9 AM – 12 PM' },
-        { day: 'Monday / Saturday',  hours: 'Closed' },
-      ];
-
-  const closureNotice = settings && settings.closure_notice ? settings.closure_notice.trim() : '';
+  const hero = await getPageHero('contact');
 
   return (
     <>
@@ -42,53 +26,14 @@ export default async function ContactPage() {
         <div className="container">
           <div className="contact-grid">
             <div>
-              <div className="contact-info-card">
-                <h3 style={{ fontFamily: 'var(--font-head)', fontSize: '1.25rem', fontWeight: 700, color: '#fff', marginBottom: 'var(--sp-3)' }}>Oasis Christian Centre</h3>
-
-                {settings && settings.address ? <div className="contact-info-item">
-                  <div>
-                    <div className="contact-info-label">Address</div>
-                    <div className="contact-info-value">{settings.address}</div>
-                  </div>
-                </div> : null}
-                {settings && settings.service_time ? <div className="contact-info-item">
-                  <div>
-                    <div className="contact-info-label">Service Times</div>
-                    <div className="contact-info-value">{settings.service_time}</div>
-                  </div>
-                </div> : null}
-                {settings && settings.phone ? <div className="contact-info-item">
-                  <div>
-                    <div className="contact-info-label">Phone</div>
-                    <div className="contact-info-value"><a href={`tel:${settings.phone}`}>{settings.phone}</a></div>
-                  </div>
-                </div> : null}
-                {settings && settings.email ? <div className="contact-info-item">
-                  <div>
-                    <div className="contact-info-label">Email</div>
-                    <div className="contact-info-value"><a href={`mailto:${settings.email}`}>{settings.email}</a></div>
-                  </div>
-                </div> : null}
-
-                <div className="office-hours">
-                  <h4>Office Hours</h4>
-                  {officeHours.map((row, i) => (
-                    <div className="office-row" key={i}>
-                      <span>{row.day}</span>
-                      <span>{row.hours}</span>
-                    </div>
-                  ))}
+              <div className="contact-info-card" data-screen-label="Our Story">
+                <h3 style={{ fontFamily: 'var(--font-head)', fontSize: '1.5rem', fontWeight: 700, color: '#fff', marginBottom: 'var(--sp-3)' }}>Our Story</h3>
+                <div className="contact-history">
+                  <p>Oasis Christian Centre began with a simple vision: to be a place where anyone could come as they are and discover who God really is. What started as a small gathering has grown into a community committed to knowing God, finding hope, and making a difference in Rahway and beyond.</p>
+                  <p>Over the years we have grown in number and in heart, but our purpose has never changed. We are a church of people — with names and stories, not titles — who believe the local church should impact the world around it. Whether you are exploring faith for the first time or have walked with Jesus for decades, there is a place for you here.</p>
+                  <p>We would love to tell you more in person. Reach out using the form, and someone from our team will be glad to connect with you.</p>
                 </div>
-
-                <SocialLinks settings={settings} className="contact-social" />
               </div>
-
-              {directionsUrl ? <div style={{ marginTop: 'var(--sp-3)' }}>
-                <div className="img-placeholder" style={{ borderRadius: 'var(--radius-md)', aspectRatio: '16/7' }}>
-                  <svg width="36" height="36" viewBox="0 0 40 40" fill="none"><rect x="4" y="4" width="32" height="32" rx="4" stroke="#9BABB6" strokeWidth="1.5" /><path d="M12 28l5-10 6 6 4-8" stroke="#9BABB6" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /><circle cx="28" cy="14" r="3" stroke="#9BABB6" strokeWidth="1.5" /></svg>
-                  <a href={directionsUrl} target="_blank" rel="noopener noreferrer">Open directions to {settings.address}</a>
-                </div>
-              </div> : null}
             </div>
 
             <ContactForm />

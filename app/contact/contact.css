@@ -54,3 +54,11 @@
 @media (max-width: 800px) {
   .contact-grid { grid-template-columns: 1fr; }
 }
+
+/* Church history block replacing the old info card on the contact page. */
+.contact-history p {
+  color: rgba(255,255,255,.8);
+  line-height: 1.75;
+  margin-bottom: var(--sp-3);
+}
+.contact-history p:last-child { margin-bottom: 0; }
