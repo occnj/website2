@@ -285,11 +285,14 @@
   .involve-title { font-size: 1.3rem; }
   .involve-desc { display: none; }
   .involve-left { gap: var(--sp-3); }
-  /* On mobile the hero content sits much closer to the nav — no giant gap */
-  .hero-home { align-items: center; min-height: 100svh; }
+  /* On mobile the hero content sits much closer to the nav — no giant gap.
+     100svh with vertically-centred content left a large dead band under the
+     buttons before the info strip, so the hero is a little shorter here and the
+     bottom padding is trimmed. */
+  .hero-home { align-items: center; min-height: 86svh; }
   .hero-content-wrap {
-    padding-top: calc(var(--header-h) + var(--sp-4));
-    padding-bottom: var(--sp-6);
+    padding-top: calc(var(--header-h) + var(--sp-3));
+    padding-bottom: var(--sp-3);
   }
   .hero-headline { font-size: clamp(2.2rem, 9vw, 3.2rem); }
   .hero-sub { font-size: .97rem; }

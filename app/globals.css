@@ -720,10 +720,11 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
      rules only make sense in a horizontal row, so they are hidden here — left in
      a column they render as stray lines with large gaps around them. The final
      button spans both columns and centres beneath the grid. */
+  .info-strip { padding: var(--sp-2) 0; }
   .info-strip-inner {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: var(--sp-3) var(--sp-2);
+    gap: var(--sp-2);
     align-items: start;
     justify-content: stretch;
     padding: 0 var(--sp-3);
