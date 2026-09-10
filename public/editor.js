@@ -124,6 +124,27 @@
   function markDirty() { dirty = true; revision++; setStatus('Unsaved changes', 'warn'); try { localStorage.setItem('oasis_draft:' + slug, JSON.stringify(edits)); } catch (e) { setStatus('Draft storage full — publish to save', 'warn'); } }
   var K = window.OASIS.keyFor;
 
+  // matchMedia is missing in some non-browser environments (and old browsers),
+  // so never call it directly — treat an absent implementation as "not matching"
+  // rather than letting it throw and abort editor setup.
+  function mq(query) {
+    try { return !!(window.matchMedia && window.matchMedia(query).matches); }
+    catch (e) { return false; }
+  }
+
+  // Floating panels (All text, orphan review) become a full-screen sheet on a
+  // phone; a small floating box is unusable next to the on-screen keyboard.
+  function panelStyle() {
+    return mq('(max-width:768px)')
+      ? 'position:fixed;inset:0;width:100%;height:100%;overflow:auto;background:white;color:#12202c;padding:14px;z-index:100004;font:16px system-ui;-webkit-overflow-scrolling:touch'
+      : 'position:fixed;inset:60px 12px 12px auto;width:min(560px,calc(100vw - 24px));overflow:auto;background:white;color:#12202c;padding:20px;z-index:100004;box-shadow:0 4px 30px #0005;border-radius:12px;font:14px system-ui';
+  }
+  // Close is sticky and full-width on a phone so it stays reachable while
+  // scrolling a long list of fields.
+  function styleCloseButton(btn) {
+    if (mq('(max-width:768px)')) btn.style.cssText = 'position:sticky;top:0;width:100%;min-height:46px;font:600 16px system-ui;background:#12202c;color:#fff;border:0;border-radius:8px;margin-bottom:12px;z-index:1';
+  }
+
   // Record the ORIGINAL text for a key the first time it is edited, so the
   // public site can heal the edit onto the right element if a later redesign
   // shifts its DOM path. Only the pre-edit content is a reliable fingerprint,
@@ -168,6 +189,26 @@
       '#cms-pop .lbl{font-size:.68rem;text-transform:uppercase;letter-spacing:.08em;color:#7a8791;font-weight:700}',
       '#cms-pop input[type=text]{font:inherit;font-size:.82rem;padding:7px 9px;border:1px solid #d7dde2;border-radius:7px;width:100%}',
       '.cms-added{outline:1px dashed rgba(0,150,199,.4);outline-offset:3px}',
+      /* ---- MOBILE / TOUCH ----
+         The bar is built for a wide desktop viewport. On a phone the brand and
+         page pill are the first things worth dropping, tap targets need to grow
+         to a comfortable size, and inputs must be >=16px or iOS zooms on focus. */
+      '@media (max-width:768px){',
+      '  #cms-bar{height:auto;min-height:56px;flex-wrap:wrap;gap:8px;padding:8px 10px}',
+      '  #cms-bar .brand{display:none}',
+      '  #cms-bar .pill{display:none}',
+      '  #cms-bar .grow{display:none}',
+      '  #cms-bar .st{order:1;flex:1 1 100%;font-size:.75rem;min-width:0}',
+      '  #cms-bar .st #cms-stmsg{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}',
+      '  #cms-bar button{order:2;flex:1 1 0;min-height:44px;font-size:.82rem;padding:11px 10px}',
+      '  #cms-hover{gap:6px;padding:6px;flex-wrap:wrap;justify-content:center}',
+      '  #cms-hover button{font-size:.8rem;padding:11px 13px;min-height:44px}',
+      '  #cms-pop{width:min(300px,calc(100vw - 24px));padding:14px}',
+      '  #cms-pop button{padding:12px;min-height:44px}',
+      '  #cms-pop .sw{width:34px;height:34px}',
+      '  #cms-pop input[type=text]{font-size:16px;padding:10px 11px}',
+      '  #cms-toast{bottom:14px;width:calc(100vw - 28px);text-align:center}',
+      '}',
       '#cms-toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:#12202c;color:#fff;padding:11px 18px;border-radius:10px;font-family:system-ui;font-size:.85rem;z-index:100003;opacity:0;transition:opacity .2s;box-shadow:0 6px 24px rgba(0,0,0,.3)}',
       '#cms-toast.show{opacity:1}',
       '@keyframes cms-spin{to{transform:rotate(360deg)}}'
@@ -258,6 +299,17 @@
     });
     var r = el.getBoundingClientRect();
     elHover.style.display = 'flex';
+    if (mq('(max-width:768px)')) {
+      // The toolbar wraps to multiple rows on a phone, so measure it after it is
+      // visible and flip below the element when there is no room above.
+      elHover.style.left = '8px';
+      elHover.style.right = '8px';
+      var h = elHover.offsetHeight;
+      var above = r.top - h - 8;
+      elHover.style.top = (above > 60 ? above : Math.min(window.innerHeight - h - 8, r.bottom + 8)) + 'px';
+      return;
+    }
+    elHover.style.right = '';
     var top = Math.max(58, r.top - 34);
     elHover.style.top = top + 'px';
     elHover.style.left = Math.min(window.innerWidth - elHover.offsetWidth - 8, Math.max(8, r.left)) + 'px';
@@ -431,7 +483,7 @@
     if (previous) previous.remove();
     var panel = document.createElement('div');
     panel.id = 'cms-text-panel';
-    panel.style.cssText = 'position:fixed;inset:60px 12px 12px auto;width:min(560px,calc(100vw - 24px));overflow:auto;background:white;color:#12202c;padding:20px;z-index:100004;box-shadow:0 4px 30px #0005;border-radius:12px;font:14px system-ui';
+    panel.style.cssText = panelStyle();
     var reasonText = { 'ambiguous': 'the same wording appears more than once, so it was not safe to guess', 'not-found': 'the original wording is no longer on the page', 'no-signature': 'this edit predates change-tracking and cannot be auto-placed' };
     var html = '<button type="button">Close</button><h2>Edits that could not be placed</h2>' +
       '<p>The page changed since these were saved, so they were not applied automatically. Find the matching text on the page and re-enter it, then publish. Nothing was lost — the old values are shown below.</p>';
@@ -441,7 +493,9 @@
         '<div style="font-size:.8rem;color:#7a8791">Why: ' + (reasonText[o.reason] || o.reason) + '</div></div>';
     });
     panel.innerHTML = html;
-    panel.querySelector('button').onclick = function () { panel.remove(); };
+    var orphanClose = panel.querySelector('button');
+    styleCloseButton(orphanClose);
+    orphanClose.onclick = function () { panel.remove(); };
     document.body.appendChild(panel);
   }
   function escapeHtml(s) { var d = document.createElement('div'); d.textContent = String(s == null ? '' : s); return d.innerHTML; }
@@ -453,9 +507,11 @@
     var targets = window.OASIS.copyTargets();
     var panel = document.createElement('div');
     panel.id = 'cms-text-panel';
-    panel.style.cssText = 'position:fixed;inset:60px 12px 12px auto;width:min(560px,calc(100vw - 24px));overflow:auto;background:white;color:#12202c;padding:20px;z-index:100004;box-shadow:0 4px 30px #0005;border-radius:12px;font:14px system-ui';
-    panel.innerHTML = '<button type="button">Close</button><h2>All page text</h2><p>Edit any wording or punctuation, including hidden content, form hints and image descriptions. Alt-click a tab or menu on the page to open other content, then reopen this list. Publish when finished.</p><input type="search" placeholder="Find text…" style="width:100%;padding:10px;margin-bottom:12px"><div class="cms-text-rows"></div>';
-    panel.querySelector('button').onclick = function () { panel.remove(); };
+    panel.style.cssText = panelStyle();
+    panel.innerHTML = '<button type="button">Close</button><h2>All page text</h2><p>Edit any wording or punctuation, including hidden content, form hints and image descriptions. Alt-click a tab or menu on the page to open other content, then reopen this list. Publish when finished.</p><input type="search" placeholder="Find text…" style="width:100%;padding:10px;margin-bottom:12px;font-size:16px;box-sizing:border-box"><div class="cms-text-rows"></div>';
+    var textClose = panel.querySelector('button');
+    styleCloseButton(textClose);
+    textClose.onclick = function () { panel.remove(); };
     var rows = panel.querySelector('.cms-text-rows');
     window.OASIS.collect().sections.forEach(function (section) {
       if (!edits.hidden || !edits.hidden[K(section)]) return;
@@ -472,7 +528,9 @@
       var field = document.createElement('textarea');
       field.value = target.get();
       field.rows = Math.min(6, Math.max(2, Math.ceil(field.value.length / 65)));
-      field.style.cssText = 'width:100%;padding:8px;font:inherit;box-sizing:border-box';
+      field.style.cssText = mq('(max-width:768px)')
+        ? 'width:100%;padding:11px;font:16px system-ui;box-sizing:border-box;border:1px solid #d7dde2;border-radius:8px'
+        : 'width:100%;padding:8px;font:inherit;box-sizing:border-box';
       var originalValue = target.get();
       field.oninput = function () { recordSig(target.key, originalValue); target.set(field.value); ensure('copy')[target.key] = field.value; markDirty(); };
       label.append(caption, field); rows.appendChild(label);
@@ -486,7 +544,19 @@
 
   // ---------- global listeners ----------
   function wire() {
+    // Touch devices never fire a real hover, so the toolbar would only appear at
+    // the same instant editing began. On touch we make selection explicit: the
+    // first tap highlights the element and shows its toolbar, a second tap (or
+    // the toolbar's own Edit button) starts editing.
+    var isTouch = mq('(hover:none)') || ('ontouchstart' in window);
+    var tapSelected = null;
+    function clearTapSelection() {
+      if (tapSelected && tapSelected.classList) tapSelected.classList.remove('cms-hl', 'cms-hl-img');
+      tapSelected = null;
+    }
+
     document.addEventListener('mouseover', function (e) {
+      if (isTouch) return; // handled by the tap flow below
       if (editingEl) return;
       if (e.target.closest('#cms-bar,#cms-hover,#cms-pop,#cms-toast,#cms-text-panel')) return;
       var el = nearestEditable(e.target) || nearestSection(e.target);
@@ -497,6 +567,7 @@
       }
     });
     document.addEventListener('mouseout', function (e) {
+      if (isTouch) return;
       if (e.target.classList) e.target.classList.remove('cms-hl', 'cms-hl-img');
     });
     document.addEventListener('click', function (e) {
@@ -507,8 +578,18 @@
       if (editingEl && !editingEl.contains(e.target)) return; // let blur handle it
       if (editingEl) return;
       var el = nearestEditable(e.target);
-      if (!el) { closePop(); return; }
+      if (!el) { closePop(); clearTapSelection(); return; }
       var t = typeOf(el);
+      if (isTouch && tapSelected !== el) {
+        // First tap on a new element: select it and show the toolbar only.
+        e.preventDefault(); e.stopPropagation();
+        clearTapSelection();
+        tapSelected = el;
+        el.classList.add(t === 'img' ? 'cms-hl-img' : 'cms-hl');
+        showHover(el);
+        return;
+      }
+      if (isTouch) clearTapSelection(); // second tap on same element falls through
       if (t === 'text') startTextEdit(el);
       else if (t === 'link') editLink(el);
       else if (t === 'img') pickImage(el);
