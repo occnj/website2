@@ -41,7 +41,6 @@ export default function BeliefsGrid({ items }) {
             aria-haspopup="dialog"
           >
             <span className="belief-card-title">{b.title}</span>
-            {b.scripture ? <span className="belief-card-scripture">{b.scripture}</span> : null}
             <span className="belief-card-more">Read more →</span>
           </button>
         ))}
@@ -66,8 +65,8 @@ export default function BeliefsGrid({ items }) {
               ×
             </button>
             <h3 className="belief-modal-title" id="belief-modal-title">{open.title}</h3>
-            {open.scripture ? <p className="belief-modal-scripture">{open.scripture}</p> : null}
             <p className="belief-modal-text">{open.content || open.body}</p>
+            {open.scripture ? <p className="belief-modal-scripture">{open.scripture}</p> : null}
           </div>
         </div>
       ) : null}

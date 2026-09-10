@@ -121,6 +121,7 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+  min-height: 120px;
   text-align: left;
   background: #fff;
   border: 1px solid var(--border);
@@ -195,7 +196,9 @@
 .belief-modal-scripture {
   font-size: .82rem;
   color: var(--gray-1);
-  margin-top: 6px;
+  margin-top: var(--sp-3);
+  padding-top: var(--sp-3);
+  border-top: 1px solid var(--border);
   line-height: 1.6;
 }
 .belief-modal-text {
