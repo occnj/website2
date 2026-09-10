@@ -299,12 +299,17 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
   align-items: center;
 }
 .header-logo img { height: 56px; width: auto; }
-.logo-mobile { display: none; }
-.logo-dark { display: none; }
-.site-header.scrolled .logo-light { display: none; }
-.site-header.scrolled .logo-dark { display: block; }
+/* Logo variants are mutually exclusive by viewport, gated on min-/max-width so
+   the desktop light/dark swap can never out-specify the mobile rule. (Media
+   queries add no specificity, so a bare `.logo-desktop{display:none}` loses to
+   `.site-header.scrolled .logo-dark{display:block}` and both would show.) */
+.logo-desktop, .logo-mobile, .logo-dark { display: none; }
+@media (min-width: 768px) {
+  .logo-light { display: block; }                      /* light logo over the hero */
+  .site-header.scrolled .logo-light { display: none; }
+  .site-header.scrolled .logo-dark { display: block; } /* dark logo on the solid bar */
+}
 @media (max-width: 767px) {
-  .logo-desktop { display: none; }
   .logo-mobile { display: block; }
 }
 

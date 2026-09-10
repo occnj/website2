@@ -88,7 +88,7 @@ export default function Header() {
         <div className="header-inner">
           <Link href="/" className="header-logo">
             <img src={asset('/uploads/oasis-logo.png')} alt="Oasis Christian Centre" className="logo-desktop logo-light" />
-            <img src={asset('/uploads/OCC_Logo_Dark-02.png')} alt="Oasis Christian Centre" className="logo-desktop logo-dark" />
+            <img src={asset('/uploads/OCC_Logo_Dark-01.png')} alt="Oasis Christian Centre" className="logo-desktop logo-dark" />
             <img src={asset('/uploads/logo-1776793086472.png')} alt="Oasis Christian Centre" className="logo-mobile" />
           </Link>
           <nav className="primary-nav">
