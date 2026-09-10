@@ -65,8 +65,8 @@ export default async function HomePage() {
           <div className="info-strip-inner">
             <div className="info-item">
               <div className="info-item-text">
-                <strong>Sunday Service</strong>
-                <span>{serviceTime}</span>
+                <strong>Sunday Services</strong>
+                <span>8:30 AM · 10:00 AM · 11:30 AM</span>
               </div>
             </div>
             {address ? <><div style={{ width: 1, height: 36, background: 'rgba(255,255,255,.1)' }}></div>
