@@ -344,3 +344,17 @@ describe('pasting into the visual editor', () => {
     dom.window.close();
   });
 });
+
+describe('empty added blocks are recoverable', () => {
+  it('an empty added block is still a selectable text block so it can be deleted', () => {
+    const dom = page('<section><div class="container"></div></section>');
+    const { OASIS, document } = dom.window;
+    const host = document.querySelector('.container');
+    // Simulate an added-but-empty block saved to overrides.
+    OASIS.applyEdits({ added: { [OASIS.keyFor(host)]: [{ id: 'add-empty', type: 'text', html: '' }] } });
+    const block = document.querySelector('[data-cms="add-empty"]');
+    expect(block).toBeTruthy();
+    expect(OASIS.collect().texts.includes(block)).toBe(true);
+    dom.window.close();
+  });
+});

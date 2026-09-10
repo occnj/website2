@@ -77,6 +77,11 @@
   }
   function isTextBlock(el) {
     if (el.closest(UI + ',script,style,noscript,svg,iframe,select,textarea')) return false;
+    // An editor-added block is always selectable — even when empty — so it can
+    // be edited or deleted. Otherwise a block someone added and left blank has
+    // no visible text, fails the check below, and becomes impossible to select
+    // or remove.
+    if (el.classList && el.classList.contains('cms-added') && el.tagName === 'P') return true;
     return !!visibleText(el) && onlyInlineChildren(el) &&
       (hasDirectText(el) || el.children.length > 0);
   }

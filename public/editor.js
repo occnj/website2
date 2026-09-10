@@ -237,7 +237,11 @@
       '#cms-pop button:hover{background:#e3e8ec}',
       '#cms-pop .lbl{font-size:.68rem;text-transform:uppercase;letter-spacing:.08em;color:#7a8791;font-weight:700}',
       '#cms-pop input[type=text]{font:inherit;font-size:.82rem;padding:7px 9px;border:1px solid #d7dde2;border-radius:7px;width:100%}',
-      '.cms-added{outline:1px dashed rgba(0,150,199,.4);outline-offset:3px}',
+      '.cms-added{outline:1px dashed rgba(0,150,199,.4);outline-offset:3px;min-height:24px}',
+      /* An added text block left empty has no height to tap. In edit mode give it
+         a clear placeholder box so it can be selected, edited or deleted. */
+      'p.cms-added:empty{min-height:40px;padding:8px 12px;border-radius:6px;background:rgba(0,150,199,.06)}',
+      'p.cms-added:empty::before{content:"Empty text block — tap to edit or delete";color:#7a8791;font-size:.85rem;font-style:italic}',
       /* A section hidden from the live site stays VISIBLE but ghosted inside the
          editor. If it were really display:none it could not be hovered, so its
          own menu — the only place with "Show section" — would be unreachable and
