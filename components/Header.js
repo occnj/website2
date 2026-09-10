@@ -43,10 +43,16 @@ export default function Header() {
       ticking = true;
       window.requestAnimationFrame(() => {
         ticking = false;
-        const next = window.scrollY > 20;
-        setScrolled((prev) => (prev === next ? prev : next));
+        const y = window.scrollY;
+        // Separate on/off thresholds. With a single boundary, any scroll that
+        // hovers around it — iOS rubber-banding, momentum settling, the address
+        // bar collapsing — flips the header back and forth every frame, which
+        // reads as a glitch. The state now has to travel a real distance to
+        // change back.
+        setScrolled((prev) => (prev ? y > 8 : y > 32));
       });
     }
+    onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);

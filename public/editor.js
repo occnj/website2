@@ -405,6 +405,8 @@
       el.removeEventListener('blur', finish);
       el.removeEventListener('input', rememberInput);
       el.removeEventListener('keydown', onKey);
+      el.removeEventListener('paste', onPaste);
+      el.removeEventListener('drop', onDrop);
       editingEl = null;
       var cleanHtml = window.OASIS.sanitizeHtml(el.innerHTML);
       if (el.innerHTML !== cleanHtml) el.innerHTML = cleanHtml;
@@ -415,10 +417,58 @@
       if (e.key === 'Escape') { el.innerHTML = before; ensure('text')[K(el)] = before; markDirty(); el.blur(); }
       if (e.key === 'Enter' && !e.shiftKey && /^(H[1-6]|SPAN|A|BUTTON|STRONG|LI)$/.test(el.tagName)) { e.preventDefault(); el.blur(); }
     }
+    // Paste as PLAIN TEXT. Copying from Word, Google Docs or another site brings
+    // along <span style="font-family:…;font-size:…;color:…"> markup, and the
+    // sanitizer only strips dangerous tags — it deliberately keeps style/class —
+    // so that formatting would survive and visibly override the site's own
+    // typography. Inserting text only means the block keeps its coded size,
+    // colour and font.
+    function onPaste(e) {
+      e.preventDefault();
+      var cb = e.clipboardData || window.clipboardData;
+      if (!cb) return;
+      var text = cb.getData('text/plain') || '';
+      if (!text) return;
+      insertPlainText(el, text);
+    }
+    // A drag-and-drop of selected text carries the same rich markup as a paste.
+    function onDrop(e) {
+      if (!e.dataTransfer) return;
+      e.preventDefault();
+      var text = e.dataTransfer.getData('text/plain') || '';
+      if (text) insertPlainText(el, text);
+    }
     el.addEventListener('input', rememberInput);
     function rememberInput() { ensure('text')[K(el)] = window.OASIS.sanitizeHtml(el.innerHTML); markDirty(); }
     el.addEventListener('blur', finish);
     el.addEventListener('keydown', onKey);
+    el.addEventListener('paste', onPaste);
+    el.addEventListener('drop', onDrop);
+  }
+
+  // Insert plain text at the caret without introducing any markup. Newlines
+  // become <br> only where the element is a block that can hold them; for
+  // single-line elements (headings, buttons, links) they collapse to spaces so a
+  // multi-line paste cannot break the layout.
+  function insertPlainText(el, text) {
+    var multiline = !/^(H[1-6]|SPAN|A|BUTTON|STRONG|LI|LABEL)$/.test(el.tagName);
+    var clean = String(text).replace(/\r\n?/g, '\n');
+    clean = multiline ? clean.replace(/\n{3,}/g, '\n\n') : clean.replace(/\s*\n\s*/g, ' ');
+    // execCommand('insertText') keeps the browser's own undo stack intact, which
+    // a manual range replacement would destroy.
+    var ok = false;
+    try { ok = document.execCommand('insertText', false, clean); } catch (err) { ok = false; }
+    if (ok) return;
+    var sel = window.getSelection();
+    if (!sel || !sel.rangeCount) { el.appendChild(document.createTextNode(clean)); return; }
+    var range = sel.getRangeAt(0);
+    range.deleteContents();
+    var node = document.createTextNode(clean);
+    range.insertNode(node);
+    range.setStartAfter(node);
+    range.collapse(true);
+    sel.removeAllRanges();
+    sel.addRange(range);
   }
 
   // ---------- image replace ----------

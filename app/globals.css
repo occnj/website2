@@ -246,7 +246,7 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
   backface-visibility: hidden;
 }
 .site-header.scrolled { box-shadow: var(--shadow-md); }
-.site-header { transition: background .25s ease, box-shadow .2s, border-color .25s ease; }
+.site-header { transition: background .25s ease, box-shadow .2s, border-color .25s ease, backdrop-filter .25s ease, -webkit-backdrop-filter .25s ease; }
 
 /* --- FLOATING HEADER (site-wide, transparent at top of page) ---
    The bar is transparent at the very top of every page so the logo + nav float
@@ -258,8 +258,12 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
   background: transparent;
   border-bottom-color: transparent;
   box-shadow: none;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
+  /* blur(0) rather than `none`: switching backdrop-filter on and off creates and
+     destroys a compositing layer on every scroll-state change, which is what
+     makes the bar visibly flicker. Keeping the property present (at zero blur)
+     keeps one stable layer and lets the value animate instead of popping. */
+  backdrop-filter: blur(0px);
+  -webkit-backdrop-filter: blur(0px);
 }
 /* Subtle top-to-transparent scrim behind the floating bar for legibility */
 .site-header.floating::before {
@@ -297,17 +301,30 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
 .header-logo {
   display: flex;
   align-items: center;
+  position: relative;
 }
 .header-logo img { height: 56px; width: auto; }
 /* Logo variants are mutually exclusive by viewport, gated on min-/max-width so
    the desktop light/dark swap can never out-specify the mobile rule. (Media
    queries add no specificity, so a bare `.logo-desktop{display:none}` loses to
    `.site-header.scrolled .logo-dark{display:block}` and both would show.) */
-.logo-desktop, .logo-mobile, .logo-dark { display: none; }
+.logo-desktop, .logo-mobile { display: none; }
 @media (min-width: 768px) {
-  .logo-light { display: block; }                      /* light logo over the hero */
-  .site-header.scrolled .logo-light { display: none; }
-  .site-header.scrolled .logo-dark { display: block; } /* dark logo on the solid bar */
+  /* Cross-fade rather than display-swap. The two files have slightly different
+     aspect ratios, so toggling `display` shifts the bar's width by a few pixels
+     mid-scroll, and an image that has never been displayed can flash blank on
+     first reveal. Overlaying them keeps the layout fixed and both decoded. */
+  .logo-light { display: block; transition: opacity .25s ease; }
+  .logo-dark {
+    display: block;
+    position: absolute;
+    left: 0; top: 50%;
+    transform: translateY(-50%);
+    opacity: 0;
+    transition: opacity .25s ease;
+  }
+  .site-header.scrolled .logo-light { opacity: 0; }
+  .site-header.scrolled .logo-dark { opacity: 1; }
 }
 @media (max-width: 767px) {
   .logo-mobile { display: block; }

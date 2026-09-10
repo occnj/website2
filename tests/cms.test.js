@@ -302,3 +302,45 @@ describe('hidden sections stay reachable', () => {
     dom.window.close();
   });
 });
+
+describe('pasting into the visual editor', () => {
+  function pasteInto(dom, el, data) {
+    const evt = new dom.window.Event('paste', { bubbles: true, cancelable: true });
+    evt.clipboardData = { getData: (type) => data[type] || '' };
+    el.dispatchEvent(evt);
+    return evt;
+  }
+
+  it('drops pasted markup so the block keeps its own font, size and colour', async () => {
+    const dom = page(fixture), { document } = dom.window;
+    await boot(dom);
+    const p = document.querySelector('p');
+    p.click();
+    const rich = '<span style="font-family:Arial;font-size:28pt;color:#ff0000">Pasted words</span>';
+    const evt = pasteInto(dom, p, { 'text/plain': 'Pasted words', 'text/html': rich });
+    expect(evt.defaultPrevented).toBe(true);
+    expect(p.innerHTML).not.toContain('font-family');
+    expect(p.innerHTML).not.toContain('color:');
+    expect(p.innerHTML).not.toContain('<span');
+    dom.window.close();
+  });
+
+  it('collapses newlines on single-line elements so a paste cannot break layout', async () => {
+    const dom = page(fixture), { document } = dom.window;
+    await boot(dom);
+    const btn = document.querySelector('button');
+    btn.click();
+    pasteInto(dom, btn, { 'text/plain': 'Line one\nLine two' });
+    expect(btn.textContent).not.toContain('\n');
+    dom.window.close();
+  });
+
+  it('the sanitizer alone would NOT have removed inline styles (why paste is intercepted)', () => {
+    const dom = page(fixture);
+    const dirty = '<span style="font-size:40pt;color:red">x</span>';
+    // Documents the gap this fix closes: sanitizeHtml strips dangerous tags but
+    // deliberately preserves style/class, so pasted formatting used to survive.
+    expect(dom.window.OASIS.sanitizeHtml(dirty)).toContain('font-size');
+    dom.window.close();
+  });
+});
