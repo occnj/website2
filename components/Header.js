@@ -87,7 +87,8 @@ export default function Header() {
       <header className={'site-header' + (scrolled ? ' scrolled' : '') + (floating ? ' floating' : '')}>
         <div className="header-inner">
           <Link href="/" className="header-logo">
-            <img src={asset('/uploads/oasis-logo.png')} alt="Oasis Christian Centre" />
+            <img src={asset('/uploads/oasis-logo.png')} alt="Oasis Christian Centre" className="logo-desktop" />
+            <img src={asset('/uploads/logo-1776793086472.png')} alt="Oasis Christian Centre" className="logo-mobile" />
           </Link>
           <nav className="primary-nav">
             {links.map((link, i) => (

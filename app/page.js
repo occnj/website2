@@ -130,7 +130,7 @@ export default async function HomePage() {
           <div className="split-2" style={{ alignItems: 'end', marginBottom: 'var(--sp-6)', paddingBottom: 'var(--sp-5)', borderBottom: '1px solid rgba(255,255,255,.1)' }}>
             <div>
               <p className="t-eyebrow" style={{ color: 'var(--amber)' }}>Get Involved</p>
-              <h2 style={{ fontFamily: 'var(--font-head)', fontSize: 'clamp(2.2rem,4.5vw,3.5rem)', fontWeight: 700, lineHeight: 1.05, letterSpacing: '-.025em', color: '#fff', marginTop: 'var(--sp-2)' }}>
+              <h2 style={{ fontFamily: 'var(--font-head)', fontSize: 'clamp(2rem,3.5vw,3.2rem)', fontWeight: 700, lineHeight: 1.1, letterSpacing: '-.025em', color: '#fff', marginTop: 'var(--sp-2)' }}>
                 See how God can use<br />your gifts to make an<br /><em style={{ fontStyle: 'italic', color: 'var(--amber)' }}>eternal impact.</em>
               </h2>
             </div>

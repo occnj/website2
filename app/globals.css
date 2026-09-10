@@ -11,8 +11,8 @@
   --blue-light: #E8F6FC;
   --charcoal:   #1A2835;
   --charcoal-2: #2D3E4E;
-  --amber:      #f05123;
-  --amber-light:#FDE8E0;
+  --amber:      #C8883A;
+  --amber-light:#FBF3E8;
   --white:      #F9F8F6;
   --off-white:  #F2F1EF;
   --gray-1:     #6B7A8A;
@@ -128,7 +128,7 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
   color: #fff;
   box-shadow: 0 2px 12px rgba(200,136,58,.25);
 }
-.btn-amber:hover { background: #d4431a; transform: translateY(-1px); }
+.btn-amber:hover { background: #b57830; transform: translateY(-1px); }
 .btn-ghost {
   background: rgba(255,255,255,.12);
   color: #fff;
@@ -299,6 +299,11 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
   align-items: center;
 }
 .header-logo img { height: 46px; width: auto; }
+.logo-mobile { display: none; }
+@media (max-width: 767px) {
+  .logo-desktop { display: none; }
+  .logo-mobile { display: block; }
+}
 
 .primary-nav { display: flex; align-items: center; gap: 4px; }
 .nav-item { position: relative; }
@@ -508,7 +513,7 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
   text-transform: uppercase;
 }
 .tag-blue { background: var(--blue-light); color: var(--blue-dark); }
-.tag-amber { background: var(--amber-light); color: #b33b18; }
+.tag-amber { background: var(--amber-light); color: #9a5f1a; }
 .tag-gray { background: var(--off-white); color: var(--gray-1); }
 .tag-green { background: #EDF7F0; color: #2D6B4A; }
 
@@ -764,6 +769,6 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
 @media (max-width: 480px) {
   .container, .container-narrow { padding: 0 var(--sp-2); }
   .header-inner { padding: 0 var(--sp-2); }
-  .header-logo img { height: 38px; }
+  .logo-desktop { height: 38px; }
   .info-strip-inner { padding: 0; }
 }
