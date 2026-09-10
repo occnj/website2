@@ -120,6 +120,55 @@
     });
   }
 
+  // A section is "hidden" per the saved overrides, not per its inline display —
+  // inside the editor we deliberately keep it on screen (ghosted) so it can
+  // still be selected and un-hidden.
+  function isHiddenSection(sec) {
+    return !!(edits.hidden && edits.hidden[K(sec)]);
+  }
+  // Re-apply the ghosted look for every hidden section. Called after load and
+  // after any hide/show toggle. Undoes the display:none that applyEdits sets,
+  // because that is the public-site behaviour, not the editor's.
+  function refreshHiddenPreview() {
+    window.OASIS.collect().sections.forEach(function (sec) {
+      if (isHiddenSection(sec)) {
+        sec.style.display = '';
+        sec.classList.add('cms-hidden-preview');
+      } else {
+        sec.classList.remove('cms-hidden-preview');
+      }
+    });
+  }
+
+  // Remove a block that was added through the editor. Added blocks carry a
+  // data-cms id, and keyFor returns that id, so their text/image/style overrides
+  // are keyed by it as well — all of it has to go or a deleted block would be
+  // rebuilt (or leave orphaned overrides behind) on the next load.
+  function deleteBlock(node) {
+    var id = node.getAttribute('data-cms');
+    if (!id) return;
+    if (edits.added) {
+      Object.keys(edits.added).forEach(function (ck) {
+        edits.added[ck] = edits.added[ck].filter(function (b) { return b.id !== id; });
+        if (!edits.added[ck].length) delete edits.added[ck];
+      });
+      if (!Object.keys(edits.added).length) delete edits.added;
+    }
+    ['text', 'img', 'style', 'copy', 'sig', 'hidden'].forEach(function (bucket) {
+      if (!edits[bucket]) return;
+      Object.keys(edits[bucket]).forEach(function (k) {
+        if (k === id || k.indexOf(id + '::') === 0 || k.indexOf(id + '>') === 0) delete edits[bucket][k];
+      });
+    });
+    if (editingEl && node.contains(editingEl)) editingEl = null;
+    node.remove();
+    hideHover();
+    closePop();
+    markDirty();
+    reclassify();
+    toast('Block deleted');
+  }
+
   function ensure(k) { edits[k] = edits[k] || {}; return edits[k]; }
   function markDirty() { dirty = true; revision++; setStatus('Unsaved changes', 'warn'); try { localStorage.setItem('oasis_draft:' + slug, JSON.stringify(edits)); } catch (e) { setStatus('Draft storage full — publish to save', 'warn'); } }
   var K = window.OASIS.keyFor;
@@ -189,6 +238,16 @@
       '#cms-pop .lbl{font-size:.68rem;text-transform:uppercase;letter-spacing:.08em;color:#7a8791;font-weight:700}',
       '#cms-pop input[type=text]{font:inherit;font-size:.82rem;padding:7px 9px;border:1px solid #d7dde2;border-radius:7px;width:100%}',
       '.cms-added{outline:1px dashed rgba(0,150,199,.4);outline-offset:3px}',
+      /* A section hidden from the live site stays VISIBLE but ghosted inside the
+         editor. If it were really display:none it could not be hovered, so its
+         own menu — the only place with "Show section" — would be unreachable and
+         the hide would be permanent. */
+      '.cms-hidden-preview{opacity:.42!important;outline:2px dashed #C8883A!important;outline-offset:-4px;position:relative}',
+      '.cms-hidden-preview::after{content:"Hidden on the live site";position:absolute;top:8px;left:8px;background:#C8883A;color:#fff;font:600 11px system-ui;letter-spacing:.02em;padding:4px 10px;border-radius:100px;z-index:5;pointer-events:none}',
+      '#cms-hover button.danger{background:rgba(220,70,60,.9)}',
+      '#cms-hover button.danger:hover{background:#c0392b}',
+      '#cms-pop button.danger{background:#fdeaea;color:#b3261e}',
+      '#cms-pop button.danger:hover{background:#f9d5d5}',
       /* ---- MOBILE / TOUCH ----
          The bar is built for a wide desktop viewport. On a phone the brand and
          page pill are the first things worth dropping, tap targets need to grow
@@ -292,6 +351,7 @@
     if (sets.img.has(el)) btns += '<button data-a="replace">⤢ Replace image</button>';
     if (sets.link.has(el)) btns += '<button data-a="link">🔗 Edit link</button>';
     if (sets.text.has(el)) btns += '<button data-a="edit">✎ Edit text</button>';
+    if (el.closest && el.closest('.cms-added')) btns += '<button class="danger" data-a="delete">🗑 Delete block</button>';
     btns += '<button data-a="section">▤ Section ▾</button>';
     elHover.innerHTML = btns;
     Array.prototype.forEach.call(elHover.querySelectorAll('button'), function (b) {
@@ -321,6 +381,10 @@
     if (a === 'edit' && sets.text.has(el)) startTextEdit(el);
     else if (a === 'replace') pickImage(el);
     else if (a === 'link') editLink(el);
+    else if (a === 'delete') {
+      var block = el.closest('.cms-added');
+      if (block && window.confirm('Delete this block? This cannot be undone once you publish.')) deleteBlock(block);
+    }
     else if (a === 'section') openSectionMenu(nearestSection(el) || el);
   }
 
@@ -401,7 +465,7 @@
   // ---------- section menu ----------
   function openSectionMenu(sec) {
     openPop(sec, function (pop) {
-      var hidden = sec.style.display === 'none';
+      var hidden = isHiddenSection(sec);
       pop.innerHTML =
         '<div class="lbl">Background colour</div><div class="row" id="cms-bgrow"></div>' +
         '<div class="row" style="margin-top:2px"><input type="color" id="cms-bgcustom" style="width:34px;height:30px;border:0;background:none;padding:0"><button id="cms-bgclear" style="flex:1">Clear</button></div>' +
@@ -421,9 +485,12 @@
       pop.querySelector('#cms-add-text').onclick = function () { addBlock(sec, 'text'); closePop(); };
       pop.querySelector('#cms-add-img').onclick = function () { addBlock(sec, 'image'); closePop(); };
       pop.querySelector('#cms-hide').onclick = function () {
-        if (hidden) { sec.style.display = ''; delete ensure('hidden')[K(sec)]; }
-        else { sec.style.display = 'none'; ensure('hidden')[K(sec)] = true; }
-        markDirty(); closePop(); toast(hidden ? 'Section shown' : 'Section hidden');
+        if (hidden) delete ensure('hidden')[K(sec)];
+        else ensure('hidden')[K(sec)] = true;
+        sec.style.display = '';        // never really hide it inside the editor
+        refreshHiddenPreview();
+        markDirty(); closePop();
+        toast(hidden ? 'Section shown' : 'Section hidden — still visible here, hidden on the live site');
       };
     });
   }
@@ -517,7 +584,7 @@
       if (!edits.hidden || !edits.hidden[K(section)]) return;
       var show = document.createElement('button');
       show.type = 'button'; show.textContent = 'Show hidden section: ' + (section.getAttribute('data-screen-label') || section.id || section.tagName.toLowerCase());
-      show.onclick = function () { delete edits.hidden[K(section)]; section.style.display = ''; markDirty(); show.remove(); };
+      show.onclick = function () { delete edits.hidden[K(section)]; section.style.display = ''; refreshHiddenPreview(); markDirty(); show.remove(); };
       panel.insertBefore(show, rows);
     });
     targets.forEach(function (target) {
@@ -548,7 +615,11 @@
     // the same instant editing began. On touch we make selection explicit: the
     // first tap highlights the element and shows its toolbar, a second tap (or
     // the toolbar's own Edit button) starts editing.
-    var isTouch = mq('(hover:none)') || ('ontouchstart' in window);
+    // Use the (hover) media feature alone. `'ontouchstart' in window` is true on
+    // any touch-capable device including laptops with a touchscreen, which would
+    // wrongly strip hover from users who do have a mouse. `(hover: none)` means
+    // the PRIMARY input cannot hover — exactly the phones/tablets we want here.
+    var isTouch = mq('(hover:none)');
     var tapSelected = null;
     function clearTapSelection() {
       if (tapSelected && tapSelected.classList) tapSelected.classList.remove('cms-hl', 'cms-hl-img');
@@ -624,6 +695,7 @@
     store.load().then(function (loaded) {
       edits = loaded || {};
       var report = window.OASIS.applyEdits(edits);
+      refreshHiddenPreview();
       reclassify();
       wire();
       ready = true;

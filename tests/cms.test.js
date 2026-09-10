@@ -243,3 +243,62 @@ describe('editor surfaces orphans on load', () => {
     dom.window.close();
   });
 });
+
+describe('deleting editor-added blocks', () => {
+  it('removes the block, its saved entry and its text override so it stays gone', async () => {
+    const dom = page(fixture), { document, OASIS, localStorage } = dom.window;
+    const host = document.querySelector('.container');
+    const saved = { added: { [OASIS.keyFor(host)]: [{ id: 'add-1', type: 'text' }] }, text: { 'add-1': 'Delete me.' } };
+    localStorage.setItem('oasis_draft:about', JSON.stringify(saved));
+    await boot(dom);
+    const block = document.querySelector('[data-cms="add-1"]');
+    expect(block).toBeTruthy();
+
+    // Select the block, then use the toolbar's Delete action.
+    dom.window.confirm = () => true;
+    block.dispatchEvent(new dom.window.MouseEvent('mouseover', { bubbles: true }));
+    const del = [...document.querySelectorAll('#cms-hover button')].find(b => b.getAttribute('data-a') === 'delete');
+    expect(del).toBeTruthy();
+    del.click();
+
+    expect(document.querySelector('[data-cms="add-1"]')).toBeNull();
+    const after = JSON.parse(localStorage.getItem('oasis_draft:about'));
+    expect(after.text && after.text['add-1']).toBeUndefined();
+    // Re-applying the saved edits must not resurrect the block.
+    const fresh = page(fixture);
+    fresh.window.OASIS.applyEdits(after);
+    expect(fresh.window.document.querySelector('[data-cms="add-1"]')).toBeNull();
+    dom.window.close(); fresh.window.close();
+  });
+
+  it('offers no delete action on ordinary coded content', async () => {
+    const dom = page(fixture), { document } = dom.window;
+    await boot(dom);
+    const p = document.querySelector('p');
+    p.dispatchEvent(new dom.window.MouseEvent('mouseover', { bubbles: true }));
+    const del = [...document.querySelectorAll('#cms-hover button')].find(b => b.getAttribute('data-a') === 'delete');
+    expect(del).toBeUndefined();
+    dom.window.close();
+  });
+});
+
+describe('hidden sections stay reachable', () => {
+  it('keeps a hidden section visible-but-ghosted in the editor so it can be unhidden', async () => {
+    const dom = page(fixture), { document, OASIS, localStorage } = dom.window;
+    const sec = document.querySelector('section');
+    localStorage.setItem('oasis_draft:about', JSON.stringify({ hidden: { [OASIS.keyFor(sec)]: true } }));
+    await boot(dom);
+    // Not display:none in the editor, and clearly marked.
+    expect(sec.style.display).not.toBe('none');
+    expect(sec.classList.contains('cms-hidden-preview')).toBe(true);
+    dom.window.close();
+  });
+
+  it('still hides the section on the public site', () => {
+    const dom = page(fixture), { OASIS, document } = dom.window;
+    const sec = document.querySelector('section');
+    OASIS.applyEdits({ hidden: { [OASIS.keyFor(sec)]: true } });
+    expect(sec.style.display).toBe('none');
+    dom.window.close();
+  });
+});
