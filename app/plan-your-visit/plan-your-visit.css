@@ -71,3 +71,24 @@
   overflow: hidden;
   aspect-ratio: 16/7;
 }
+
+/* Full-bleed map: break out of the centered container to span the whole viewport
+   width, with a tall fixed height so it reads as a "full screen" map. Uses the
+   100vw / margin-left trick so it ignores the page's max-width without needing a
+   different layout wrapper. */
+.map-fullbleed {
+  width: 100vw;
+  position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+  margin-top: var(--sp-5);
+  height: 70vh;
+  min-height: 420px;
+  overflow: hidden;
+}
+.map-fullbleed iframe { width: 100%; height: 100%; }
+@media (max-width: 768px) {
+  .map-fullbleed { height: 60vh; min-height: 340px; margin-top: var(--sp-4); }
+}

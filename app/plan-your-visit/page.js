@@ -132,36 +132,30 @@ export default async function PlanYourVisitPage() {
         </div>
       </section>
 
-      <section className="section" data-screen-label="Location & CTA">
+      <section className="section" data-screen-label="Location & CTA" style={{ paddingBottom: 0 }}>
         <div className="container">
-          <div className="split-2" style={{ alignItems: 'start', gap: 'var(--sp-5)' }}>
-            <div>
-              <p className="t-eyebrow">Find Us</p>
-              <h2 className="t-h2 mt-2">We&rsquo;re in the heart of Rahway</h2>
-              <div style={{ marginTop: 'var(--sp-3)', display: 'flex', flexDirection: 'column', gap: 12 }}>
-                {address ? <div style={{ fontSize: '.95rem', padding: '12px 0', borderBottom: '1px solid var(--border)' }}><strong>{address}</strong></div> : null}
-                {settings && settings.phone ? <div style={{ fontSize: '.95rem', padding: '12px 0' }}><a href={`tel:${settings.phone}`}>{settings.phone}</a></div> : null}
-              </div>
-              {directionsUrl ? <div style={{ marginTop: 'var(--sp-4)' }}>
-                <a href={directionsUrl} target="_blank" rel="noopener noreferrer" className="btn btn-primary">Get Directions</a>
-              </div> : null}
-            </div>
-            <div className="map-embed" style={{ minHeight: 320, borderRadius: 'var(--radius-lg)', overflow: 'hidden' }}>
-              <iframe
-                title="Map to Oasis Christian Centre, 2052 St Georges Ave, Rahway, NJ 07065"
-                src={mapEmbedUrl}
-                width="100%"
-                height="100%"
-                style={{ border: 0, display: 'block', minHeight: 320 }}
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-                allowFullScreen
-              />
+          <div style={{ textAlign: 'center', maxWidth: 640, margin: '0 auto' }}>
+            <p className="t-eyebrow">Find Us</p>
+            <h2 className="t-h2 mt-2">We&rsquo;re in the heart of Rahway</h2>
+            {address ? <p style={{ marginTop: 'var(--sp-2)', fontSize: '1.05rem' }}><strong>{address}</strong></p> : null}
+            {settings && settings.phone ? <p style={{ marginTop: 6 }}><a href={`tel:${settings.phone}`}>{settings.phone}</a></p> : null}
+            <div style={{ marginTop: 'var(--sp-3)', display: 'flex', gap: 'var(--sp-2)', justifyContent: 'center', flexWrap: 'wrap' }}>
+              {directionsUrl ? <a href={directionsUrl} target="_blank" rel="noopener noreferrer" className="btn btn-primary">Get Directions</a> : null}
+              <Link href="/contact" className="btn btn-secondary">Contact Us</Link>
             </div>
           </div>
-          <div style={{ marginTop: 'var(--sp-5)', display: 'flex', justifyContent: 'center' }}>
-            <Link href="/contact" className="btn btn-secondary">Contact Us</Link>
-          </div>
+        </div>
+        <div className="map-fullbleed">
+          <iframe
+            title="Map to Oasis Christian Centre, 2052 St Georges Ave, Rahway, NJ 07065"
+            src={mapEmbedUrl}
+            width="100%"
+            height="100%"
+            style={{ border: 0, display: 'block' }}
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+            allowFullScreen
+          />
         </div>
       </section>
     </>
