@@ -330,6 +330,7 @@
     elBar = document.createElement('div');
     elBar.id = 'cms-bar';
     elBar.innerHTML =
+      '<button class="b-ghost" id="cms-admin" title="Back to the Admin panel">← Admin</button>' +
       '<span class="brand">Oasis · Visual Editor</span>' +
       '<span class="pill" id="cms-page"></span>' +
       '<span class="grow"></span>' +
@@ -341,11 +342,16 @@
     document.getElementById('cms-page').textContent = slug === 'index' ? 'Home' : slug.replace(/-/g, ' ');
     document.getElementById('cms-pub').onclick = publish;
     document.getElementById('cms-all-text').onclick = openTextPanel;
-    document.getElementById('cms-exit').onclick = function () {
+    // Leave the editor: "← Admin" returns to the Admin panel (it reopens on the
+    // screen you were last on, normally Pages); "Exit" shows the public page.
+    function leave(to) {
       if (dirty && !confirm('You have unsaved changes. Leave the editor anyway?')) return;
+      dirty = false; // already confirmed (the draft is kept) — don't ask a second time on unload
       localStorage.removeItem('oasis_edit');
-      location.href = location.pathname;
-    };
+      location.href = to;
+    }
+    document.getElementById('cms-exit').onclick = function () { leave(location.pathname); };
+    document.getElementById('cms-admin').onclick = function () { leave(BASE_PATH + '/admin'); };
 
     elHover = document.createElement('div'); elHover.id = 'cms-hover'; document.body.appendChild(elHover);
     elPop = document.createElement('div'); elPop.id = 'cms-pop'; document.body.appendChild(elPop);
