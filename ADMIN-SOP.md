@@ -113,7 +113,7 @@ To show Facebook and Instagram icons:
 
 ## 4. House Rules
 
-- **Publish means live.** There's no second approval step — proofread before publishing
+- **Publish means live for Owners/Admins.** When *Change approval* is on (Settings), changes by editor and events-only accounts wait until an approver confirms them — by the emailed link or in **Approvals**. Proofread either way
 - One person edits a page at a time (coordinate in the team chat)
 - Photos: get consent before posting faces, especially kids
 - Keep image files under 1MB; the Media Library shows what's already available — reuse before uploading duplicates
@@ -129,6 +129,8 @@ To show Facebook and Instagram icons:
 | Sermon missing | Check it's Public on YouTube; the feed refreshes ~every 30 min |
 | Prayer/contact email not arriving | Check spam; confirm Resend key in server `.env.local`; test-submit the form |
 | Live stream not showing | Confirm Restream is pushing; check the channel IDs in Admin → Live player |
+| My change isn't showing (editor) | It is waiting for approval — see **Approvals** for its status and any note |
+| Something wrong or inappropriate went live | **Admins:** Admin → **Change History** → **Undo**, then Users & Roles → **Suspend** if needed |
 | Site down / no CSS | Developer: on the server run the deploy steps in `SERVER-COMMANDS.md` (never `next dev`) |
 
 **Developer contact:** _(fill in name / phone / email)_
