@@ -15,6 +15,7 @@ Tailscale/proxy setup. Runs `next start` on port **5900** with `basePath: /websi
 | **`SUPABASE-GUIDE.md`** | Backend architecture, tables, RLS policies. |
 | **`VISUAL-EDITOR.md`** | How the inline "edit the real page" CMS works. |
 | **`AUDIT.md`** | Original audit + current status of each item. |
+| **`docs/change-approval.md`** | Editors' changes wait for an approver (email link or Admin); change history and undo. |
 
 ---
 
@@ -38,6 +39,8 @@ Full details + troubleshooting in `SERVER-COMMANDS.md`.
 ## First-time / after-pull setup
 
 1. **SQL** (Supabase SQL editor) — run `db/migrations-2026-07.sql` once.
+   For change approval + history, also run `db/migrations-2026-10-change-approval.sql`
+   (see `docs/change-approval.md`).
 2. **Env** — create `~/website2/.env.local` on the server:
    ```
    RESEND_API_KEY=re_xxxxxxxx

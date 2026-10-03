@@ -157,6 +157,12 @@ The server `.env.local` must also contain `SUPABASE_SECRET_KEY` so the email API
 can read that private table. The legacy `SUPABASE_SERVICE_ROLE_KEY` name remains
 accepted temporarily while migrating.
 
+### Change approval + history
+
+Also run `db/migrations-2026-10-change-approval.sql` (additive, safe to re-run; approval stays
+off until switched on in Admin → Settings). The server `.env.local` needs `RESEND_API_KEY`,
+`SUPABASE_SECRET_KEY` and `NEXT_PUBLIC_SITE_URL`. Details: `docs/change-approval.md`.
+
 ---
 
 ## Admin panel

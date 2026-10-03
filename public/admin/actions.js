@@ -348,6 +348,87 @@ async function saveFormRecipients() {
   } catch (e) { fail(e); }
 }
 
+async function saveApprovalSettings() {
+  try {
+    const on = document.getElementById('approval-required').checked;
+    const list = document.getElementById('approval-recipients').value.trim();
+    if (on && !/[^\s@]+@[^\s@]+\.[^\s@]+/.test(list)) throw new Error('Add at least one approver email before turning approval on');
+    await DB.saveFormSettings({ require_change_approval: on, change_alert_recipients: list });
+    toast(on ? 'Approval is ON — editors\' changes now wait for an approver' : 'Approval is off — editors publish directly');
+  } catch (e) { fail(e); }
+}
+
+// ---------- CHANGE APPROVAL ----------
+async function refreshApprovalBadge() {
+  const el = document.getElementById('approvals-badge');
+  if (!el || !DB.client) return;
+  try {
+    const { count, error } = await DB.client.from('change_requests').select('id', { count: 'exact', head: true }).eq('status', 'pending');
+    el.textContent = !error && count ? String(count) : '';
+    el.style.display = !error && count ? '' : 'none';
+  } catch (e) { el.style.display = 'none'; }
+}
+async function approveRequest(id, force) {
+  try {
+    const { error } = await DB.client.rpc('approve_change_request', { p_id: id, p_force: !!force });
+    if (error) throw error;
+    DB.audit('approval.approve', id.slice(0, 8));
+    toast('Approved — now live on the site');
+    refreshApprovalBadge(); go('approvals');
+  } catch (e) {
+    const m = String((e && e.message) || e);
+    const ask = function (msg) { confirmAction(msg, function () { approveRequest(id, true); }); };
+    if (m.indexOf('row_changed_since') >= 0) ask('This item was edited by someone else <strong>after</strong> the request was made. Approving will replace those newer edits with this version. Continue?');
+    else if (m.indexOf('row_missing') >= 0) ask('This item has been deleted since the request was made. Approving will bring it back with these changes. Continue?');
+    else if (m.indexOf('row_already_exists') >= 0) ask('An item like this already exists. Approving will overwrite it. Continue?');
+    else if (m.indexOf('not_pending') >= 0) { toast('That request was already handled'); refreshApprovalBadge(); go('approvals'); }
+    else fail(e);
+  }
+}
+async function rejectRequest(id) {
+  try {
+    const noteEl = document.getElementById('rq-note-' + id);
+    const { error } = await DB.client.rpc('reject_change_request', { p_id: id, p_note: noteEl ? noteEl.value.trim() : '' });
+    if (error) throw error;
+    DB.audit('approval.reject', id.slice(0, 8));
+    toast('Rejected — nothing was published');
+    refreshApprovalBadge(); go('approvals');
+  } catch (e) {
+    if (String((e && e.message) || e).indexOf('not_pending') >= 0) { toast('That request was already handled'); go('approvals'); }
+    else fail(e);
+  }
+}
+async function withdrawRequest(id) {
+  try {
+    const { error } = await DB.client.rpc('withdraw_change_request', { p_id: id });
+    if (error) throw error;
+    toast('Request withdrawn');
+    refreshApprovalBadge(); go('approvals');
+  } catch (e) { fail(e); }
+}
+
+// ---------- CHANGE HISTORY: undo ----------
+async function undoChange(id, force) {
+  try {
+    const { error } = await DB.client.rpc('restore_content_revision', { p_id: id, p_force: !!force });
+    if (error) throw error;
+    DB.audit('history.undo', '#' + id);
+    toast('Change undone');
+    go('history');
+  } catch (e) {
+    const m = String((e && e.message) || e);
+    if (m.indexOf('row_changed_since') >= 0 || m.indexOf('row_missing') >= 0) {
+      confirmAction('This item was changed again <strong>after</strong> that change. Undoing it will also discard the later change. Continue?', function () { undoChange(id, true); });
+    } else if (m.indexOf('row_already_exists') >= 0) {
+      fail(new Error('That item already exists again, so there is nothing to bring back.'));
+    } else if (m.indexOf('already_reverted') >= 0) {
+      toast('That change was already undone'); go('history');
+    } else if (m.indexOf('not_restorable') >= 0) {
+      fail(new Error('User access changes cannot be undone here — use Users & Roles.'));
+    } else { fail(e); }
+  }
+}
+
 // ---------- FAQ ----------
 const FAQ_FIELDS = [
   { key: 'question', label: 'Question' },
@@ -527,7 +608,7 @@ async function pageVideoUpload(fid) {
       // Upload raw (no image compression) directly to Supabase storage.
       const ext = file.name.split('.').pop().toLowerCase();
       const name = 'hero-' + Date.now() + '.' + ext;
-      const { data, error } = await DB.client.storage.from('media').upload('heroes/' + name, file, { upsert: true, contentType: file.type });
+      const { data, error } = await DB.client.storage.from('media').upload('heroes/' + name, file, { upsert: false, contentType: file.type });
       if (error) { fail(error); return; }
       const { data: pub } = DB.client.storage.from('media').getPublicUrl('heroes/' + name);
       const url = pub.publicUrl;
@@ -555,16 +636,18 @@ async function savePage() {
         content[k] = document.getElementById('pb-' + bi + '-' + k).value;
       });
       const visible = document.getElementById('pb-' + bi + '-visible').checked;
-      const { error } = await DB.client.from('page_blocks').update({ content: content, visible: visible }).eq('id', b.id);
+      const { data: d1, error } = await DB.client.from('page_blocks').update({ content: content, visible: visible }).eq('id', b.id).select('id');
       if (error) throw error;
+      DB.held(d1);
     }
-    const { error: e2 } = await DB.client.from('pages').update({
+    const { data: d2, error: e2 } = await DB.client.from('pages').update({
       seo_title: document.getElementById('seo-title').value,
       seo_description: document.getElementById('seo-desc').value,
       updated_at: new Date().toISOString(),
-    }).eq('id', ctx.page.id);
+    }).eq('id', ctx.page.id).select('id');
     if (e2) throw e2;
-    DB.audit('page.update', ctx.page.slug);
+    DB.held(d2);
+    DB.audit('page.update' + (DB.gated ? '.requested' : ''), ctx.page.slug);
     toast('Published — live on the site');
   } catch (e) { fail(e); }
 }
