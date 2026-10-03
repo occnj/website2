@@ -251,6 +251,26 @@ async function saveEditor() {
 }
 
 // =====================================================================
+// ---------- change approval + history helpers ----------
+// Renders the before → after lines of one change. describe() comes from
+// lib/changeRequests.js (the same code the approval email and review page use).
+function changeLines(c) {
+  const d = window.OasisChanges.describe(c);
+  return {
+    desc: d,
+    html: d.lines.slice(0, 8).map(function (l) {
+      return '<div style="font-size:.78rem;margin-top:3px;overflow-wrap:anywhere;' + (l.risky ? 'background:#fff4e5;padding:2px 6px;border-radius:4px;' : '') + '"><span style="color:var(--gray-1)">' + esc(l.what) + ':</span> ' +
+        (l.before ? '<span style="color:#a33;text-decoration:line-through">' + esc(l.before) + '</span> → ' : '') +
+        '<span style="color:#1a6b34">' + esc(l.after || (l.before ? '(removed)' : '')) + '</span></div>';
+    }).join('') + (d.lines.length > 8 ? '<div style="font-size:.75rem;color:var(--gray-1);margin-top:3px">…and ' + (d.lines.length - 8 + d.extra) + ' more</div>' : ''),
+  };
+}
+const REQUEST_STATUS = {
+  pending: ['Waiting', 'tag-amber'], approved: ['Approved', 'tag-green'], rejected: ['Rejected', 'tag-gray'],
+  withdrawn: ['Withdrawn', 'tag-gray'], superseded: ['Replaced by newer', 'tag-gray'],
+};
+const APPROVAL_SETUP_MSG = 'Change approval is not set up yet. In the Supabase SQL Editor, run <code>db/migrations-2026-10-change-approval.sql</code> (it only adds things and is safe on the live database), then reload this page.';
+
 const VIEWS = {
 
 // ---------------- DASHBOARD ----------------
@@ -553,7 +573,17 @@ settings: () => safe(async function () {
     '<button class="btn btn-sm btn-primary" onclick="saveFormRecipients()">Save</button></div><div class="panel-body">' +
     '<div class="form-group"><label class="form-label">Prayer request recipients</label><textarea class="form-textarea" id="form-prayer-recipients" placeholder="pastor@example.com, prayer@example.com">' + esc(s.prayer_recipients || '') + '</textarea><div class="sub" style="margin-top:4px">Comma-, space-, or line-separated addresses</div></div>' +
     '<div class="form-group"><label class="form-label">Regular form recipients</label><textarea class="form-textarea" id="form-regular-recipients" placeholder="office@example.com">' + esc(s.form_recipients || '') + '</textarea><div class="sub" style="margin-top:4px">Contact, baptism, dedication, and other non-prayer forms</div></div>' +
-    '</div></div>';
+    '</div></div>' +
+    ('require_change_approval' in s
+      ? '<div class="panel" style="margin-top:16px"><div class="panel-head"><div><h3>Change approval</h3><div class="sub">Admin-only · hold editors\' changes until an approver confirms them</div></div>' +
+        '<button class="btn btn-sm btn-primary" onclick="saveApprovalSettings()">Save</button></div><div class="panel-body">' +
+        '<div class="form-group" style="flex-direction:row;align-items:center;gap:10px">' +
+        '<label class="toggle"><input type="checkbox" id="approval-required"' + (s.require_change_approval ? ' checked' : '') + '><span class="track"></span></label>' +
+        '<span style="font-size:.84rem">Require approval for changes made by <strong>editor</strong> and <strong>events_only</strong> accounts (Visual Editor and Admin). Owners and admins always publish directly.</span></div>' +
+        '<div class="form-group" style="margin-bottom:0"><label class="form-label">Approver emails</label><textarea class="form-textarea" id="approval-recipients" placeholder="pastor@example.com, admin@example.com">' + esc(s.change_alert_recipients || '') + '</textarea>' +
+        '<div class="sub" style="margin-top:4px">Each address gets an email with a personal Review &amp; approve link for every change. Anyone holding a link can approve that change without signing in, so list only people you trust to approve.</div></div>' +
+        '</div></div>'
+      : '<div class="panel" style="margin-top:16px"><div class="panel-body" style="color:var(--gray-1)">' + APPROVAL_SETUP_MSG + '</div></div>');
 }),
 
 // ---------------- FAQ ----------------
@@ -593,8 +623,78 @@ media: () => safe(async function () {
       const url = DB.client.storage.from('media').getPublicUrl(o.folder + '/' + o.name).data.publicUrl;
       return '<div class="media-item"><div class="thumb" onclick="copyUrl(\'' + url + '\')" title="Click to copy URL"><img src="' + url + '" alt="" loading="lazy"></div>' +
         '<div class="meta" style="display:flex;align-items:center;gap:6px"><span style="flex:1;overflow:hidden;text-overflow:ellipsis">' + esc(o.name) + '</span>' +
-        '<button class="icon-btn" style="padding:3px" onclick="confirmAction(\'Delete <strong>' + esc(o.name) + '</strong>? Pages using it will show a broken image.\', function(){delMedia(\'' + o.folder + '/' + o.name + '\')})">' + ICONS.trash + '</button></div></div>';
+        (DB.gated ? '' : '<button class="icon-btn" style="padding:3px" onclick="confirmAction(\'Delete <strong>' + esc(o.name) + '</strong>? Pages using it will show a broken image.\', function(){delMedia(\'' + o.folder + '/' + o.name + '\')})">' + ICONS.trash + '</button>') + '</div></div>';
     }).join('') + '</div>' : '<div style="color:var(--gray-1);font-size:.85rem">No files yet. Upload images here, then use them across the site.</div>') +
+    '</div></div>';
+}),
+
+// ---------------- APPROVALS ----------------
+// Admins: everything waiting, with Approve / Reject.
+// Editors: their own requests, with Withdraw and the outcome of past ones.
+approvals: () => safe(async function () {
+  let rows;
+  try { rows = await DB.list('change_requests', { order: [['created_at', 'desc']], limit: 120 }); }
+  catch (e) { return needSetup(APPROVAL_SETUP_MSG); }
+  const admin = DB.canManageUsers();
+  const pending = rows.filter(function (r) { return r.status === 'pending'; }).reverse();   // oldest first
+  const past = rows.filter(function (r) { return r.status !== 'pending' && r.status !== 'superseded'; }).slice(0, 30);
+
+  const head = admin
+    ? '<h3>Waiting for approval (' + pending.length + ')</h3><div class="sub">None of this is on the website yet. Approve to publish it, or reject with a note.</div>'
+    : '<h3>Your changes waiting for approval (' + pending.length + ')</h3><div class="sub">These go live once an approver confirms. Saving the same item again updates your request.</div>';
+
+  const list = pending.length ? pending.map(function (r) {
+    const c = changeLines(r);
+    const mine = DB.me && r.requested_by === DB.me.id;
+    return '<div class="data-row" style="align-items:flex-start"><div class="row-main">' +
+      '<div class="row-title">' + esc(c.desc.headline) + (c.desc.risky ? ' <span class="tag tag-amber">Look closely</span>' : '') + '</div>' +
+      '<div class="row-sub">' + esc(r.requested_by_name || 'Unknown') + ' · ' + esc(new Date(r.created_at).toLocaleString()) +
+        (admin && !r.notified_at ? ' · <span style="color:#b33b18">approvers not emailed yet</span>' : '') + '</div>' +
+      (c.desc.risky ? '<div style="font-size:.75rem;color:#b33b18;margin-top:2px">' + esc(c.desc.reasons.join('; ')) + '</div>' : '') +
+      c.html +
+      (admin ? '<input class="form-input" id="rq-note-' + r.id + '" placeholder="Note if rejecting (optional)" maxlength="500" style="margin-top:8px;font-size:.78rem;padding:6px 10px">' : '') +
+      '</div><div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0">' +
+      (admin ? '<button class="btn btn-sm btn-primary" onclick="approveRequest(\'' + r.id + '\')">Approve</button>' +
+               '<button class="btn btn-sm btn-outline" onclick="rejectRequest(\'' + r.id + '\')">Reject</button>' : '') +
+      (mine ? '<button class="btn btn-sm btn-outline" onclick="confirmAction(\'Withdraw this request? Your change will not be published.\', function(){withdrawRequest(\'' + r.id + '\')})">Withdraw</button>' : '') +
+      '</div></div>';
+  }).join('') : '<div class="data-row"><div class="row-main" style="color:var(--gray-1)">Nothing is waiting.</div></div>';
+
+  const done = past.length ? past.map(function (r) {
+    const c = changeLines(r);
+    const st = REQUEST_STATUS[r.status] || [r.status, 'tag-gray'];
+    return '<div class="data-row" style="align-items:flex-start"><div class="row-main">' +
+      '<div class="row-title" style="font-weight:500">' + esc(c.desc.headline) + ' <span class="tag ' + st[1] + '">' + st[0] + '</span></div>' +
+      '<div class="row-sub">' + esc(r.requested_by_name || 'Unknown') + ' · ' + esc(new Date(r.decided_at || r.created_at).toLocaleString()) +
+        (r.decided_by && r.status !== 'withdrawn' ? ' · by ' + esc(r.decided_by) : '') + '</div>' +
+      (r.decision_note ? '<div style="font-size:.8rem;margin-top:4px;padding:6px 10px;background:var(--off-white);border-radius:6px">Note: ' + esc(r.decision_note) + '</div>' : '') +
+      '</div></div>';
+  }).join('') : '<div class="data-row"><div class="row-main" style="color:var(--gray-1)">No decisions yet.</div></div>';
+
+  return '<div class="panel" style="margin-bottom:16px"><div class="panel-head"><div>' + head + '</div></div><div class="data-list">' + list + '</div></div>' +
+    '<div class="panel"><div class="panel-head"><div><h3>Recent decisions</h3></div></div><div class="data-list">' + done + '</div></div>';
+}),
+
+// ---------------- CHANGE HISTORY (what went live, with undo) ----------------
+history: () => safe(async function () {
+  if (!DB.canManageUsers()) return needSetup('Only administrators can view change history.');
+  let rows;
+  try { rows = await DB.list('content_revisions', { order: [['id', 'desc']], limit: 150 }); }
+  catch (e) { return needSetup(APPROVAL_SETUP_MSG); }
+  return '<div class="panel"><div class="panel-head"><div><h3>Change history</h3><div class="sub">Everything that went live, newest first · latest ' + rows.length + '. Editors cannot see or alter this record.</div></div></div><div class="data-list">' +
+    (rows.length ? rows.map(function (r) {
+      const c = changeLines(r);
+      const src = String(r.source || '');
+      const isUndo = src.indexOf('restore:') === 0;
+      const tag = r.reverted_at ? '<span class="tag tag-gray">Undone' + (r.reverted_by_name ? ' by ' + esc(r.reverted_by_name) : '') + '</span>'
+        : isUndo ? '<span class="tag tag-blue">Undo of #' + esc(src.slice(8)) + '</span>' : '';
+      const canUndo = !r.reverted_at && !isUndo && r.table_name !== 'profiles';
+      return '<div class="data-row" style="align-items:flex-start;' + (r.reverted_at ? 'opacity:.55' : '') + '"><div class="row-main">' +
+        '<div class="row-title">' + esc(c.desc.headline) + ' ' + tag + '</div>' +
+        '<div class="row-sub">' + esc(r.changed_by_name || 'system') + (r.approved_by ? ' · approved by ' + esc(r.approved_by) : '') + ' · ' + esc(new Date(r.changed_at).toLocaleString()) + ' · #' + r.id + '</div>' +
+        c.html + '</div>' +
+        (canUndo ? '<button class="btn btn-sm btn-outline" onclick="undoChange(' + r.id + ')">Undo</button>' : '') + '</div>';
+    }).join('') : '<div class="data-row"><div class="row-main" style="color:var(--gray-1)">No changes recorded yet. Changes made from now on will appear here.</div></div>') +
     '</div></div>';
 }),
 

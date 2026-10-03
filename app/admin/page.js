@@ -6,6 +6,7 @@ import { loadScriptSequence } from '@/lib/scriptLoader';
 import { asset } from '@/lib/basePath';
 import { SUPABASE_ANON_KEY, SUPABASE_URL } from '@/lib/supabase';
 import { createRichTextEditor } from './richTextEditor';
+import { describeChange } from '@/lib/changeRequests';
 
 const TITLES = {
   dashboard: 'Dashboard', pages: 'Pages', sermons: 'Sermons', events: 'Events',
@@ -13,6 +14,7 @@ const TITLES = {
   faq: 'FAQ — Plan Your Visit',
   navigation: 'Navigation & Site Info', settings: 'Settings',
   media: 'Media Library', users: 'Users & Roles',
+  approvals: 'Approvals', history: 'Change History',
 };
 
 // This value is generated once in next.config.js for the entire build. Using
@@ -26,6 +28,8 @@ export default function AdminPage() {
     window.OASIS_RUNTIME_CONFIG = { SUPABASE_URL, SUPABASE_ANON_KEY };
     const richTextApi = { create: createRichTextEditor };
     window.OasisRichText = richTextApi;
+    // Shared with the approval email + review page so all three read the same.
+    window.OasisChanges = { describe: describeChange };
 
     loadScriptSequence([
       asset('/admin/config.js') + ADMIN_V,
@@ -85,6 +89,7 @@ export default function AdminPage() {
           <nav className="sidebar-nav" id="sidebar-nav">
             <div className="sidebar-heading">Overview</div>
             <button className="side-link" data-view="dashboard">Dashboard</button>
+            <button className="side-link" data-view="approvals">Approvals <span id="approvals-badge" className="tag tag-amber" style={{ display: 'none', marginLeft: 6 }}></span></button>
             <div className="sidebar-heading" data-role="content">Content</div>
             <button className="side-link" data-view="pages" data-role="content">Pages</button>
             <button className="side-link" data-view="sermons" data-role="content">Sermons</button>
@@ -102,6 +107,7 @@ export default function AdminPage() {
             <div className="sidebar-heading" data-role="admin">Settings</div>
             <button className="side-link" data-view="settings" data-role="admin">Settings</button>
             <button className="side-link" data-view="users" data-role="admin">Users &amp; Roles</button>
+            <button className="side-link" data-view="history" data-role="admin">Change History</button>
           </nav>
           <div className="sidebar-foot">
             <div className="avatar" id="me-avatar">·</div>
@@ -260,7 +266,8 @@ function initAdminController() {
     document.getElementById('admin-shell').style.display = 'flex';
     resetInactivityTimer();
     const last = localStorage.getItem('oasis-admin-view') || 'dashboard';
-    go((isEditor || last === 'events') ? last : 'dashboard');
+    go((isEditor || last === 'events' || last === 'approvals') ? last : 'dashboard');
+    if (window.refreshApprovalBadge) window.refreshApprovalBadge();
   }
   window.__adminShowShell = showShell;
 

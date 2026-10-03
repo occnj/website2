@@ -13,7 +13,44 @@
     if (!session) return null;
     const { data } = await client.from('profiles').select('*').eq('id', session.user.id).single();
     me = data ? Object.assign({ email: session.user.email }, data) : null;
+    // Do this person's changes wait for approval? (false if the approval
+    // migration has not been run yet, or approval is switched off.)
+    gated = false;
+    try {
+      const r = await client.rpc('changes_need_approval');
+      gated = !r.error && r.data === true;
+    } catch (e) { gated = false; }
     return me;
+  }
+
+  // ---------- change approval ----------
+  // When approval is on, the database holds an editor's write instead of
+  // applying it: the write "succeeds" but returns no rows. `held(rows)` detects
+  // that, tells the person, and asks the server to email the approvers.
+  let gated = false;
+  let notifyTimer = null;
+  const HELD_MSG = 'Sent for approval — it goes live once an approver confirms';
+  function held(rows) {
+    if (!gated || (rows && rows.length)) return false;
+    // Runs just after the caller's own "Saved" toast so this message wins.
+    setTimeout(function () { if (window.toast) window.toast(HELD_MSG); }, 80);
+    clearTimeout(notifyTimer);
+    notifyTimer = setTimeout(notifyApprovers, 1500);   // one email for a multi-part save
+    return true;
+  }
+  async function notifyApprovers() {
+    try {
+      const { data: { session } } = await client.auth.getSession();
+      if (!session) return;
+      const res = await fetch('/api/change-requests/notify', { method: 'POST', headers: { Authorization: 'Bearer ' + session.access_token } });
+      const out = await res.json().catch(function () { return {}; });
+      if (!out.ok && window.toast) {
+        window.toast(out.reason === 'no_recipients'
+          ? 'Saved for approval, but no approver emails are set — ask an admin to check Approvals'
+          : 'Saved for approval, but the approvers could not be emailed — ask an admin to check Approvals');
+      }
+      if (window.refreshApprovalBadge) window.refreshApprovalBadge();
+    } catch (e) { console.warn('[approval] notify failed:', e && e.message); }
   }
 
   async function list(table, opts) {
@@ -33,14 +70,16 @@
       : client.from(table).insert(row).select();
     const { data, error } = await q;
     if (error) throw error;
-    if (auditAction) audit(auditAction, auditDetail);
+    const pending = held(data);
+    if (auditAction) audit(auditAction + (pending ? '.requested' : ''), auditDetail);
     return data && data[0];
   }
 
   async function del(table, id, auditAction, auditDetail) {
-    const { error } = await client.from(table).delete().eq('id', id);
+    const { data, error } = await client.from(table).delete().eq('id', id).select('id');
     if (error) throw error;
-    if (auditAction) audit(auditAction, auditDetail);
+    const pending = held(data);
+    if (auditAction) audit(auditAction + (pending ? '.requested' : ''), auditDetail);
   }
 
   function audit(action, detail) {
@@ -133,9 +172,10 @@
     return data;
   }
   async function saveSettings(patch, auditAction) {
-    const { error } = await client.from('site_settings').update(patch).eq('id', 1);
+    const { data, error } = await client.from('site_settings').update(patch).eq('id', 1).select('id');
     if (error) throw error;
-    audit(auditAction || 'settings.update', Object.keys(patch).join(', '));
+    const pending = held(data);
+    audit((auditAction || 'settings.update') + (pending ? '.requested' : ''), Object.keys(patch).join(', '));
   }
   async function getFormSettings() {
     const { data, error } = await client.from('form_settings').select('*').eq('id', 1).single();
@@ -154,6 +194,7 @@
   window.DB = {
     client: client, connected: !!client,
     loadProfile: loadProfile, get me() { return me; },
+    get gated() { return gated; }, held: held, notifyApprovers: notifyApprovers,
     list: list, save: save, del: del, audit: audit,
     upload: upload, pickAndUpload: pickAndUpload,
     uploadMany: uploadMany, pickAndUploadMany: pickAndUploadMany,

@@ -358,3 +358,54 @@ describe('empty added blocks are recoverable', () => {
     dom.window.close();
   });
 });
+
+describe('change approval in the visual editor', () => {
+  const gatedSb = ({ pending, onUpsert }) => {
+    const reqChain = { select: () => reqChain, eq: () => reqChain, order: () => reqChain, limit: async () => ({ data: pending ? [{ new_data: { edits: pending } }] : [], error: null }) };
+    return {
+      auth: { getSession: async () => ({ data: { session: { user: { id: 'vic' }, access_token: 'jwt' } } }) },
+      rpc: async (name) => ({ data: name === 'changes_need_approval', error: null }),
+      from: (table) => table === 'change_requests' ? reqChain : ({
+        select: () => ({ eq: () => ({ maybeSingle: async () => ({ data: { edits: {} } }) }) }),
+        upsert: async (value) => { onUpsert && onUpsert(value); return { error: null }; },
+      }),
+    };
+  };
+  it('says "sent for approval" instead of "published", and asks the server to email approvers', async () => {
+    const dom = page(fixture), { document, localStorage } = dom.window;
+    let payload; const calls = [];
+    dom.window.fetch = async (url, init) => { calls.push([url, init]); return { json: async () => ({ ok: true }) }; };
+    await boot(dom, gatedSb({ onUpsert: (v) => { payload = v; } }));
+    document.querySelector('#cms-all-text').click();
+    const field = document.querySelector('#cms-text-panel textarea');
+    field.value = 'Needs a second pair of eyes'; field.dispatchEvent(new dom.window.Event('input'));
+    document.querySelector('#cms-pub').click();
+    await new Promise(r => setTimeout(r, 30));
+    expect(Object.values(payload.edits.copy)).toContain('Needs a second pair of eyes');
+    expect(document.querySelector('#cms-stmsg').textContent).toContain('Sent for approval');
+    expect(document.querySelector('#cms-stmsg').textContent).not.toContain('live on the site');
+    expect(calls).toEqual([['/api/change-requests/notify', { method: 'POST', headers: { Authorization: 'Bearer jwt' } }]]);
+    expect(localStorage.getItem('oasis_draft:about')).toBeNull();
+    dom.window.close();
+  });
+  it('reopens the page on the editor\'s own waiting version, clearly marked as not live', async () => {
+    const dom = page(fixture), { document, OASIS } = dom.window;
+    const key = OASIS.keyFor(document.querySelector('p'));
+    await boot(dom, gatedSb({ pending: { text: { [key]: 'My waiting words.' } } }));
+    expect(document.querySelector('p').textContent).toBe('My waiting words.');
+    expect(document.querySelector('#cms-stmsg').textContent).toContain('waiting for approval');
+    dom.window.close();
+  });
+  it('warns when the approvers could not be emailed', async () => {
+    const dom = page(fixture), { document } = dom.window;
+    dom.window.fetch = async () => ({ json: async () => ({ ok: false, reason: 'no_recipients' }) });
+    await boot(dom, gatedSb({}));
+    document.querySelector('#cms-all-text').click();
+    const field = document.querySelector('#cms-text-panel textarea');
+    field.value = 'Edit'; field.dispatchEvent(new dom.window.Event('input'));
+    document.querySelector('#cms-pub').click();
+    await new Promise(r => setTimeout(r, 30));
+    expect(document.querySelector('#cms-stmsg').textContent).toContain('could not be emailed');
+    dom.window.close();
+  });
+});

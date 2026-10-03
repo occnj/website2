@@ -25,17 +25,55 @@
     var cfg = window.OASIS_CONFIG || {};
     var sb = window.OASIS_SUPABASE || ((cfg.SUPABASE_URL && cfg.SUPABASE_ANON_KEY && window.supabase)
       ? window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY) : null);
+    // Change approval: when it is switched on, the database holds an editor's
+    // publish for an approver instead of applying it (see
+    // db/migrations-2026-10-change-approval.sql). `gated()` asks whether that
+    // applies to this person; it is false if approval is off or not installed.
+    var gatedPromise = null;
+    function gated() {
+      if (!gatedPromise) {
+        gatedPromise = (sb && typeof sb.rpc === 'function')
+          ? Promise.resolve(sb.rpc('changes_need_approval')).then(function (r) { return !r.error && r.data === true; }, function () { return false; })
+          : Promise.resolve(false);
+      }
+      return gatedPromise;
+    }
+    // This person's own not-yet-approved version of the page, if any, so they
+    // keep working from what they submitted rather than from the live page.
+    function myPending(session) {
+      return gated().then(function (isGated) {
+        if (!isGated || !session) return null;
+        return sb.from('change_requests').select('new_data')
+          .eq('table_name', 'page_overrides').eq('pk_value', slug).eq('status', 'pending').eq('requested_by', session.user.id)
+          .order('created_at', { ascending: false }).limit(1)
+          .then(function (r) { var row = !r.error && r.data && r.data[0]; return (row && row.new_data && row.new_data.edits) || null; });
+      }).catch(function () { return null; });
+    }
+    function notifyApprovers(session) {
+      return fetch(BASE_PATH + '/api/change-requests/notify', { method: 'POST', headers: { Authorization: 'Bearer ' + session.access_token } })
+        .then(function (res) { return res.json(); }).then(function (out) { return !!(out && out.ok); }).catch(function () { return false; });
+    }
     return {
       sb: sb,
+      pendingLoaded: false,
       session: function () { return sb ? sb.auth.getSession().then(function (r) { return r.data.session; }) : Promise.resolve(null); },
       load: function () {
+        var self = this;
         if (sb) {
           return sb.from('page_overrides').select('edits').eq('slug', slug).maybeSingle()
             .then(function (r) {
               if (r.error) throw r.error;
               if (!r.data && slug !== legacySlug) return sb.from('page_overrides').select('edits').eq('slug', legacySlug).maybeSingle();
               return r;
-            }).then(function (r) { if (r.error) throw r.error; return localDraft() || (r.data && r.data.edits) || {}; });
+            }).then(function (r) {
+              if (r.error) throw r.error;
+              var live = (r.data && r.data.edits) || {};
+              if (localDraft()) return localDraft();
+              return self.session().then(myPending).then(function (pending) {
+                self.pendingLoaded = !!pending;
+                return pending || live;
+              });
+            });
         }
         return Promise.resolve(localDraft() || {});
       },
@@ -43,7 +81,13 @@
         return this.session().then(function (s) {
           if (sb && s) {
             return sb.from('page_overrides').upsert({ slug: slug, edits: edits, updated_at: new Date().toISOString(), updated_by: s.user.id })
-              .then(function (r) { if (r.error) throw r.error; return 'live'; });
+              .then(function (r) {
+                if (r.error) throw r.error;
+                return gated().then(function (isGated) {
+                  if (!isGated) return 'live';
+                  return notifyApprovers(s).then(function (emailed) { return emailed ? 'pending' : 'pending-unsent'; });
+                });
+              });
           }
           localStorage.setItem('oasis_draft:' + slug, JSON.stringify(edits));
           return 'local';
@@ -589,12 +633,15 @@
     document.getElementById('cms-pub').disabled = true;
     setStatus('Publishing…', 'warn');
     store.publish(snapshot).then(function (where) {
+      var pending = where === 'pending' || where === 'pending-unsent';
       if (revision === savedRevision) {
         dirty = false;
-        if (where === 'live') localStorage.removeItem('oasis_draft:' + slug);
-        setStatus(where === 'live' ? 'Published — live on the site' : 'Saved locally (sign in to publish live)');
+        // A held publish is stored with the request, so the local draft is no longer needed.
+        if (where === 'live' || pending) localStorage.removeItem('oasis_draft:' + slug);
+        if (pending) setStatus(where === 'pending' ? 'Sent for approval — not live until an approver confirms' : 'Saved for approval, but the approvers could not be emailed — tell an admin', 'warn');
+        else setStatus(where === 'live' ? 'Published — live on the site' : 'Saved locally (sign in to publish live)');
       } else setStatus('New changes still need publishing', 'warn');
-      toast(where === 'live' ? 'Published live ✓' : 'Saved locally ✓');
+      toast(pending ? 'Sent for approval ✓' : where === 'live' ? 'Published live ✓' : 'Saved locally ✓');
     }).catch(function (e) { setStatus('Publish failed — changes kept', 'warn'); toast('Publish failed: ' + (e.message || e)); })
       .finally(function () { publishing = false; document.getElementById('cms-pub').disabled = false; });
   }
@@ -763,7 +810,9 @@
         if (msg) { msg.style.cursor = 'pointer'; msg.title = 'Some previously saved edits no longer match the page and were not applied'; msg.onclick = showOrphans; }
         toast(n + ' saved edit' + (n > 1 ? 's' : '') + ' could not be placed after a page change');
       } else {
-        setStatus(dirty ? 'Recovered unpublished draft' : 'All changes saved', dirty ? 'warn' : undefined);
+        if (dirty) setStatus('Recovered unpublished draft', 'warn');
+        else if (store.pendingLoaded) setStatus('Showing your changes that are waiting for approval — not live yet', 'warn');
+        else setStatus('All changes saved');
       }
       var observer = new MutationObserver(function (records) {
         if (!window.document || editingEl || document.getElementById('cms-text-panel')) return;
