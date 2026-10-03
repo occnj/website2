@@ -409,3 +409,21 @@ describe('change approval in the visual editor', () => {
     dom.window.close();
   });
 });
+
+describe('leaving the editor', () => {
+  it('offers a way straight back to Admin, and asks first when there are unsaved changes', async () => {
+    const dom = page(fixture), { document } = dom.window;
+    await boot(dom);
+    const back = document.querySelector('#cms-admin');
+    expect(back.textContent).toContain('Admin');
+    expect(document.querySelector('#cms-exit')).not.toBeNull();
+    document.querySelector('#cms-all-text').click();
+    const field = document.querySelector('#cms-text-panel textarea');
+    field.value = 'Unsaved'; field.dispatchEvent(new dom.window.Event('input'));
+    let asked = 0; dom.window.confirm = () => { asked++; return false; };
+    back.click();
+    expect(asked).toBe(1);
+    expect(dom.window.location.pathname).toBe('/about');   // stayed, because the answer was "no"
+    dom.window.close();
+  });
+});
