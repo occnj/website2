@@ -36,7 +36,7 @@ export default async function MinistryPostPage({ params }) {
 
   const color = ministry.color || 'var(--blue)';
   // Mission posts live under /missions (the Mission Blog); others under /ministries/<slug>.
-  const isMissions = params.slug === 'missions';
+  const isMissions = params.slug === 'missions' || params.missionBlog === true;
   const listHref = isMissions ? '/missions' : `/ministries/${params.slug}`;
   const safeBody = post.body ? await sanitizeHtml(post.body) : '';
 

@@ -850,3 +850,16 @@ window.VIEW_READY.livestream = function () {
     el.addEventListener('input', refreshLiveStatus);
   });
 };
+
+// ---------- MISSION BLOG SETUP ----------
+async function createMissionsMinistry() {
+  try {
+    const rows = await DB.list('ministries', { order: [['sort_order', 'desc']], limit: 1 });
+    await DB.save('ministries', {
+      name: 'Missions', slug: 'missions', color: 'var(--charcoal)', published: true,
+      description: 'Oasis is a sending church. We actively support global mission partners and mobilize our congregation to make a difference both locally and around the world.',
+      sort_order: rows.length ? (rows[0].sort_order || 0) + 1 : 0,
+    }, 'ministry.create', 'Missions');
+    toast('Mission Blog created'); go('missionblog');
+  } catch (e) { fail(e); }
+}

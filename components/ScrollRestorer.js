@@ -85,9 +85,14 @@ export default function ScrollRestorer() {
     };
   }, []);
 
-  // A Back/Forward that changed page: give the new page time to render.
+  // On every page change: no header fade while the new page settles (it may
+  // jump to a #section), and a Back/Forward gets time for the page to render.
   useEffect(() => {
+    const root = document.documentElement;
+    root.classList.add('hdr-instant');
+    const t = setTimeout(() => { if (!target) root.classList.remove('hdr-instant'); }, 400);
     if (target && target.key === keyFor()) target.until = Math.max(target.until, Date.now() + 1200);
+    return () => clearTimeout(t);
   }, [pathname]);
 
   return null;
