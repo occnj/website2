@@ -1,19 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import TextVariants from './TextVariants';
-import { useSiteData } from './SiteDataContext';
-import { isLiveInBrowser } from '@/lib/serviceWindow';
+import useLiveNow from './useLiveNow';
 
 export default function LiveInfoPanel() {
-  const { settings } = useSiteData();
-  const [live, setLive] = useState(false);
-
-  useEffect(() => {
-    setLive(isLiveInBrowser(settings));
-    const t = setInterval(() => setLive(isLiveInBrowser(settings)), 20 * 1000);
-    return () => clearInterval(t);
-  }, [settings]);
+  const live = useLiveNow();
 
   return (
     <div className="featured-sermon-info">
