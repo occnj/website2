@@ -1,19 +1,37 @@
 import Link from 'next/link';
 import './home.css';
-import { getPageHero, getSermons, getSiteSettings } from '@/lib/data';
+import { getLatestMissionPost, getPageHero, getSermons, getSiteSettings } from '@/lib/data';
 import { getChannelVideos } from '@/lib/youtube';
 import { asset } from '@/lib/basePath';
+import { isLiveNow } from '@/lib/serviceWindow';
 import PrayerForm from '@/components/PrayerForm';
+import HomeHero from '@/components/HomeHero';
+
+// Used until the service_times column exists (db/migrations-2026-10-redesign.sql).
+const DEFAULT_SERVICE_TIMES = [
+  { time: '8:30 AM', kids: false },
+  { time: '10:00 AM', kids: true },
+  { time: '11:30 AM', kids: true },
+];
+
+function joinTimes(list) {
+  return list.length <= 1 ? list.join('') : list.slice(0, -1).join(', ') + ' & ' + list[list.length - 1];
+}
 
 export const dynamic = 'force-dynamic';
 
 export default async function HomePage() {
-  const [hero, ytVideos, dbSermons, settings] = await Promise.all([
+  const [hero, ytVideos, dbSermons, settings, missionPost] = await Promise.all([
     getPageHero('index'),
     getChannelVideos(),
     getSermons(),
     getSiteSettings(),
+    getLatestMissionPost(),
   ]);
+  const serviceTimes = (settings && Array.isArray(settings.service_times) && settings.service_times.filter((t) => t && t.time).length)
+    ? settings.service_times.filter((t) => t && t.time)
+    : DEFAULT_SERVICE_TIMES;
+  const kidsTimes = serviceTimes.filter((t) => t.kids).map((t) => t.time);
   const sermons = ytVideos.length ? ytVideos : dbSermons;
   const heroImage = (hero && hero.image) || asset('/images/hero-placeholder.svg');
   const heroVideo = (hero && hero.video) || null;
@@ -26,7 +44,8 @@ export default async function HomePage() {
 
   return (
     <>
-      {/* ===== HERO ===== */}
+      {/* ===== HERO (switches to the livestream on Sundays — components/HomeHero.js) ===== */}
+      <HomeHero initialLive={isLiveNow(settings)}>
       <section className="hero-home" data-screen-label="Hero">
         <div className="hero-bg-placeholder"></div>
         <div className="hero-bg-pattern"></div>
@@ -58,31 +77,46 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+      </HomeHero>
+
+      {/* ===== MISSION CTA ===== */}
+      <section className="mission-cta-band" data-screen-label="Mission CTA">
+        <div className="container">
+          <div className="mission-cta-inner">
+            <div className="mission-cta-copy">
+              <p className="t-eyebrow" style={{ color: 'var(--amber)' }}>Missions</p>
+              <h2 className="mission-cta-title">We are a <em>sending</em> church.</h2>
+              <p className="mission-cta-text">
+                {missionPost ? (
+                  <>Latest from the field: <Link href={`/missions/${missionPost.slug || missionPost.id}`}>{missionPost.title} →</Link></>
+                ) : (
+                  <>The Great Commission isn&rsquo;t a suggestion — it&rsquo;s our mandate. See what God is doing through our missionary partners in Rahway and around the world.</>
+                )}
+              </p>
+            </div>
+            <div className="mission-cta-actions">
+              <Link href="/missions" className="btn btn-amber">Mission Blog</Link>
+              <Link href="/serve" className="btn btn-ghost btn-sm">Serve With Us →</Link>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* ===== SERVICE INFO STRIP ===== */}
       <div className="info-strip" data-screen-label="Service Info Strip">
         <div className="container">
           <div className="info-strip-inner">
-            <div className="info-item">
-              <div className="info-item-text">
-                <strong>Sunday Service</strong>
-                <span>8:30 AM</span>
+            {serviceTimes.map((t, i) => (
+              <div key={t.time} style={{ display: 'contents' }}>
+                {i > 0 ? <div className="info-div" style={{ width: 1, height: 36, background: 'rgba(255,255,255,.1)' }}></div> : null}
+                <div className="info-item">
+                  <div className="info-item-text">
+                    <strong>Sunday Service</strong>
+                    <span>{t.time}</span>
+                  </div>
+                </div>
               </div>
-            </div>
-            <div className="info-div" style={{ width: 1, height: 36, background: 'rgba(255,255,255,.1)' }}></div>
-            <div className="info-item">
-              <div className="info-item-text">
-                <strong>Sunday Service</strong>
-                <span>10:00 AM</span>
-              </div>
-            </div>
-            <div className="info-div" style={{ width: 1, height: 36, background: 'rgba(255,255,255,.1)' }}></div>
-            <div className="info-item">
-              <div className="info-item-text">
-                <strong>Sunday Service</strong>
-                <span>11:30 AM</span>
-              </div>
-            </div>
+            ))}
             {address ? <><div className="info-div" style={{ width: 1, height: 36, background: 'rgba(255,255,255,.1)' }}></div>
             <a className="info-item" href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`} target="_blank" rel="noopener noreferrer">
               <div className="info-item-text">
@@ -94,7 +128,7 @@ export default async function HomePage() {
             <div className="info-item">
               <div className="info-item-text">
                 <strong>Kids & Youth</strong>
-                <span>Nursery through High School</span>
+                <span>{kidsTimes.length ? `${joinTimes(kidsTimes)} service${kidsTimes.length > 1 ? 's' : ''}` : 'Nursery through High School'}</span>
               </div>
             </div>
             <div className="info-div" style={{ width: 1, height: 36, background: 'rgba(255,255,255,.1)' }}></div>
@@ -253,7 +287,7 @@ export default async function HomePage() {
               </div>
               <div style={{ display: 'flex', gap: 'var(--sp-2)', marginTop: 'var(--sp-4)' }}>
                 <Link href="/watch" className="btn btn-primary">Watch Now</Link>
-                <Link href="/watch" className="btn btn-secondary">All Messages</Link>
+                <Link href="/watch#latest-messages" className="btn btn-secondary">Latest Messages</Link>
               </div>
             </div>
           </div>

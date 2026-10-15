@@ -312,8 +312,7 @@ export default async function AboutPage() {
                 ))}
               </div>
               <div style={{ marginTop: 'var(--sp-4)', display: 'flex', gap: 'var(--sp-2)' }}>
-                <Link href="/give" className="btn btn-amber">Support Missions</Link>
-                <Link href="/contact" className="btn btn-ghost btn-sm" style={{ alignSelf: 'center' }}>Get Involved →</Link>
+                <Link href="/missions" className="btn btn-amber">Get Involved →</Link>
               </div>
             </div>
             <div className="img-placeholder img-placeholder-dark" style={{ aspectRatio: '4/3', borderRadius: 'var(--radius-lg)' }}>
@@ -338,7 +337,7 @@ export default async function AboutPage() {
               <p className="t-body t-muted mt-3">Every person at Oasis has something to offer. When you serve, you stop being an audience member and become part of the team that makes Sundays happen — and the community thrive.</p>
               <p className="t-body t-muted mt-3">From worship to media, from kids ministry to hospitality — there&rsquo;s a team waiting for someone exactly like you.</p>
               <div style={{ marginTop: 'var(--sp-4)', display: 'flex', gap: 'var(--sp-2)', flexWrap: 'wrap' }}>
-                <Link href="/contact" className="btn btn-primary">Find Your Team</Link>
+                <Link href="/serve" className="btn btn-primary">Find Your Team</Link>
                 <Link href="/contact" className="btn btn-secondary">Talk to Someone</Link>
               </div>
             </div>

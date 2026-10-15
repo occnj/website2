@@ -4,6 +4,7 @@ import Footer from '@/components/Footer';
 import CmsBridge from '@/components/CmsBridge';
 import ClosureBanner from '@/components/ClosureBanner';
 import { SiteDataProvider } from '@/components/SiteDataContext';
+import ScrollRestorer from '@/components/ScrollRestorer';
 import { getSiteSettings, getNavItems } from '@/lib/data';
 
 export const metadata = {
@@ -24,11 +25,24 @@ export const metadata = {
 
 export const dynamic = 'force-dynamic';
 
+// Runs before the first paint: decides whether the header is floating or solid
+// (class `hdr-solid` on <html>) and keeps it in step with scrolling, with
+// separate on/off thresholds so iOS rubber-banding can't make it flicker.
+// `hdr-instant` suppresses the fade while the page loads/restores its position.
+const HEADER_STATE_SCRIPT = `(function(){var d=document.documentElement;
+function u(){var y=window.scrollY||0,s=d.classList.contains('hdr-solid');if(s?y<=8:y>32)d.classList.toggle('hdr-solid',!s);}
+d.classList.add('hdr-instant');u();
+addEventListener('scroll',u,{passive:true});addEventListener('pageshow',u);
+addEventListener('load',function(){u();setTimeout(function(){d.classList.remove('hdr-instant');},300);});})();`;
+
 export default async function RootLayout({ children }) {
   const [settings, navItems] = await Promise.all([getSiteSettings(), getNavItems()]);
 
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: HEADER_STATE_SCRIPT }} />
+      </head>
       <body>
         <SiteDataProvider settings={settings} navItems={navItems}>
           <Header />
@@ -37,6 +51,7 @@ export default async function RootLayout({ children }) {
           <Footer />
         </SiteDataProvider>
         <CmsBridge />
+        <ScrollRestorer />
       </body>
     </html>
   );

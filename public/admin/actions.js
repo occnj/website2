@@ -4,19 +4,26 @@
 const EVENT_FIELDS = [
   { key: 'title', label: 'Event title' },
   { key: 'image', label: 'Event image', type: 'image', folder: 'events' },
-  { key: 'starts_at', label: 'Date', type: 'date', half: true },
+  { key: 'starts_at', label: 'Date', hint: 'first date, for repeating events', type: 'date', half: true },
   { key: 'time_label', label: 'Time', placeholder: '7:00 PM', half: true },
   { key: 'location', label: 'Location', placeholder: 'Main Auditorium', half: true },
-  { key: 'category', label: 'Category', type: 'select', options: ['worship', 'women', 'youth', 'community', 'family'], half: true },
+  { key: 'category', label: 'Category', type: 'select', options: ['worship', 'women', 'men', 'youth', 'kids', 'community', 'family', 'missions', 'prayer'], half: true },
   { key: 'description', label: 'Description', type: 'textarea' },
+  { key: 'repeat', label: 'Repeat', type: 'recurrence', dateKey: 'starts_at', hint: 'e.g. every 2 weeks, monthly, every 1st & 3rd Thursday' },
   { key: 'registration_url', label: 'Registration link', hint: 'optional', placeholder: 'https://…' },
   { key: 'featured', label: 'Feature on home page', type: 'check', half: true },
   { key: 'published', label: 'Published (visible on site)', type: 'check', default: true, half: true },
 ];
 function eventRowFrom(out, id) {
+  const repeat = out.repeat || { recurrence: null, exceptions: [] };
+  const r = repeat.recurrence;
+  if (r && r.freq === 'monthly' && r.monthly_mode === 'weekday' && (!r.weekdays || !r.weekdays.length || !r.ordinals || !r.ordinals.length))
+    throw new Error('Pick which week(s) of the month and which weekday the event repeats on');
+  if (r && r.until && out.starts_at && r.until < out.starts_at) throw new Error('The repeat end date is before the first date');
   return { id: id || undefined, title: out.title, starts_at: out.starts_at || null, time_label: out.time_label,
     location: out.location, category: out.category, description: out.description,
-    registration_url: out.registration_url, image_url: out.image, featured: out.featured, published: out.published };
+    registration_url: out.registration_url, image_url: out.image, featured: out.featured, published: out.published,
+    recurrence: r || null, exceptions: r ? (repeat.exceptions || []) : [] };
 }
 function addEvent() {
   openEditor('Add event', EVENT_FIELDS, {}, async function (out) {
@@ -245,23 +252,24 @@ function ministryPostRowFrom(out, id, ministryId) {
     published_at: out.published_at || new Date().toISOString().slice(0, 10),
     published: out.published };
 }
-function addMinistryPost(ministryId, ministryName) {
+// backView: the admin screen to return to ('ministries' or 'missionblog').
+function addMinistryPost(ministryId, ministryName, backView) {
   openEditor('New Post — ' + ministryName, MINISTRY_POST_FIELDS, {}, async function (out) {
     await DB.save('ministry_posts', ministryPostRowFrom(out, null, ministryId), 'ministry_post.create', out.title);
-    toast('Post added'); go('ministries');
+    toast('Post added'); go(backView || 'ministries');
   });
 }
-async function editMinistryPost(id, ministryId) {
+async function editMinistryPost(id, ministryId, backView) {
   const p = (await DB.list('ministry_posts', { eq: { id: id } }))[0];
   if (p && p.published_at) p.published_at = p.published_at.slice(0, 10);
   openEditor('Edit Post', MINISTRY_POST_FIELDS, p, async function (out) {
     out._slug = p.slug || null; // carry existing slug forward so we don't regenerate
     await DB.save('ministry_posts', ministryPostRowFrom(out, id, ministryId || p.ministry_id), 'ministry_post.update', out.title);
-    toast('Post saved'); go('ministries');
+    toast('Post saved'); go(backView || 'ministries');
   });
 }
-async function delMinistryPost(id, ministryId) {
-  try { await DB.del('ministry_posts', id, 'ministry_post.delete', id); toast('Post deleted'); go('ministries'); }
+async function delMinistryPost(id, ministryId, backView) {
+  try { await DB.del('ministry_posts', id, 'ministry_post.delete', id); toast('Post deleted'); go(backView || 'ministries'); }
   catch (e) { fail(e); }
 }
 
@@ -480,7 +488,7 @@ function copyUrl(url) {
 // ---------- USERS ----------
 function addUser() {
   openEditor('Add user', [
-    { key: 'note', label: 'Step 1 — create the login', hint: 'Supabase Dashboard → Authentication → Users → Add user (set their email + temp password, Auto Confirm ON). Then paste their User ID below.', type: 'textarea', default: '' },
+    { key: 'note', label: 'Step 1 — create the login', hint: 'PIBASE Dashboard (pibase.oasisnj.net) → your project → Users → Add user (email + temporary password). Then paste their User ID below.', type: 'textarea', default: '' },
     { key: 'user_id', label: 'User ID (UUID from the dashboard)' },
     { key: 'full_name', label: 'Full name', half: true },
     { key: 'role', label: 'Role', type: 'select', options: ['editor', 'admin', 'events_only'], half: true },
@@ -605,7 +613,7 @@ async function pageVideoUpload(fid) {
       const file = inp.files[0];
       if (!file) return;
       toast('Uploading video — this may take a moment…');
-      // Upload raw (no image compression) directly to Supabase storage.
+      // Upload raw (no image compression) directly to PIBASE storage.
       const ext = file.name.split('.').pop().toLowerCase();
       const name = 'hero-' + Date.now() + '.' + ext;
       const { data, error } = await DB.client.storage.from('media').upload('heroes/' + name, file, { upsert: false, contentType: file.type });
@@ -736,3 +744,109 @@ async function delHubCard(id) {
   try { await DB.del('about_hub_cards', id, 'hubcard.delete', id); toast('Card removed'); go('hubcards'); }
   catch (e) { fail(e); }
 }
+
+// ---------- SERVE: OPEN POSITIONS ----------
+const DEFAULT_APPLY_URL = 'https://oasisnj.churchcenter.com/people/forms/339396';
+const POSITION_FIELDS = [
+  { key: 'title', label: 'Position title', placeholder: 'Camera Operator' },
+  { key: 'team', label: 'Team / ministry', placeholder: 'Creative & Production', half: true },
+  { key: 'commitment', label: 'Commitment', placeholder: '2 Sundays a month', half: true, hint: 'optional' },
+  { key: 'description', label: 'Description', type: 'textarea' },
+  { key: 'apply_url', label: 'How to apply — link', default: DEFAULT_APPLY_URL, hint: 'defaults to the Church Center volunteer form' },
+  { key: 'apply_label', label: 'Button text', default: 'How to Apply', half: true },
+  { key: 'published', label: 'Open (visible on the Serve page)', type: 'check', default: true, half: true },
+];
+function positionRowFrom(out, id) {
+  if (!out.title || !out.title.trim()) throw new Error('Position title is required');
+  const url = (out.apply_url || '').trim() || DEFAULT_APPLY_URL;
+  if (!/^https:\/\//i.test(url)) throw new Error('The apply link must begin with https://');
+  return { id: id || undefined, title: out.title.trim(), team: out.team || '', commitment: out.commitment || '',
+    description: out.description || '', apply_url: url, apply_label: (out.apply_label || '').trim() || 'How to Apply',
+    published: out.published };
+}
+async function addPosition() {
+  const rows = await DB.list('volunteer_positions', { order: [['sort_order', 'desc']], limit: 1 }).catch(function () { return []; });
+  openEditor('Add position', POSITION_FIELDS, {}, async function (out) {
+    const row = positionRowFrom(out);
+    row.sort_order = rows.length ? (rows[0].sort_order || 0) + 1 : 0;
+    await DB.save('volunteer_positions', row, 'position.create', out.title);
+    toast('Position added'); go('serve');
+  });
+}
+async function editPosition(id) {
+  const r = (await DB.list('volunteer_positions', { eq: { id: id } }))[0];
+  openEditor('Edit position', POSITION_FIELDS, r, async function (out) {
+    await DB.save('volunteer_positions', positionRowFrom(out, id), 'position.update', out.title);
+    toast('Position saved'); go('serve');
+  });
+}
+async function delPosition(id) {
+  try { await DB.del('volunteer_positions', id, 'position.delete', id); toast('Position deleted'); go('serve'); }
+  catch (e) { fail(e); }
+}
+
+// ---------- LIVESTREAM + SERVICE TIMES ----------
+function liveFormValue() {
+  const picked = document.querySelector('input[name="live-mode"]:checked');
+  return {
+    live_mode: picked ? picked.value : 'auto',
+    live_day: +document.getElementById('live-day').value,
+    live_start: document.getElementById('live-start').value,
+    live_end: document.getElementById('live-end').value,
+  };
+}
+function refreshLiveStatus() {
+  const box = document.getElementById('live-status');
+  if (!box || !window.OasisLive) return;
+  const v = liveFormValue();
+  const L = window.OasisLive;
+  const live = L.isLiveNow(v);
+  const c = L.churchClock();
+  const hhmm = String(Math.floor(c.minutes / 60)).padStart(2, '0') + ':' + String(c.minutes % 60).padStart(2, '0');
+  const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  box.className = 'live-status' + (live ? ' is-live' : '');
+  box.innerHTML = '<span class="live-status-dot"></span><div><strong>' +
+    (live ? 'LIVE — the home page is showing the livestream' : 'Normal — the home page is showing the regular hero') + '</strong>' +
+    '<div class="sub">' + ({ auto: 'Automatic schedule', live: 'Forced on', off: 'Forced off' }[v.live_mode]) +
+    ' · church time now: ' + days[c.day] + ' ' + L.formatClock(hhmm) + ' (unsaved changes included)</div></div>';
+  // Simulate links: the next scheduled day, one minute before and at the start.
+  const now = new Date();
+  const ahead = (v.live_day - c.day + 7) % 7;
+  const d = new Date(now.getTime() + ahead * 86400000);
+  const ymd = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  const m = /^(\d{2}):(\d{2})$/.exec(v.live_start || '');
+  if (m) {
+    const before = Math.max(0, +m[1] * 60 + +m[2] - 1);
+    document.getElementById('sim-before').href = '/?now=' + ymd + 'T' + String(Math.floor(before / 60)).padStart(2, '0') + ':' + String(before % 60).padStart(2, '0');
+    document.getElementById('sim-at').href = '/?now=' + ymd + 'T' + v.live_start;
+  }
+}
+async function saveLivestream() {
+  try {
+    const v = liveFormValue();
+    if (!/^\d{2}:\d{2}$/.test(v.live_start) || !/^\d{2}:\d{2}$/.test(v.live_end) || v.live_start >= v.live_end)
+      throw new Error('Pick a start time before the end time');
+    await DB.saveSettings(v, 'livestream.update');
+    toast(v.live_mode === 'live' ? 'Saved — the livestream hero is ON for everyone' : v.live_mode === 'off' ? 'Saved — the livestream hero is OFF' : 'Saved — following the schedule');
+  } catch (e) { fail(e); }
+}
+function addServiceRow() {
+  document.getElementById('svc-list').insertAdjacentHTML('beforeend', serviceRowHtml({}));
+}
+async function saveServiceTimes() {
+  try {
+    const rows = [].slice.call(document.querySelectorAll('#svc-list .svc-row')).map(function (r) {
+      return { time: r.querySelector('[data-svc-time]').value.trim(), kids: r.querySelector('[data-svc-kids]').checked };
+    }).filter(function (r) { return r.time; });
+    await DB.saveSettings({ service_times: rows }, 'service_times.update');
+    toast('Service times saved');
+  } catch (e) { fail(e); }
+}
+window.VIEW_READY = window.VIEW_READY || {};
+window.VIEW_READY.livestream = function () {
+  refreshLiveStatus();
+  document.querySelectorAll('input[name="live-mode"], #live-day, #live-start, #live-end').forEach(function (el) {
+    el.addEventListener('change', refreshLiveStatus);
+    el.addEventListener('input', refreshLiveStatus);
+  });
+};

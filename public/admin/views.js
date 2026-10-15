@@ -19,7 +19,7 @@ async function safe(fn) {
   try { return await fn(); }
   catch (e) {
     console.error(e);
-    return needSetup('Could not load data: <strong>' + esc(e.message) + '</strong><br><br>If tables are missing, run <code>supabase-setup.sql</code> in the Supabase SQL Editor first.');
+    return needSetup('Could not load data: <strong>' + esc(e.message) + '</strong><br><br>If tables are missing, apply the database migrations (see <code>docs/pibase.md</code>) first.');
   }
 }
 function ytIdFrom(input) {
@@ -112,6 +112,7 @@ function openEditor(title, fields, row, onSave) {
           '<input type="hidden" id="fld-' + f.key + '" value="' + esc(JSON.stringify(items)) + '">' +
         '</div>';
     }
+    else if (f.type === 'recurrence') ctrl = recurrenceHtml(f.key, row || {}, f.dateKey || 'starts_at');
     else ctrl = '<input class="form-input" id="fld-' + f.key + '" type="' + (f.type || 'text') + '" value="' + esc(v) + '" placeholder="' + esc(f.placeholder || '') + '">';
     return '<div class="form-group"' + (f.half ? ' data-half' : '') + '><label class="form-label">' + esc(f.label) +
       (f.hint ? ' <span class="form-hint">— ' + esc(f.hint) + '</span>' : '') + '</label>' + ctrl + '</div>';
@@ -140,6 +141,164 @@ function openEditor(title, fields, row, onSave) {
   });
   // Render any gallery fields' current thumbnails.
   (editorCtx.fields || []).forEach(function (f) { if (f.type === 'gallery') renderGallery(f.key); });
+  (editorCtx.fields || []).forEach(function (f) { if (f.type === 'recurrence') wireRecurrence(f.key, f.dateKey || 'starts_at'); });
+}
+
+// ---------- REPEATING EVENTS FIELD ----------
+// Value in: row.recurrence + row.exceptions. Value out: { recurrence, exceptions }.
+// Dates and wording come from lib/recurrence.js (window.OasisRecurrence), the
+// same code the public Events page uses, so the preview matches the site.
+var REC_DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+var REC_ORDS = [[1, '1st'], [2, '2nd'], [3, '3rd'], [4, '4th'], [-1, 'Last']];
+function recurrenceHtml(key, row, dateKey) {
+  var r = row.recurrence || {};
+  var freq = r.freq || 'none';
+  var wd = (r.weekdays || []).map(Number), ords = (r.ordinals || []).map(Number);
+  var ends = r.until ? 'until' : r.count ? 'count' : 'never';
+  var skips = (row.exceptions || []).map(function (d) { return String(d).slice(0, 10); });
+  var id = function (s) { return 'rec-' + key + '-' + s; };
+  return '<div class="rec-box" id="fld-' + key + '" data-skips="' + esc(JSON.stringify(skips)) + '">' +
+    '<div class="rec-presets">' +
+      [['none', 'Does not repeat'], ['weekly', 'Every week'], ['biweekly', 'Every 2 weeks'], ['monthly-date', 'Monthly (same date)'],
+       ['first-third', '1st & 3rd weekday'], ['second-fourth', '2nd & 4th weekday'], ['last', 'Last weekday of month']].map(function (p) {
+        return '<button type="button" class="btn btn-sm btn-outline" data-rec-preset="' + p[0] + '">' + p[1] + '</button>';
+      }).join('') +
+    '</div>' +
+    '<div class="rec-row"><span>Repeats</span>' +
+      '<select class="form-select" id="' + id('freq') + '">' +
+      [['none', 'Does not repeat'], ['daily', 'Daily'], ['weekly', 'Weekly'], ['monthly', 'Monthly'], ['yearly', 'Yearly']].map(function (o) {
+        return '<option value="' + o[0] + '"' + (o[0] === freq ? ' selected' : '') + '>' + o[1] + '</option>';
+      }).join('') + '</select>' +
+      '<span data-rec-show="repeat">every</span>' +
+      '<input class="form-input rec-num" type="number" min="1" max="99" id="' + id('interval') + '" value="' + esc(r.interval || 1) + '" data-rec-show="repeat">' +
+      '<span data-rec-show="repeat" id="' + id('unit') + '">weeks</span>' +
+    '</div>' +
+    '<div data-rec-show="monthly">' +
+      '<label class="rec-row"><input type="radio" name="' + id('mmode') + '" value="date"' + (r.monthly_mode !== 'weekday' ? ' checked' : '') + '> On the same day of the month <span id="' + id('daynum') + '"></span></label>' +
+      '<div class="rec-row"><label><input type="radio" name="' + id('mmode') + '" value="weekday"' + (r.monthly_mode === 'weekday' ? ' checked' : '') + '> On the</label>' +
+        REC_ORDS.map(function (o) { return '<label class="rec-chip"><input type="checkbox" data-rec-ord value="' + o[0] + '"' + (ords.indexOf(o[0]) !== -1 ? ' checked' : '') + '><span>' + o[1] + '</span></label>'; }).join('') +
+      '</div>' +
+    '</div>' +
+    '<div class="rec-row" data-rec-show="weekdays"><span id="' + id('wdlabel') + '">On</span>' +
+      REC_DAYS.map(function (d, i) { return '<label class="rec-chip"><input type="checkbox" data-rec-wd value="' + i + '"' + (wd.indexOf(i) !== -1 ? ' checked' : '') + '><span>' + d + '</span></label>'; }).join('') +
+    '</div>' +
+    '<div data-rec-show="repeat">' +
+      '<div class="rec-row"><span>Ends</span>' +
+        '<label><input type="radio" name="' + id('end') + '" value="never"' + (ends === 'never' ? ' checked' : '') + '> Never</label>' +
+        '<label><input type="radio" name="' + id('end') + '" value="until"' + (ends === 'until' ? ' checked' : '') + '> On</label>' +
+        '<input class="form-input rec-date" type="date" id="' + id('until') + '" value="' + esc(r.until || '') + '">' +
+        '<label><input type="radio" name="' + id('end') + '" value="count"' + (ends === 'count' ? ' checked' : '') + '> After</label>' +
+        '<input class="form-input rec-num" type="number" min="1" id="' + id('count') + '" value="' + esc(r.count || '') + '"> times' +
+      '</div>' +
+      '<div class="rec-row"><span>Skip a date</span><input class="form-input rec-date" type="date" id="' + id('skipdate') + '">' +
+        '<button type="button" class="btn btn-sm btn-outline" data-rec-skip>Skip</button></div>' +
+      '<div class="rec-dates" id="' + id('skips') + '"></div>' +
+    '</div>' +
+    '<div class="rec-summary" id="' + id('summary') + '"></div>' +
+    '<div class="rec-dates" id="' + id('next') + '"></div>' +
+  '</div>';
+}
+function readRecurrence(key) {
+  var box = document.getElementById('fld-' + key);
+  var q = function (s) { return document.getElementById('rec-' + key + '-' + s); };
+  var picked = function (name) { var el = box.querySelector('input[name="rec-' + key + '-' + name + '"]:checked'); return el ? el.value : ''; };
+  var freq = q('freq').value;
+  var skips = JSON.parse(box.dataset.skips || '[]');
+  if (freq === 'none') return { recurrence: null, exceptions: [] };
+  var r = { freq: freq, interval: q('interval').value,
+    weekdays: [].slice.call(box.querySelectorAll('[data-rec-wd]:checked')).map(function (i) { return +i.value; }),
+    monthly_mode: picked('mmode') || 'date',
+    ordinals: [].slice.call(box.querySelectorAll('[data-rec-ord]:checked')).map(function (i) { return +i.value; }) };
+  var end = picked('end');
+  if (end === 'until' && q('until').value) r.until = q('until').value;
+  if (end === 'count' && +q('count').value > 0) r.count = +q('count').value;
+  var R = window.OasisRecurrence;
+  return { recurrence: R ? R.normalizeRecurrence(r) : r, exceptions: skips };
+}
+function wireRecurrence(key, dateKey) {
+  var box = document.getElementById('fld-' + key);
+  var dateEl = document.getElementById('fld-' + dateKey);
+  var R = window.OasisRecurrence;
+  if (!box || !dateEl || !R) return;
+  var q = function (s) { return document.getElementById('rec-' + key + '-' + s); };
+  var picked = function (name) { var el = box.querySelector('input[name="rec-' + key + '-' + name + '"]:checked'); return el ? el.value : ''; };
+  var startDow = function () { var t = R.parseDate(dateEl.value); return isNaN(t) ? null : new Date(t).getUTCDay(); };
+  var startNth = function () { var t = R.parseDate(dateEl.value); return isNaN(t) ? 1 : Math.min(4, Math.ceil(new Date(t).getUTCDate() / 7)); };
+  function setChecks(sel, vals) { box.querySelectorAll(sel).forEach(function (i) { i.checked = vals.indexOf(+i.value) !== -1; }); }
+  function update() {
+    var freq = q('freq').value, mmode = picked('mmode');
+    box.querySelectorAll('[data-rec-show]').forEach(function (el) {
+      var s = el.dataset.recShow;
+      el.hidden = !((s === 'repeat' && freq !== 'none') || (s === 'monthly' && freq === 'monthly') ||
+        (s === 'weekdays' && (freq === 'weekly' || (freq === 'monthly' && mmode === 'weekday'))));
+    });
+    var n = parseInt(q('interval').value, 10) || 1;
+    var unit = { daily: 'day', weekly: 'week', monthly: 'month', yearly: 'year' }[freq] || '';
+    q('unit').textContent = unit + (n === 1 ? '' : 's');
+    var t = R.parseDate(dateEl.value);
+    q('daynum').textContent = isNaN(t) ? '' : '(day ' + new Date(t).getUTCDate() + ')';
+    q('wdlabel').textContent = freq === 'monthly' ? 'Which weekday' : 'On';
+    var skips = JSON.parse(box.dataset.skips || '[]');
+    q('skips').innerHTML = skips.map(function (d) {
+      return '<span class="rec-skip">Skip ' + esc(R.formatLongDate(d)) + ' <button type="button" data-rec-unskip="' + esc(d) + '" aria-label="Remove">×</button></span>';
+    }).join('');
+    if (!dateEl.value) { q('summary').textContent = 'Pick the date first to see when this event happens.'; q('next').innerHTML = ''; return; }
+    var val = readRecurrence(key);
+    if (!val.recurrence) { q('summary').textContent = 'One-time event on ' + R.formatLongDate(dateEl.value); q('next').innerHTML = ''; return; }
+    q('summary').textContent = R.describeRecurrence(val.recurrence, dateEl.value);
+    var today = R.churchToday();
+    var from = dateEl.value > today ? dateEl.value : today;
+    var next = R.occurrences({ starts_at: dateEl.value, recurrence: val.recurrence, exceptions: val.exceptions }, from, R.addDays(from, 3 * 366), 10);
+    q('next').innerHTML = next.length
+      ? '<span class="rec-next-label">Next:</span>' + next.map(function (d) { return '<span>' + REC_DAYS[new Date(R.parseDate(d)).getUTCDay()] + ' ' + esc(fmtDate(d)) + '</span>'; }).join('')
+      : '<span>No upcoming dates — check the end date and the days you picked.</span>';
+  }
+  function preset(name) {
+    var dow = startDow() == null ? 0 : startDow();
+    var set = function (freq, n, mmode, wds, ords) {
+      q('freq').value = freq; q('interval').value = n;
+      if (mmode) box.querySelector('input[name="rec-' + key + '-mmode"][value="' + mmode + '"]').checked = true;
+      setChecks('[data-rec-wd]', wds || []); setChecks('[data-rec-ord]', ords || []);
+    };
+    if (name === 'none') set('none', 1);
+    if (name === 'weekly') set('weekly', 1, null, [dow]);
+    if (name === 'biweekly') set('weekly', 2, null, [dow]);
+    if (name === 'monthly-date') set('monthly', 1, 'date');
+    if (name === 'first-third') set('monthly', 1, 'weekday', [dow], [1, 3]);
+    if (name === 'second-fourth') set('monthly', 1, 'weekday', [dow], [2, 4]);
+    if (name === 'last') set('monthly', 1, 'weekday', [dow], [-1]);
+    if (name !== 'none' && startDow() == null) toast('Tip: pick the date first — presets use its weekday');
+    update();
+  }
+  box.addEventListener('click', function (e) {
+    var p = e.target.closest('[data-rec-preset]');
+    if (p) { preset(p.dataset.recPreset); return; }
+    if (e.target.closest('[data-rec-skip]')) {
+      var d = q('skipdate').value;
+      var skips = JSON.parse(box.dataset.skips || '[]');
+      if (d && skips.indexOf(d) === -1) { skips.push(d); skips.sort(); box.dataset.skips = JSON.stringify(skips); }
+      update(); return;
+    }
+    var u = e.target.closest('[data-rec-unskip]');
+    if (u) {
+      box.dataset.skips = JSON.stringify(JSON.parse(box.dataset.skips || '[]').filter(function (x) { return x !== u.dataset.recUnskip; }));
+      update();
+    }
+  });
+  box.addEventListener('change', function (e) {
+    var freq = q('freq').value, mmode = picked('mmode');
+    // A weekday-based repeat with no weekday ticked uses the date's weekday.
+    if ((freq === 'weekly' || (freq === 'monthly' && mmode === 'weekday')) && !box.querySelector('[data-rec-wd]:checked') && startDow() != null)
+      setChecks('[data-rec-wd]', [startDow()]);
+    if (freq === 'monthly' && mmode === 'weekday' && !box.querySelector('[data-rec-ord]:checked')) setChecks('[data-rec-ord]', [startNth()]);
+    if (e.target === q('until')) box.querySelector('input[name="rec-' + key + '-end"][value="until"]').checked = true;
+    if (e.target === q('count')) box.querySelector('input[name="rec-' + key + '-end"][value="count"]').checked = true;
+    update();
+  });
+  box.addEventListener('input', update);
+  dateEl.addEventListener('input', update);
+  dateEl.addEventListener('change', update);
+  update();
 }
 
 // ---------- GALLERY FIELD ----------
@@ -244,10 +403,19 @@ async function saveEditor() {
       out[f.key] = richTextEditor ? richTextEditor.getHTML() : '';
     }
     else if (f.type === 'gallery') { try { out[f.key] = JSON.parse(el.value || '[]'); } catch (e) { out[f.key] = []; } }
+    else if (f.type === 'recurrence') out[f.key] = readRecurrence(f.key);
     else out[f.key] = el.value;
   });
   try { await editorCtx.onSave(out); closeEditor(); }
   catch (e) { fail(e); }
+}
+
+function serviceRowHtml(t) {
+  t = t || {};
+  return '<div class="rec-row svc-row" style="margin-bottom:8px">' +
+    '<input class="form-input" data-svc-time value="' + esc(t.time || '') + '" placeholder="10:00 AM" style="width:140px">' +
+    '<label><input type="checkbox" data-svc-kids' + (t.kids ? ' checked' : '') + '> Kids &amp; Youth during this service</label>' +
+    '<button type="button" class="icon-btn" title="Remove" onclick="this.closest(\'.svc-row\').remove()">' + ICONS.trash + '</button></div>';
 }
 
 // =====================================================================
@@ -269,7 +437,7 @@ const REQUEST_STATUS = {
   pending: ['Waiting', 'tag-amber'], approved: ['Approved', 'tag-green'], rejected: ['Rejected', 'tag-gray'],
   withdrawn: ['Withdrawn', 'tag-gray'], superseded: ['Replaced by newer', 'tag-gray'],
 };
-const APPROVAL_SETUP_MSG = 'Change approval is not set up yet. In the Supabase SQL Editor, run <code>db/migrations-2026-10-change-approval.sql</code> (it only adds things and is safe on the live database), then reload this page.';
+const APPROVAL_SETUP_MSG = 'Change approval is not set up yet. Apply <code>db/migrations-2026-10-change-approval.sql</code> to the database (it only adds things and is safe on the live database), then reload this page.';
 
 const VIEWS = {
 
@@ -375,7 +543,10 @@ events: () => safe(async function () {
         '<button class="icon-btn" style="padding:2px" ' + (i === events.length - 1 ? 'disabled' : '') + ' onclick="moveRow(\'events\',\'' + e.id + '\',1,\'events\')">' + ICONS.down + '</button></div>' +
         (d ? '<div class="date-chip"><div class="m">' + d.toLocaleString('en-US', { month: 'short' }) + '</div><div class="d">' + d.getDate() + '</div></div>' : '') +
         '<div class="row-main"><div class="row-title">' + esc(e.title) + '</div>' +
-        '<div class="row-sub">' + esc([e.time_label, e.location, e.category].filter(Boolean).join(' · ')) + '</div></div>' +
+        '<div class="row-sub">' + esc([e.time_label, e.location, e.category].filter(Boolean).join(' · ')) + '</div>' +
+        (e.recurrence && window.OasisRecurrence ? '<div class="row-sub" style="color:var(--blue-dark)">↻ ' + esc(window.OasisRecurrence.describeRecurrence(e.recurrence, e.starts_at)) + '</div>' : '') +
+        '</div>' +
+        (e.recurrence ? '<span class="tag tag-blue" style="flex-shrink:0">Repeats</span>' : '') +
         (e.featured ? '<span class="tag tag-amber" style="flex-shrink:0">Featured</span>' : '') +
         '<span class="tag ' + (e.published ? 'tag-green' : 'tag-gray') + '" style="flex-shrink:0">' + (e.published ? 'Published' : 'Draft') + '</span>' +
         '<div class="row-actions">' +
@@ -479,6 +650,98 @@ ministries: () => safe(async function () {
     '<div class="sub">Each ministry has its own blog. Add posts from the ministry row.</div></div>' +
     '<button class="btn btn-primary" onclick="addMinistry()">+ Add Ministry</button></div>' +
     (ministries.length ? ministryRows : '<div class="panel"><div class="panel-body" style="color:var(--gray-1)">No ministries yet — click "+ Add Ministry" to get started.</div></div>');
+}),
+
+// ---------------- MISSION BLOG ----------------
+// The Mission Blog is the "missions" ministry's blog, shown at /missions.
+missionblog: () => safe(async function () {
+  const m = (await DB.list('ministries', { eq: { slug: 'missions' } }))[0];
+  if (!m) return needSetup('The Missions ministry is missing. Apply <code>db/migrations-2026-10-redesign.sql</code> to the database, then reload.');
+  const posts = await DB.list('ministry_posts', { order: [['published_at', 'desc']], eq: { ministry_id: m.id } });
+  return '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;gap:12px;flex-wrap:wrap">' +
+    '<div><h3 style="margin:0;font-family:var(--font-head)">Mission Blog (' + posts.length + ')</h3>' +
+    '<div class="sub">Stories and updates shown on <a href="/missions" target="_blank" rel="noopener">/missions</a> and in the home page Mission section. Headlines, images, links and photo galleries are all supported.</div></div>' +
+    '<button class="btn btn-primary" onclick="addMinistryPost(\'' + m.id + '\',\'Missions\',\'missionblog\')">+ New Post</button></div>' +
+    '<div class="panel"><div class="data-list">' +
+    (posts.length ? posts.map(function (p) {
+      var href = '/missions/' + encodeURIComponent(p.slug || p.id);
+      return '<div class="data-row" style="' + (p.published ? '' : 'opacity:.55') + '">' +
+        (p.image_url ? '<img class="row-thumb" src="' + esc(p.image_url) + '" alt="">' : '<div class="row-thumb-sq" style="display:grid;place-items:center;color:var(--gray-2)">' + ICONS.pages + '</div>') +
+        '<div class="row-main"><div class="row-title">' + esc(p.title) + '</div>' +
+        '<div class="row-sub">' + (p.published_at ? fmtDate(String(p.published_at).slice(0, 10)) : 'No date') + '</div></div>' +
+        '<span class="tag ' + (p.published ? 'tag-green' : 'tag-gray') + '" style="flex-shrink:0">' + (p.published ? 'Published' : 'Draft') + '</span>' +
+        '<div class="row-actions">' +
+        (p.published ? '<a class="btn btn-sm btn-outline" href="' + esc(href) + '" target="_blank" rel="noopener">View ↗</a>' : '') +
+        '<button class="icon-btn" title="Edit post" onclick="editMinistryPost(\'' + p.id + '\',\'' + m.id + '\',\'missionblog\')">' + ICONS.edit + '</button>' +
+        '<button class="icon-btn" title="Delete post" onclick="confirmAction(\'Delete post <strong>' + esc(p.title).replace(/'/g, '&#39;') + '</strong>?\', function(){delMinistryPost(\'' + p.id + '\',\'' + m.id + '\',\'missionblog\')})">' + ICONS.trash + '</button>' +
+        '</div></div>';
+    }).join('') : '<div class="data-row"><div class="row-main" style="color:var(--gray-1)">No mission posts yet — click “+ New Post”.</div></div>') +
+    '</div></div>';
+}),
+
+// ---------------- SERVE: OPEN POSITIONS ----------------
+serve: () => safe(async function () {
+  const rows = await DB.list('volunteer_positions', { order: [['sort_order', 'asc']] });
+  return '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;gap:12px;flex-wrap:wrap">' +
+    '<div><h3 style="margin:0;font-family:var(--font-head)">Open volunteer positions (' + rows.length + ')</h3>' +
+    '<div class="sub">Listed on the <a href="/serve" target="_blank" rel="noopener">Serve page</a>. Each has a title, a description and a “How to apply” link.</div></div>' +
+    '<button class="btn btn-primary" onclick="addPosition()">+ Add Position</button></div>' +
+    '<div class="panel"><div class="data-list">' +
+    (rows.length ? rows.map(function (r, i) {
+      return '<div class="data-row" style="' + (r.published ? '' : 'opacity:.55') + '">' +
+        '<div style="display:flex;flex-direction:column;flex-shrink:0">' +
+        '<button class="icon-btn" style="padding:2px" ' + (i === 0 ? 'disabled' : '') + ' onclick="moveRow(\'volunteer_positions\',\'' + r.id + '\',-1,\'serve\')">' + ICONS.up + '</button>' +
+        '<button class="icon-btn" style="padding:2px" ' + (i === rows.length - 1 ? 'disabled' : '') + ' onclick="moveRow(\'volunteer_positions\',\'' + r.id + '\',1,\'serve\')">' + ICONS.down + '</button></div>' +
+        '<div class="row-main"><div class="row-title">' + esc(r.title) + '</div>' +
+        '<div class="row-sub">' + esc([r.team, r.commitment].filter(Boolean).join(' · ') || r.apply_url) + '</div></div>' +
+        '<span class="tag ' + (r.published ? 'tag-green' : 'tag-gray') + '" style="flex-shrink:0">' + (r.published ? 'Open' : 'Hidden') + '</span>' +
+        '<div class="row-actions">' +
+        '<button class="icon-btn" title="Edit" onclick="editPosition(\'' + r.id + '\')">' + ICONS.edit + '</button>' +
+        '<button class="icon-btn" title="Delete" onclick="confirmAction(\'Delete position <strong>' + esc(r.title).replace(/'/g, '&#39;') + '</strong>?\', function(){delPosition(\'' + r.id + '\')})">' + ICONS.trash + '</button>' +
+        '</div></div>';
+    }).join('') : '<div class="data-row"><div class="row-main" style="color:var(--gray-1)">No open positions — the Serve page shows a general “Apply to serve” card instead. Click “+ Add Position”.</div></div>') +
+    '</div></div>';
+}),
+
+// ---------------- LIVESTREAM + SERVICE TIMES ----------------
+livestream: () => safe(async function () {
+  const s = await DB.getSettings();
+  if (!('live_mode' in s)) return needSetup('Livestream settings are not set up yet. Apply <code>db/migrations-2026-10-redesign.sql</code> to the database, then reload.');
+  var mode = s.live_mode || 'auto';
+  var times = Array.isArray(s.service_times) ? s.service_times : [];
+  var DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  var radio = function (v, title, sub) {
+    return '<label class="live-mode"><input type="radio" name="live-mode" value="' + v + '"' + (mode === v ? ' checked' : '') + '><span><strong>' + title + '</strong><span>' + sub + '</span></span></label>';
+  };
+  return '<div class="panel"><div class="panel-head"><div><h3>Livestream hero</h3><div class="sub">The home page hero switches to the livestream (Twitch) during the window below, and back afterwards. Open pages switch without a reload.</div></div>' +
+    '<button class="btn btn-sm btn-primary" onclick="saveLivestream()">Save</button></div><div class="panel-body">' +
+    '<div id="live-status" class="live-status"></div>' +
+    '<div class="form-label" style="margin:14px 0 8px">Mode</div>' +
+    '<div class="live-modes">' +
+      radio('auto', 'Automatic', 'Follow the schedule below') +
+      radio('live', 'Force LIVE now', 'Everyone sees the livestream hero until you switch back') +
+      radio('off', 'Force OFF', 'Never show it (e.g. no stream this week)') +
+    '</div>' +
+    '<div class="form-label" style="margin:16px 0 8px">Schedule (New York time)</div>' +
+    '<div class="rec-row">' +
+      '<select class="form-select" id="live-day" style="width:auto">' + DAYS.map(function (d, i) { return '<option value="' + i + '"' + (+s.live_day === i ? ' selected' : '') + '>' + d + '</option>'; }).join('') + '</select>' +
+      'from <input class="form-input rec-date" type="time" id="live-start" value="' + esc(s.live_start || '09:55') + '">' +
+      'to <input class="form-input rec-date" type="time" id="live-end" value="' + esc(s.live_end || '11:20') + '">' +
+    '</div>' +
+    '<div class="form-label" style="margin:18px 0 8px">Test the switch <span class="form-hint">— only you see these previews</span></div>' +
+    '<div class="rec-row">' +
+      '<a class="btn btn-sm btn-outline" href="/?live=1" target="_blank" rel="noopener">Preview live hero ↗</a>' +
+      '<a class="btn btn-sm btn-outline" href="/?live=0" target="_blank" rel="noopener">Preview normal hero ↗</a>' +
+      '<a class="btn btn-sm btn-outline" id="sim-before" href="/" target="_blank" rel="noopener">Simulate 1 min before ↗</a>' +
+      '<a class="btn btn-sm btn-outline" id="sim-at" href="/" target="_blank" rel="noopener">Simulate start time ↗</a>' +
+    '</div>' +
+    '<div class="sub" style="margin-top:6px">The simulate links use the saved schedule. Twitch channel and other live settings are under Navigation &amp; Site Info.</div>' +
+    '</div></div>' +
+    '<div class="panel" style="margin-top:16px"><div class="panel-head"><div><h3>Sunday service times</h3><div class="sub">Shown on the home page. Tick the services where Kids &amp; Youth ministry runs.</div></div>' +
+    '<button class="btn btn-sm btn-primary" onclick="saveServiceTimes()">Save</button></div><div class="panel-body">' +
+    '<div id="svc-list">' + times.map(serviceRowHtml).join('') + '</div>' +
+    '<button class="btn btn-sm btn-outline" onclick="addServiceRow()">+ Add service</button>' +
+    '</div></div>';
 }),
 
 // ---------------- EXTERNAL GIVING LINK ----------------
@@ -617,7 +880,7 @@ media: () => safe(async function () {
     const { data } = await DB.client.storage.from('media').list(f, { limit: 60, sortBy: { column: 'created_at', order: 'desc' } });
     (data || []).forEach(function (o) { if (o.name !== '.emptyFolderPlaceholder') all.push({ folder: f, name: o.name }); });
   }
-  return '<div class="panel"><div class="panel-head"><div><h3>Media library</h3><div class="sub">Supabase Storage · ' + all.length + ' files</div></div>' +
+  return '<div class="panel"><div class="panel-head"><div><h3>Media library</h3><div class="sub">Media storage · ' + all.length + ' files</div></div>' +
     '<button class="btn btn-sm btn-primary" onclick="uploadMedia()">↑ Upload</button></div><div class="panel-body">' +
     (all.length ? '<div class="media-grid">' + all.map(function (o) {
       const url = DB.client.storage.from('media').getPublicUrl(o.folder + '/' + o.name).data.publicUrl;

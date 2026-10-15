@@ -2,15 +2,14 @@
 
 import { useState } from 'react';
 import { safeHttpUrl } from '@/lib/safeUrl';
+import { describeRecurrence, isRecurring } from '@/lib/recurrence';
 
-const CATS = [
-  ['all', 'All Events'],
-  ['worship', 'Worship'],
-  ['women', 'Women'],
-  ['youth', 'Youth'],
-  ['community', 'Community'],
-  ['family', 'Family'],
-];
+const CAT_LABELS = {
+  worship: 'Worship', women: 'Women', men: 'Men', youth: 'Youth', kids: 'Kids',
+  community: 'Community', family: 'Family', missions: 'Missions', prayer: 'Prayer',
+};
+const DEFAULT_CATS = ['worship', 'women', 'youth', 'community', 'family'];
+const catLabel = (c) => CAT_LABELS[c] || c.replace(/^\w/, (x) => x.toUpperCase());
 
 function eventDate(e) {
   return e.starts_at ? new Date(e.starts_at + 'T12:00:00') : null;
@@ -19,13 +18,16 @@ function eventDate(e) {
 export default function EventsList({ events }) {
   const [filter, setFilter] = useState('all');
   const filtered = filter === 'all' ? events : events.filter((e) => (e.category || 'community') === filter);
+  // Chips for the standard categories plus any other category in use.
+  const used = new Set(events.map((e) => e.category || 'community'));
+  const cats = [['all', 'All Events'], ...[...DEFAULT_CATS, ...[...used].filter((c) => !DEFAULT_CATS.includes(c))].map((c) => [c, catLabel(c)])];
 
   let lastMonth = '';
 
   return (
     <div data-events-list>
       <div className="filter-bar">
-        {CATS.map(([key, label]) => (
+        {cats.map(([key, label]) => (
           <button type="button"
             key={key}
             className={'filter-chip' + (filter === key ? ' active' : '')}
@@ -47,7 +49,7 @@ export default function EventsList({ events }) {
         const showMonthHeading = monthLabel && monthLabel !== lastMonth;
         lastMonth = monthLabel;
         return (
-          <div key={e.id} data-cms-scope={`event-${e.id}`}>
+          <div key={e.occurrence_key || e.id} id={`event-${e.id}-${e.starts_at}`} data-cms-scope={`event-${e.id}`}>
             {showMonthHeading && (
               <div style={{ fontFamily: 'var(--font-head)', fontSize: '.75rem', fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--gray-1)', marginBottom: 'var(--sp-2)', marginTop: 'var(--sp-4)' }}>
                 {monthLabel}
@@ -60,12 +62,13 @@ export default function EventsList({ events }) {
                 <div className="dow">{d ? d.toLocaleString('en-US', { weekday: 'short' }) : ''}</div>
               </div>
               <div className="event-body">
-                <div className="event-cat">{(e.category || 'community').replace(/^\w/, (c) => c.toUpperCase())}</div>
+                <div className="event-cat">{catLabel(e.category || 'community')}</div>
                 <div className="event-title">{e.title}</div>
                 <div className="event-meta-row">
                   {[e.time_label, e.location].filter(Boolean).map((x) => <span key={x}>{x}</span>)}
                 </div>
                 {e.description ? <div className="event-desc">{e.description}</div> : null}
+                {isRecurring(e) ? <div className="event-repeat">{describeRecurrence(e.recurrence, e.series_start || e.starts_at)}</div> : null}
               </div>
               {safeHttpUrl(e.registration_url) ? (
                 <div className="event-action">
