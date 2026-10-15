@@ -655,8 +655,15 @@ ministries: () => safe(async function () {
 // ---------------- MISSION BLOG ----------------
 // The Mission Blog is the "missions" ministry's blog, shown at /missions.
 missionblog: () => safe(async function () {
-  const m = (await DB.list('ministries', { eq: { slug: 'missions' } }))[0];
-  if (!m) return needSetup('The Missions ministry is missing. Apply <code>db/migrations-2026-10-redesign.sql</code> to the database, then reload.');
+  // Same rule as the public site (lib/data.js getMissionsMinistry): slug
+  // "missions", else the first ministry whose slug or name starts with "mission".
+  const all = await DB.list('ministries', { order: [['sort_order', 'asc']] });
+  const m = all.find(function (x) { return x.slug === 'missions'; }) ||
+    all.find(function (x) { return /^mission/i.test(x.slug || '') || /^mission/i.test((x.name || '').trim()); });
+  if (!m) return '<div class="panel"><div class="panel-body">' +
+    '<h3 style="margin:0 0 6px;font-family:var(--font-head)">Set up the Mission Blog</h3>' +
+    '<p style="color:var(--gray-1);font-size:.88rem;margin-bottom:14px">The Mission Blog is the blog of a ministry called “Missions”. There isn’t one yet — create it with one click, then add posts here.</p>' +
+    '<button class="btn btn-primary" onclick="createMissionsMinistry()">Create the Mission Blog</button></div></div>';
   const posts = await DB.list('ministry_posts', { order: [['published_at', 'desc']], eq: { ministry_id: m.id } });
   return '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;gap:12px;flex-wrap:wrap">' +
     '<div><h3 style="margin:0;font-family:var(--font-head)">Mission Blog (' + posts.length + ')</h3>' +

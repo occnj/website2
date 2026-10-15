@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import './home.css';
-import { getLatestMissionPost, getPageHero, getSermons, getSiteSettings } from '@/lib/data';
+import { getMissionsSummary, getPageHero, getSermons, getSiteSettings } from '@/lib/data';
 import { getChannelVideos } from '@/lib/youtube';
 import { asset } from '@/lib/basePath';
 import { isLiveNow } from '@/lib/serviceWindow';
@@ -21,13 +21,15 @@ function joinTimes(list) {
 export const dynamic = 'force-dynamic';
 
 export default async function HomePage() {
-  const [hero, ytVideos, dbSermons, settings, missionPost] = await Promise.all([
+  const [hero, ytVideos, dbSermons, settings, missions] = await Promise.all([
     getPageHero('index'),
     getChannelVideos(),
     getSermons(),
     getSiteSettings(),
-    getLatestMissionPost(),
+    getMissionsSummary(),
   ]);
+  const missionPost = missions.post;
+  const missionImage = (missionPost && missionPost.image_url) || (missions.ministry && missions.ministry.image_url) || null;
   const serviceTimes = (settings && Array.isArray(settings.service_times) && settings.service_times.filter((t) => t && t.time).length)
     ? settings.service_times.filter((t) => t && t.time)
     : DEFAULT_SERVICE_TIMES;
@@ -79,24 +81,37 @@ export default async function HomePage() {
       </section>
       </HomeHero>
 
-      {/* ===== MISSION CTA ===== */}
-      <section className="mission-cta-band" data-screen-label="Mission CTA">
+      {/* ===== MISSIONS (Mission Blog teaser) ===== */}
+      <section className="section mission-feature-section" data-screen-label="Missions">
         <div className="container">
-          <div className="mission-cta-inner">
-            <div className="mission-cta-copy">
-              <p className="t-eyebrow" style={{ color: 'var(--amber)' }}>Missions</p>
-              <h2 className="mission-cta-title">We are a <em>sending</em> church.</h2>
-              <p className="mission-cta-text">
-                {missionPost ? (
-                  <>Latest from the field: <Link href={`/missions/${missionPost.slug || missionPost.id}`}>{missionPost.title} →</Link></>
-                ) : (
-                  <>The Great Commission isn&rsquo;t a suggestion — it&rsquo;s our mandate. See what God is doing through our missionary partners in Rahway and around the world.</>
-                )}
+          <div className="mission-feature">
+            <Link href="/missions" className="mission-feature-media" aria-label="Mission Blog">
+              {missionImage ? (
+                <img src={missionImage} alt={missionPost ? missionPost.title : 'Oasis missions'} />
+              ) : (
+                <div className="mission-feature-fallback">
+                  <svg width="56" height="56" viewBox="0 0 48 48" fill="none" aria-hidden="true"><circle cx="24" cy="24" r="18" stroke="currentColor" strokeWidth="1.5" /><path d="M6 24h36M24 6c-4 6-6 12-6 18s2 12 6 18M24 6c4 6 6 12 6 18s-2 12-6 18" stroke="currentColor" strokeWidth="1.5" /></svg>
+                  <span>Rahway &middot; and around the world</span>
+                </div>
+              )}
+            </Link>
+            <div className="mission-feature-copy">
+              <p className="t-eyebrow">Missions</p>
+              <h2 className="t-h1 mt-2">We are a sending church.</h2>
+              <p className="t-body t-muted mt-3">
+                The Great Commission isn&rsquo;t a suggestion — it&rsquo;s our mandate. We support missionary partners around the world and serve right here in Rahway.
               </p>
-            </div>
-            <div className="mission-cta-actions">
-              <Link href="/missions" className="btn btn-amber">Mission Blog</Link>
-              <Link href="/serve" className="btn btn-ghost btn-sm">Serve With Us →</Link>
+              {missionPost ? (
+                <Link href={`/missions/${missionPost.slug || missionPost.id}`} className="mission-latest">
+                  <span className="mission-latest-label">Latest story</span>
+                  <span className="mission-latest-title">{missionPost.title}</span>
+                  <span className="mission-latest-arrow" aria-hidden="true">→</span>
+                </Link>
+              ) : null}
+              <div className="mission-feature-actions">
+                <Link href="/missions" className="btn btn-primary">Read the Mission Blog</Link>
+                <Link href="/serve" className="btn btn-secondary">Serve With Us</Link>
+              </div>
             </div>
           </div>
         </div>

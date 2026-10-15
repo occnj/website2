@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import PageHero from '@/components/PageHero';
-import { getMinistryBySlug, getMinistryPosts, getPageHero } from '@/lib/data';
+import { getMinistryPosts, getMissionsMinistry, getPageHero } from '@/lib/data';
 import '../ministries/ministries.css';
 
 // Mission Blog. Posts are the "missions" ministry's posts, managed in
@@ -23,7 +23,7 @@ function excerpt(body, max = 160) {
 }
 
 export default async function MissionsPage() {
-  const [ministry, hero] = await Promise.all([getMinistryBySlug('missions'), getPageHero('missions')]);
+  const [ministry, hero] = await Promise.all([getMissionsMinistry(), getPageHero('missions')]);
   const posts = ministry ? await getMinistryPosts(ministry.id) : [];
 
   return (

@@ -39,7 +39,7 @@ export default async function RootLayout({ children }) {
   const [settings, navItems] = await Promise.all([getSiteSettings(), getNavItems()]);
 
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" data-scroll-behavior="smooth" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: HEADER_STATE_SCRIPT }} />
       </head>
