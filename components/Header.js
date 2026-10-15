@@ -21,6 +21,7 @@ function normalizeHref(href) {
 const STATIC_LINKS = [
   { label: 'About', href: '/about' },
   { label: 'Ministries', href: '/ministries' },
+  { label: 'Serve', href: '/serve' },
   { label: 'Plan Your Visit', href: '/plan-your-visit' },
   { label: 'Watch', href: '/watch' },
   { label: 'Events', href: '/events' },
@@ -31,31 +32,17 @@ const STATIC_LINKS = [
 const REMOVED_NAV_LABELS = new Set(['teams', 'life events', 'next steps', 'prayer', 'prayer request', 'leadership']);
 
 export default function Header() {
-  const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
   const { navItems, settings } = useSiteData();
 
-  useEffect(() => {
-    let ticking = false;
-    function onScroll() {
-      if (ticking) return;
-      ticking = true;
-      window.requestAnimationFrame(() => {
-        ticking = false;
-        const y = window.scrollY;
-        // Separate on/off thresholds. With a single boundary, any scroll that
-        // hovers around it — iOS rubber-banding, momentum settling, the address
-        // bar collapsing — flips the header back and forth every frame, which
-        // reads as a glitch. The state now has to travel a real distance to
-        // change back.
-        setScrolled((prev) => (prev ? y > 8 : y > 32));
-      });
-    }
-    onScroll();
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
+  // Floating (transparent) vs solid is NOT React state: the inline script in
+  // app/layout.js sets `hdr-solid` on <html> before the first paint and on every
+  // scroll, so the bar is already right when a refreshed page restores its
+  // scroll position (that mismatch was the navbar flash).
+
+  // Close the mobile menu when the route changes.
+  useEffect(() => { setMobileOpen(false); }, [pathname]);
 
   // Lock background scroll while the mobile menu is open so the page behind
   // the drawer can't move.
@@ -67,11 +54,8 @@ export default function Header() {
   }, [mobileOpen]);
 
   // Site-wide floating header: the bar is transparent at the top of every page
-  // so the logo + nav float over the content/hero, and fades to a solid bar as
-  // soon as the user scrolls (keeps links readable on light pages). The Give
-  // button keeps its amber pill in every state. Pages that open with a dark hero
-  // (Ministries, About, etc.) get white floating nav; the solid bar returns on scroll.
-  const floating = !scrolled;
+  // so the logo + nav float over the content/hero, and turns solid as soon as
+  // the user scrolls (see globals.css, `hdr-solid`).
 
   const podcastUrl = settings && settings.podcast_nav_url ? settings.podcast_nav_url.trim() : '';
 
@@ -90,7 +74,7 @@ export default function Header() {
 
   return (
     <>
-      <header className={'site-header' + (scrolled ? ' scrolled' : '') + (floating ? ' floating' : '')}>
+      <header className={'site-header' + (mobileOpen ? ' menu-open' : '')}>
         <div className="header-inner">
           <Link href="/" className="header-logo">
             <img src={asset('/uploads/oasis-logo.png')} alt="Oasis Christian Centre" className="logo-desktop logo-light" />

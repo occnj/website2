@@ -7,10 +7,13 @@ import { asset } from '@/lib/basePath';
 import { SUPABASE_ANON_KEY, SUPABASE_URL } from '@/lib/supabase';
 import { createRichTextEditor } from './richTextEditor';
 import { describeChange } from '@/lib/changeRequests';
+import * as recurrence from '@/lib/recurrence';
+import * as liveWindow from '@/lib/serviceWindow';
 
 const TITLES = {
   dashboard: 'Dashboard', pages: 'Pages', sermons: 'Sermons', events: 'Events',
   team: 'Leadership Team', ministries: 'Ministries & Posts', give: 'External Giving Link',
+  missionblog: 'Mission Blog', serve: 'Serve — Open Positions', livestream: 'Livestream & Service Times',
   faq: 'FAQ — Plan Your Visit',
   navigation: 'Navigation & Site Info', settings: 'Settings',
   media: 'Media Library', users: 'Users & Roles',
@@ -30,6 +33,9 @@ export default function AdminPage() {
     window.OasisRichText = richTextApi;
     // Shared with the approval email + review page so all three read the same.
     window.OasisChanges = { describe: describeChange };
+    // Repeating-event dates + wording, shared with the public Events page.
+    window.OasisRecurrence = recurrence;
+    window.OasisLive = liveWindow;
 
     loadScriptSequence([
       asset('/admin/config.js') + ADMIN_V,
@@ -100,6 +106,9 @@ export default function AdminPage() {
             <button className="side-link" data-view="beliefs" data-role="content">About · What we believe</button>
             <button className="side-link" data-view="team" data-role="content">Team</button>
             <button className="side-link" data-view="ministries" data-role="content" style={{ display: 'none' }} data-show-if="not-events-only">Ministries</button>
+            <button className="side-link" data-view="missionblog" data-role="content" style={{ display: 'none' }} data-show-if="not-events-only">Mission Blog</button>
+            <button className="side-link" data-view="serve" data-role="content">Serve Positions</button>
+            <button className="side-link" data-view="livestream" data-role="content">Livestream &amp; Service Times</button>
             <button className="side-link" data-view="give" data-role="content">External Giving Link</button>
             <div className="sidebar-heading" data-role="content">Site</div>
             <button className="side-link" data-view="navigation" data-role="content">Navigation</button>
@@ -108,6 +117,7 @@ export default function AdminPage() {
             <button className="side-link" data-view="settings" data-role="admin">Settings</button>
             <button className="side-link" data-view="users" data-role="admin">Users &amp; Roles</button>
             <button className="side-link" data-view="history" data-role="admin">Change History</button>
+            <a className="side-link" data-role="admin" href={process.env.NEXT_PUBLIC_PIBASE_DASHBOARD_URL || 'https://pibase.oasisnj.net'} target="_blank" rel="noopener noreferrer">PIBASE Dashboard ↗</a>
           </nav>
           <div className="sidebar-foot">
             <div className="avatar" id="me-avatar">·</div>
@@ -218,11 +228,12 @@ function initAdminController() {
     localStorage.setItem('oasis-admin-view', name);
     const html = await window.VIEWS[name]();
     container.innerHTML = '<div class="view active" data-screen-label="' + (TITLES[name] || name) + '">' + html + '</div>';
+    if (window.VIEW_READY && window.VIEW_READY[name]) window.VIEW_READY[name]();
     window.scrollTo(0, 0);
   }
   window.go = go;
 
-  document.querySelectorAll('.side-link').forEach((b) => {
+  document.querySelectorAll('.side-link[data-view]').forEach((b) => {
     b.addEventListener('click', () => go(b.dataset.view));
   });
 
@@ -275,7 +286,7 @@ function initAdminController() {
     const user = document.getElementById('login-user').value.trim();
     const pass = document.getElementById('login-pass').value;
     document.getElementById('login-error').style.display = 'none';
-    if (!DB.connected) { loginError('Supabase is not configured — add keys in admin/config.js.'); return; }
+    if (!DB.connected) { loginError('The database is not configured — set NEXT_PUBLIC_SUPABASE_URL and the publishable key (see docs/pibase.md).'); return; }
     const CFG = window.OASIS_CONFIG;
     const email = (user.toLowerCase() === (CFG.ADMIN_USERNAME || '').toLowerCase()) ? CFG.ADMIN_EMAIL : user;
     const btn = document.getElementById('login-btn');
@@ -290,7 +301,7 @@ function initAdminController() {
   async function forgotPassword() {
     const user = document.getElementById('login-user').value.trim();
     if (!user) { loginError('Enter your email address first.'); return; }
-    if (!DB.connected) { loginError('Supabase is not configured.'); return; }
+    if (!DB.connected) { loginError('The database is not configured.'); return; }
     const CFG = window.OASIS_CONFIG;
     const email = (user.toLowerCase() === (CFG.ADMIN_USERNAME || '').toLowerCase()) ? CFG.ADMIN_EMAIL : user;
     const { error } = await DB.client.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin + '/admin' });
@@ -351,6 +362,6 @@ function initAdminController() {
     });
   } else {
     const note = document.getElementById('supabase-note');
-    if (note) note.innerHTML = '<span style="color:var(--amber);font-weight:600">Not configured</span>&nbsp;— add Supabase keys in admin/config.js';
+    if (note) note.innerHTML = '<span style="color:var(--amber);font-weight:600">Not configured</span>&nbsp;— set the PIBASE address and key in .env.local (docs/pibase.md)';
   }
 }

@@ -1,6 +1,6 @@
 # Oasis Christian Centre — Website
 
-Next.js app (App Router) + Supabase, deployed on the church server behind a
+Next.js app (App Router) + PIBASE (Supabase-compatible backend, see `docs/pibase.md`), deployed on the church server behind a
 Tailscale/proxy setup. Runs `next start` on port **5900** with `basePath: /website`.
 
 ---
@@ -16,6 +16,7 @@ Tailscale/proxy setup. Runs `next start` on port **5900** with `basePath: /websi
 | **`VISUAL-EDITOR.md`** | How the inline "edit the real page" CMS works. |
 | **`AUDIT.md`** | Original audit + current status of each item. |
 | **`docs/change-approval.md`** | Editors' changes wait for an approver (email link or Admin); change history and undo. |
+| **`docs/pibase.md`** | Running on PIBASE (pibase.oasisnj.net): database setup script, env vars, first owner, Oct 2026 redesign features. |
 
 ---
 
@@ -59,8 +60,9 @@ Full details + troubleshooting in `SERVER-COMMANDS.md`.
 - **Content** (text, images, events, nav, settings) is edited in the **Admin panel**
   (`/admin`) or via the **inline Visual Editor**, stored in Supabase.
 - **Watch page** pulls messages from YouTube (@OCCNJ) and shows a live
-  **Twitch / YouTube / Facebook** tabbed player. Live/offline switches automatically
-  on the Sunday service schedule (9:55–11:20 AM ET, `lib/serviceWindow.js`).
+  **Twitch** live player. Live/offline (and the home page livestream hero) switch
+  automatically on the Sunday schedule (9:55–11:20 AM ET by default, Admin →
+  Livestream & Service Times, `lib/serviceWindow.js`).
 - **Forms** send email via **Resend**: prayer → pastoral team, all else → oasis@.
 - **Giving** is never processed by this website; every Give control opens the
   Admin-configured external provider.

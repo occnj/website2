@@ -46,6 +46,8 @@
 /* --- RESET --- */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; font-size: 16px; }
+/* In-page links (#serve, #positions…) land below the fixed header. */
+[id] { scroll-margin-top: calc(var(--header-h) + 16px); }
 body {
   font-family: var(--font-body);
   color: var(--charcoal);
@@ -245,16 +247,24 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
   will-change: transform;
   backface-visibility: hidden;
 }
-.site-header.scrolled { box-shadow: var(--shadow-md); }
+/* Solid vs floating is a class on <html> (`hdr-solid`), set by the inline
+   script in app/layout.js before the first paint and on every scroll. It used
+   to be React state, so after a refresh the server HTML showed the floating
+   bar over mid-page content and then animated to solid once React loaded —
+   the "flash". `hdr-instant` turns transitions off while the page restores. */
+html.hdr-solid .site-header { box-shadow: var(--shadow-md); }
+html.hdr-instant .site-header,
+html.hdr-instant .site-header *,
+html.hdr-instant .site-header::before { transition: none !important; }
 .site-header { transition: background .25s ease, box-shadow .2s, border-color .25s ease, backdrop-filter .25s ease, -webkit-backdrop-filter .25s ease; }
 
 /* --- FLOATING HEADER (site-wide, transparent at top of page) ---
    The bar is transparent at the very top of every page so the logo + nav float
    over the hero/content; a soft dark scrim keeps white text legible even over
-   light page tops. As soon as the user scrolls (`.scrolled` on, `.floating`
-   off) the solid frosted bar returns. The Give button keeps its amber pill in
+   light page tops. As soon as the user scrolls (`hdr-solid` on <html>) the
+   solid frosted bar returns. An open mobile menu (`.menu-open`) is always solid. The Give button keeps its amber pill in
    every state. */
-.site-header.floating {
+html:not(.hdr-solid) .site-header:not(.menu-open) {
   background: transparent;
   border-bottom-color: transparent;
   box-shadow: none;
@@ -266,7 +276,7 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
   -webkit-backdrop-filter: blur(0px);
 }
 /* Subtle top-to-transparent scrim behind the floating bar for legibility */
-.site-header.floating::before {
+html:not(.hdr-solid) .site-header:not(.menu-open)::before {
   content: '';
   position: absolute;
   inset: 0;
@@ -277,17 +287,17 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
   z-index: -1;
 }
 /* Floating controls render light over the scrim */
-.site-header.floating .nav-link { color: #fff; }
-.site-header.floating .nav-link:hover { color: #fff; background: rgba(255,255,255,.15); }
-.site-header.floating .nav-link.active { color: #fff; }
-.site-header.floating .nav-toggle span { background: #fff; }
-.site-header.floating .header-social a { color: rgba(255,255,255,.9); }
-.site-header.floating .header-social a:hover { color: #fff; background: rgba(255,255,255,.15); }
+html:not(.hdr-solid) .site-header:not(.menu-open) .nav-link { color: #fff; }
+html:not(.hdr-solid) .site-header:not(.menu-open) .nav-link:hover { color: #fff; background: rgba(255,255,255,.15); }
+html:not(.hdr-solid) .site-header:not(.menu-open) .nav-link.active { color: #fff; }
+html:not(.hdr-solid) .site-header:not(.menu-open) .nav-toggle span { background: #fff; }
+html:not(.hdr-solid) .site-header:not(.menu-open) .header-social a { color: rgba(255,255,255,.9); }
+html:not(.hdr-solid) .site-header:not(.menu-open) .header-social a:hover { color: #fff; background: rgba(255,255,255,.15); }
 /* Drop-shadow so a white logo / white bars stay crisp on any background */
-.site-header.floating .header-logo img,
-.site-header.floating .nav-toggle span,
-.site-header.floating .nav-link { text-shadow: 0 1px 6px rgba(0,0,0,.35); }
-.site-header.floating .header-logo img { filter: drop-shadow(0 1px 4px rgba(0,0,0,.45)); }
+html:not(.hdr-solid) .site-header:not(.menu-open) .header-logo img,
+html:not(.hdr-solid) .site-header:not(.menu-open) .nav-toggle span,
+html:not(.hdr-solid) .site-header:not(.menu-open) .nav-link { text-shadow: 0 1px 6px rgba(0,0,0,.35); }
+html:not(.hdr-solid) .site-header:not(.menu-open) .header-logo img { filter: drop-shadow(0 1px 4px rgba(0,0,0,.45)); }
 /* Give button already has its own amber background + shadow — leave it as-is */
 .header-inner {
   display: flex;
@@ -307,7 +317,7 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
 /* Logo variants are mutually exclusive by viewport, gated on min-/max-width so
    the desktop light/dark swap can never out-specify the mobile rule. (Media
    queries add no specificity, so a bare `.logo-desktop{display:none}` loses to
-   `.site-header.scrolled .logo-dark{display:block}` and both would show.) */
+   `.hdr-solid .site-header .logo-dark{display:block}` and both would show.) */
 .logo-desktop, .logo-mobile { display: none; }
 @media (min-width: 768px) {
   /* Cross-fade rather than display-swap. The two files have slightly different
@@ -323,8 +333,8 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
     opacity: 0;
     transition: opacity .25s ease;
   }
-  .site-header.scrolled .logo-light { opacity: 0; }
-  .site-header.scrolled .logo-dark { opacity: 1; }
+  html.hdr-solid .site-header .logo-light, .site-header.menu-open .logo-light { opacity: 0; }
+  html.hdr-solid .site-header .logo-dark, .site-header.menu-open .logo-dark { opacity: 1; }
 }
 @media (max-width: 767px) {
   .logo-mobile { display: block; }

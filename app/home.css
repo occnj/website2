@@ -301,3 +301,33 @@
   .steps-grid { grid-template-columns: 1fr; }
   .circles-grid { grid-template-columns: 1fr; }
 }
+
+/* ===== LIVESTREAM HERO (components/HomeHero.js) ===== */
+.hero-home.hero-live { align-items: center; }
+.hero-live-grid { display: grid; grid-template-columns: 1fr 1.25fr; gap: var(--sp-5); align-items: center; }
+.hero-live .hero-headline { font-size: clamp(2.2rem, 4.4vw, 3.6rem); }
+.hero-live-player {
+  position: relative; aspect-ratio: 16/9; border-radius: var(--radius-md); overflow: hidden;
+  background: #0e0e10; box-shadow: 0 20px 60px rgba(0,0,0,.45); border: 1px solid rgba(255,255,255,.08);
+}
+.hero-live-note { margin-top: var(--sp-2); font-size: .8rem; color: rgba(255,255,255,.45); }
+@media (max-width: 900px) {
+  .hero-live-grid { grid-template-columns: 1fr; gap: var(--sp-3); }
+  .hero-live-player { order: -1; }
+}
+
+/* ===== MISSION CTA (top of home) ===== */
+.mission-cta-band { background: linear-gradient(90deg, #0a2233 0%, var(--charcoal) 100%); padding: var(--sp-5) 0; border-bottom: 1px solid rgba(255,255,255,.06); }
+.mission-cta-inner { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-4); flex-wrap: wrap; }
+.mission-cta-copy { max-width: 680px; }
+.mission-cta-title { font-family: var(--font-head); font-size: clamp(1.6rem, 3vw, 2.3rem); font-weight: 700; color: #fff; line-height: 1.15; margin-top: 6px; }
+.mission-cta-title em { color: var(--amber); font-style: italic; }
+.mission-cta-text { color: rgba(255,255,255,.65); margin-top: 10px; line-height: 1.65; }
+.mission-cta-text a { color: #fff; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+.mission-cta-actions { display: flex; gap: var(--sp-2); align-items: center; flex-wrap: wrap; }
+.hero-live .live-badge {
+  display: inline-flex; align-items: center; gap: 6px; background: #e53e3e; color: #fff;
+  padding: 5px 14px; border-radius: 100px; font-size: .72rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+}
+.hero-live .live-dot { width: 6px; height: 6px; border-radius: 50%; background: #fff; animation: livePulse 1s infinite; }
+@keyframes livePulse { 0%,100% { opacity: 1; } 50% { opacity: .4; } }

@@ -38,31 +38,26 @@ export default async function WatchPage() {
 
       <LiveBanner />
 
-      <section className="section" data-screen-label="Watch Now Live">
+      <section className="section" id="live" data-screen-label="Watch Now Live">
         <div className="container">
           <div className="section-label">
             <p className="t-eyebrow">Watch Now Live</p>
           </div>
           <div className="featured-sermon">
             <div className="featured-sermon-video" data-live-player>
-              <LivePlayer
-                twitch_channel={(settings && settings.twitch_channel) || 'occnj'}
-                youtube_channel={(settings && settings.youtube_channel) || ''}
-                facebook_page_id={(settings && settings.facebook_page_id) || ''}
-                live_default_tab={(settings && settings.live_default_tab) || 'twitch'}
-              />
+              <LivePlayer twitch_channel={(settings && settings.twitch_channel) || 'occnj'} />
             </div>
             <LiveInfoPanel />
           </div>
         </div>
       </section>
 
-      <section className="section bg-off" data-screen-label="All Messages">
+      <section className="section bg-off" id="latest-messages" data-screen-label="Latest Messages">
         <div className="container">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 'var(--sp-2)', marginBottom: 'var(--sp-4)' }}>
             <div>
               <p className="t-eyebrow">Library</p>
-              <h2 className="t-h2 mt-1">All Messages</h2>
+              <h2 className="t-h2 mt-1">Latest Messages</h2>
             </div>
           </div>
 

@@ -2,18 +2,18 @@
 
 import { useEffect, useState } from 'react';
 import TextVariants from './TextVariants';
-import { TWITCH_CHANNEL_URL } from './TwitchEmbed';
-import { YT_CHANNEL_URL } from '@/lib/youtube';
-import { isServiceWindowNow } from '@/lib/serviceWindow';
+import { useSiteData } from './SiteDataContext';
+import { isLiveInBrowser } from '@/lib/serviceWindow';
 
 export default function LiveInfoPanel() {
+  const { settings } = useSiteData();
   const [live, setLive] = useState(false);
 
   useEffect(() => {
-    setLive(isServiceWindowNow());
-    const t = setInterval(() => setLive(isServiceWindowNow()), 60 * 1000);
+    setLive(isLiveInBrowser(settings));
+    const t = setInterval(() => setLive(isLiveInBrowser(settings)), 20 * 1000);
     return () => clearInterval(t);
-  }, []);
+  }, [settings]);
 
   return (
     <div className="featured-sermon-info">
@@ -55,15 +55,8 @@ export default function LiveInfoPanel() {
           </p>
         </div>
 
-      {/* Buttons */}
-      <div style={{ display: 'flex', gap: 'var(--sp-2)', marginTop: 'var(--sp-4)', flexWrap: 'wrap' }}>
-        <a href={TWITCH_CHANNEL_URL} target="_blank" rel="noopener"
-          className={live ? 'btn btn-primary btn-lg' : 'btn btn-primary'}>
-          <TextVariants id="live-info-link" active={live ? 'live' : 'offline'} variants={{ live: '▶ Watch Live Now', offline: 'Watch on Twitch' }} />
-        </a>
-        <a href={YT_CHANNEL_URL} target="_blank" rel="noopener" className="btn btn-ghost btn-sm">
-          Past Messages on YouTube →
-        </a>
+      <div style={{ marginTop: 'var(--sp-4)' }}>
+        <a href="#latest-messages" className="btn btn-ghost btn-sm">Latest Messages ↓</a>
       </div>
     </div>
   );

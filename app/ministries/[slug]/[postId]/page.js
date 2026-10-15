@@ -35,6 +35,9 @@ export default async function MinistryPostPage({ params }) {
   if (!post) notFound();
 
   const color = ministry.color || 'var(--blue)';
+  // Mission posts live under /missions (the Mission Blog); others under /ministries/<slug>.
+  const isMissions = params.slug === 'missions';
+  const listHref = isMissions ? '/missions' : `/ministries/${params.slug}`;
   const safeBody = post.body ? await sanitizeHtml(post.body) : '';
 
   return (
@@ -67,9 +70,9 @@ export default async function MinistryPostPage({ params }) {
         <article className="post-article">
           {/* Use params.slug — the URL segment — not the joined ministry object,
               which could be null if the FK join didn't resolve. */}
-          <Link href={`/ministries/${params.slug}`} className="post-back">
+          <Link href={listHref} className="post-back">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M19 12H5M12 5l-7 7 7 7" /></svg>
-            Back to {ministry.name}
+            Back to {isMissions ? 'Mission Blog' : ministry.name}
           </Link>
 
           {safeBody ? (
@@ -83,10 +86,10 @@ export default async function MinistryPostPage({ params }) {
           )}
 
           <div style={{ marginTop: 'var(--sp-5)', paddingTop: 'var(--sp-4)', borderTop: '1px solid var(--border)', display: 'flex', gap: 'var(--sp-2)', flexWrap: 'wrap' }}>
-            <Link href={`/ministries/${params.slug}`} className="btn btn-secondary">
-              ← More from {ministry.name}
+            <Link href={listHref} className="btn btn-secondary">
+              ← More from {isMissions ? 'the Mission Blog' : ministry.name}
             </Link>
-            <Link href="/contact" className="btn btn-primary">Get Involved</Link>
+            <Link href={isMissions ? '/serve' : '/contact'} className="btn btn-primary">Get Involved</Link>
           </div>
         </article>
       </div>

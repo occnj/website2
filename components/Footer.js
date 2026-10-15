@@ -39,6 +39,8 @@ export default function Footer() {
             <h4>Connect</h4>
             <ul>
               <li><Link href="/about#ministries">Ministries</Link></li>
+              <li><Link href="/serve">Serve</Link></li>
+              <li><Link href="/missions">Mission Blog</Link></li>
               <li><Link href="/prayer">Prayer Request</Link></li>
               <li><Link href="/events#life-events">Life Events</Link></li>
             </ul>

@@ -2,17 +2,18 @@
 
 import { useEffect, useState } from 'react';
 import TextVariants from './TextVariants';
-import { TWITCH_CHANNEL_URL } from './TwitchEmbed';
-import { isServiceWindowNow } from '@/lib/serviceWindow';
+import { useSiteData } from './SiteDataContext';
+import { isLiveInBrowser } from '@/lib/serviceWindow';
 
 export default function LiveBanner() {
+  const { settings } = useSiteData();
   const [live, setLive] = useState(false);
 
   useEffect(() => {
-    setLive(isServiceWindowNow());
-    const t = setInterval(() => setLive(isServiceWindowNow()), 60 * 1000);
+    setLive(isLiveInBrowser(settings));
+    const t = setInterval(() => setLive(isLiveInBrowser(settings)), 20 * 1000);
     return () => clearInterval(t);
-  }, []);
+  }, [settings]);
 
   return (
     <div
@@ -34,9 +35,11 @@ export default function LiveBanner() {
                 We stream live every Sunday at 10:00 AM EST
               </span>
           </div>
-          <a href={TWITCH_CHANNEL_URL} target="_blank" rel="noopener" className="btn btn-ghost btn-sm">
-            <TextVariants id="live-banner-link" active={live ? 'live' : 'offline'} variants={{ live: 'Join the Stream →', offline: 'Watch on Twitch →' }} />
-          </a>
+          {live ? (
+            <a href="#live" className="btn btn-ghost btn-sm">
+              <TextVariants id="live-banner-link" active="live" variants={{ live: 'Join the Stream ↓' }} />
+            </a>
+          ) : null}
         </div>
       </div>
     </div>
