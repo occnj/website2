@@ -1,19 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import TextVariants from './TextVariants';
-import { useSiteData } from './SiteDataContext';
-import { isLiveInBrowser } from '@/lib/serviceWindow';
+import useLiveNow from './useLiveNow';
 
 export default function LiveBanner() {
-  const { settings } = useSiteData();
-  const [live, setLive] = useState(false);
-
-  useEffect(() => {
-    setLive(isLiveInBrowser(settings));
-    const t = setInterval(() => setLive(isLiveInBrowser(settings)), 20 * 1000);
-    return () => clearInterval(t);
-  }, [settings]);
+  const live = useLiveNow();
 
   return (
     <div
@@ -27,7 +18,7 @@ export default function LiveBanner() {
       <div className="container">
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 'var(--sp-3)', flexWrap: 'wrap' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-2)', color: '#fff' }}>
-            <span hidden={!live} data-cms-scope="live-banner-live">
+            <span hidden={!live} data-cms-scope="live-banner-live" style={{ display: live ? 'inline-flex' : 'none', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
                 <span className="live-badge"><span className="live-dot"></span>Live Now</span>
                 <span style={{ fontSize: '.9rem', fontWeight: 500 }}>Sunday Service is streaming live right now</span>
               </span>

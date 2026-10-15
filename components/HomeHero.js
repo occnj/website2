@@ -1,27 +1,19 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import LivePlayer from './LivePlayer';
 import { useSiteData } from './SiteDataContext';
-import { isLiveInBrowser } from '@/lib/serviceWindow';
+import useLiveNow from './useLiveNow';
 
 // Home page hero. During the Sunday stream window (9:55 AM by default — Admin →
 // Livestream & Service Times) it becomes the livestream, and switches back when
-// the window ends. Re-checked every 20 seconds, so an open page flips over
-// without a reload. Preview without changing anything for others: /?live=1,
+// the window ends. Open pages follow the clock and re-read the admin settings
+// (useLiveNow), so they flip over — and follow Force LIVE/OFF — without a reload. Preview without changing anything for others: /?live=1,
 // /?live=0, or /?now=2026-10-18T09:55.
 export default function HomeHero({ initialLive, children }) {
   const { settings } = useSiteData();
-  const [live, setLive] = useState(!!initialLive);
+  const live = useLiveNow(initialLive);
   const channel = (settings && settings.twitch_channel) || 'occnj';
-
-  useEffect(() => {
-    const check = () => setLive(isLiveInBrowser(settings));
-    check();
-    const t = setInterval(check, 20 * 1000);
-    return () => clearInterval(t);
-  }, [settings]);
 
   if (!live) return children;
 
