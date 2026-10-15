@@ -24,6 +24,10 @@ function save() {
 }
 
 let target = null; // { key, y, until }
+// The page (path + query) currently shown. Chrome also fires popstate for
+// in-page #section links; those keep the same key and must not be "restored"
+// (that fought the jump and made the About sub-nav look unclickable).
+let shownKey = null;
 let raf = 0;
 
 function stopRestore() {
@@ -61,7 +65,12 @@ export default function ScrollRestorer() {
     // Record the position at the moment a link is followed (before Next.js
     // changes the URL), and when the page is left or hidden.
     const onClick = (e) => { if (e.target.closest && e.target.closest('a[href]')) save(); };
-    const onPop = () => restore(keyFor(), read(keyFor()), 2500);
+    shownKey = keyFor();
+    const onPop = () => {
+      const key = keyFor();
+      if (key === shownKey) return; // only the #hash changed
+      restore(key, read(key), 2500);
+    };
     const onUserScroll = () => { if (target) stopRestore(); };
 
     window.addEventListener('scroll', onScroll, { passive: true });
@@ -88,6 +97,7 @@ export default function ScrollRestorer() {
   // On every page change: no header fade while the new page settles (it may
   // jump to a #section), and a Back/Forward gets time for the page to render.
   useEffect(() => {
+    shownKey = keyFor();
     const root = document.documentElement;
     root.classList.add('hdr-instant');
     const t = setTimeout(() => { if (!target) root.classList.remove('hdr-instant'); }, 400);
