@@ -34,7 +34,8 @@ function Links({ links }) {
 }
 
 function Photo({ member }) {
-  const initials = (member.name || '').split(' ').map((w) => w[0]).slice(0, 2).join('');
+  // First letters of the first two real words ("Albert & Ruth Perez" → "AR").
+  const initials = (member.name || '').split(/\s+/).filter((w) => /^[A-Za-z]/.test(w)).map((w) => w[0].toUpperCase()).slice(0, 2).join('');
   return member.photo_url ? (
     <img src={member.photo_url} alt={member.name} />
   ) : (
