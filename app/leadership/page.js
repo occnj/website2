@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import './leadership.css';
 import PageHero from '@/components/PageHero';
+import LeaderGrid from '@/components/LeaderGrid';
 import { getPageHero, getTeamMembers } from '@/lib/data';
 
 export const metadata = {
@@ -23,43 +24,11 @@ export default async function LeadershipPage() {
 
       <section className="section bg-off" data-screen-label="Leadership Team">
         <div className="container">
-          <div className="leader-grid" data-team-list>
-            {team.length === 0 && (
-              <p style={{ gridColumn: '1/-1', color: 'var(--gray-1)', textAlign: 'center', padding: '60px 0' }}>
-                Our leadership team page is being updated. Check back soon!
-              </p>
-            )}
-            {team.map((t) => {
-              const links = t.links || {};
-              const initials = (t.name || '').split(' ').map((w) => w[0]).slice(0, 2).join('');
-              return (
-                <div className="leader-card" key={t.id}>
-                  <div className="leader-photo">
-                    {t.photo_url ? (
-                      <img src={t.photo_url} alt={t.name} />
-                    ) : (
-                      <div className="img-placeholder" style={{ height: '100%', minHeight: 280 }}>
-                        <span style={{ fontFamily: 'var(--font-head)', fontSize: '2.4rem', color: '#9BABB6' }}>{initials}</span>
-                      </div>
-                    )}
-                    <div className="leader-photo-overlay"></div>
-                  </div>
-                  <div className="leader-info">
-                    <div className="leader-name">{t.name}</div>
-                    <div className="leader-role">{t.role_title}</div>
-                    {t.bio ? <p className="leader-bio">{t.bio}</p> : null}
-                    {(links.instagram || links.facebook || links.email) && (
-                      <div style={{ display: 'flex', gap: 14, marginTop: 10, fontSize: '.8rem', fontWeight: 600 }}>
-                        {links.instagram ? <a href={links.instagram} target="_blank" rel="noopener">Instagram</a> : null}
-                        {links.facebook ? <a href={links.facebook} target="_blank" rel="noopener">Facebook</a> : null}
-                        {links.email ? <a href={`mailto:${links.email}`}>Email</a> : null}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+          {team.length === 0 ? (
+            <p style={{ color: 'var(--gray-1)', textAlign: 'center', padding: '60px 0' }}>
+              Our leadership team page is being updated. Check back soon!
+            </p>
+          ) : <LeaderGrid members={team} />}
         </div>
       </section>
 

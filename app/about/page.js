@@ -3,6 +3,7 @@ import './about.css';
 import '../leadership/leadership.css';
 import '../ministries/ministries.css';
 import PageHero from '@/components/PageHero';
+import LeaderGrid from '@/components/LeaderGrid';
 import AboutSubnav from '@/components/AboutSubnav';
 import BeliefsGrid from '@/components/BeliefsGrid';
 import { getPageHero, getTeamMembers, getTeamSections, getMinistries, getBeliefs, getCoreValues, getAboutHubCards } from '@/lib/data';
@@ -225,38 +226,7 @@ export default async function AboutPage() {
                   {group.description ? <p className="leader-section-desc">{group.description}</p> : null}
                 </div>
               )}
-              <div className="leader-grid" data-team-list>
-                {group.members.map((t) => {
-                  const links = t.links || {};
-                  const initials = (t.name || '').split(' ').map((w) => w[0]).slice(0, 2).join('');
-                  return (
-                    <div className="leader-card" key={t.id}>
-                      <div className="leader-photo">
-                        {t.photo_url ? (
-                          <img src={t.photo_url} alt={t.name} />
-                        ) : (
-                          <div className="img-placeholder" style={{ height: '100%', minHeight: 280 }}>
-                            <span style={{ fontFamily: 'var(--font-head)', fontSize: '2.4rem', color: '#9BABB6' }}>{initials}</span>
-                          </div>
-                        )}
-                        <div className="leader-photo-overlay"></div>
-                      </div>
-                      <div className="leader-info">
-                        <div className="leader-name">{t.name}</div>
-                        <div className="leader-role">{t.role_title}</div>
-                        {t.bio ? <p className="leader-bio">{t.bio}</p> : null}
-                        {(links.instagram || links.facebook || links.email) && (
-                          <div style={{ display: 'flex', gap: 14, marginTop: 10, fontSize: '.8rem', fontWeight: 600 }}>
-                            {links.instagram ? <a href={links.instagram} target="_blank" rel="noopener">Instagram</a> : null}
-                            {links.facebook ? <a href={links.facebook} target="_blank" rel="noopener">Facebook</a> : null}
-                            {links.email ? <a href={`mailto:${links.email}`}>Email</a> : null}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+              <LeaderGrid members={group.members} />
             </div>
           ))}
         </div>

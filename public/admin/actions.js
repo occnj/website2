@@ -115,7 +115,7 @@ function teamFields(sectionNames) {
     { key: 'role_title', label: 'Position / title', half: true, placeholder: 'e.g. Lead Pastor' },
     { key: 'grouping', label: 'Section', type: 'select', options: sectionNames, half: true },
     { key: 'published', label: 'Published (visible on site)', type: 'check', default: true, half: true },
-    { key: 'bio', label: 'Biography', type: 'textarea' },
+    { key: 'bio', label: 'Biography', type: 'textarea', hint: 'leave a blank line between paragraphs — the card shows the start, with “Read more” for the rest' },
     { key: 'link_instagram', label: 'Instagram', half: true, hint: 'optional' },
     { key: 'link_facebook', label: 'Facebook', half: true, hint: 'optional' },
     { key: 'link_email', label: 'Contact email', half: true, hint: 'optional' },
