@@ -4,6 +4,7 @@ import '../leadership/leadership.css';
 import '../ministries/ministries.css';
 import PageHero from '@/components/PageHero';
 import LeaderGrid from '@/components/LeaderGrid';
+import MinistryCards from '@/components/MinistryCards';
 import AboutSubnav from '@/components/AboutSubnav';
 import BeliefsGrid from '@/components/BeliefsGrid';
 import { getPageHero, getTeamMembers, getTeamSections, getMinistries, getBeliefs, getCoreValues, getAboutHubCards } from '@/lib/data';
@@ -242,26 +243,11 @@ export default async function AboutPage() {
             </div>
             <p className="t-body t-muted" style={{ maxWidth: 380 }}>Every ministry at Oasis exists to help people know God, find their people, and make a real difference.</p>
           </div>
-          <div className="grid-3">
-            {ministries.length === 0 && (
-              <p style={{ gridColumn: '1/-1', color: 'var(--gray-1)', padding: 'var(--sp-4) 0' }}>
-                Ministry information is coming soon — check back shortly.
-              </p>
-            )}
-            {ministries.map((m) => (
-              <div key={m.id} className="ministry-card" style={{ borderTop: `3px solid ${m.color || 'var(--blue)'}` }}>
-                <div className="ministry-card-top">
-                  <span className="ministry-card-dot" style={{ background: m.color || 'var(--blue)' }}></span>
-                  <span className="ministry-card-name">{m.name}</span>
-                </div>
-                <p className="ministry-card-desc">{m.description}</p>
-                <div className="ministry-card-links">
-                  <Link href={`/ministries/${m.slug}`} className="btn btn-primary btn-sm">Blog & Updates</Link>
-                  <Link href="/contact" className="btn btn-secondary btn-sm">Get Involved</Link>
-                </div>
-              </div>
-            ))}
-          </div>
+          {ministries.length === 0 ? (
+            <p style={{ color: 'var(--gray-1)', padding: 'var(--sp-4) 0' }}>
+              Ministry information is coming soon — check back shortly.
+            </p>
+          ) : <MinistryCards ministries={ministries} showDescription />}
         </div>
       </section>
 
