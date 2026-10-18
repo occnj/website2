@@ -94,3 +94,29 @@
   .leader-modal { padding: var(--sp-4) var(--sp-3); }
   .leader-modal-head { flex-direction: column; align-items: flex-start; }
 }
+
+/* ---------- compact cards (big groups such as the ministry leaders) ---------- */
+.leader-grid-compact { grid-template-columns: repeat(6, 1fr); gap: var(--sp-3); }
+.leader-card-compact {
+  display: flex; flex-direction: column; justify-content: flex-start;
+  width: 100%; padding: 0; border: 0; text-align: left;
+  font: inherit; color: inherit; cursor: pointer;
+}
+.leader-grid-compact.is-collapsed .leader-card-compact:nth-child(n+13) { display: none; }
+.leader-card-compact:focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; }
+.leader-card-compact .leader-photo { aspect-ratio: 1 / 1; }
+.leader-card-compact .leader-photo .img-placeholder { min-height: 0 !important; }
+.leader-card-compact .leader-photo .img-placeholder span { font-size: 1.8rem !important; }
+.leader-card-compact .leader-info { padding: 12px 14px 14px; }
+.leader-card-compact .leader-name { font-size: .98rem; line-height: 1.25; }
+.leader-card-compact .leader-role { font-size: .68rem; letter-spacing: .05em; line-height: 1.4; }
+.leader-card-compact .leader-more { display: inline-block; margin-top: 8px; font-size: .74rem; }
+.leader-toggle-row { display: flex; justify-content: center; margin-top: var(--sp-4); }
+@media (max-width: 1180px) { .leader-grid-compact { grid-template-columns: repeat(5, 1fr); } }
+@media (max-width: 1024px) { .leader-grid-compact { grid-template-columns: repeat(4, 1fr); } }
+@media (max-width: 760px)  { .leader-grid-compact { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 520px) {
+  .leader-grid-compact { grid-template-columns: repeat(2, 1fr); }
+  .leader-grid-compact.is-collapsed .leader-card-compact:nth-child(n+7) { display: none; }
+}
+@media (min-width: 521px) { .leader-toggle-row.phone-only { display: none; } }

@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import PageHero from '@/components/PageHero';
+import MinistryCards from '@/components/MinistryCards';
 import { getPageHero, getMinistries } from '@/lib/data';
 import './ministries.css';
 
@@ -38,33 +39,7 @@ export default async function MinistriesPage() {
               Ministry pages coming soon — check back shortly.
             </p>
           ) : (
-            <div className="ministry-cards-grid">
-              {ministries.map((m) => {
-                const overlay = m.overlay_color || '#1A2835';
-                return (
-                  <Link
-                    key={m.id}
-                    href={`/ministries/${m.slug}`}
-                    className="ministry-card-overlay"
-                    style={!m.image_url ? { background: overlay } : undefined}
-                  >
-                    {m.image_url && (
-                      <img className="ministry-card-bg" src={m.image_url} alt={m.name} />
-                    )}
-                    <div
-                      className="ministry-card-gradient"
-                      style={{
-                        background: `linear-gradient(to top, ${overlay}ee 0%, ${overlay}88 45%, ${overlay}22 100%)`,
-                      }}
-                    />
-                    <div className="ministry-card-body">
-                      <p className="ministry-card-name">{m.name}</p>
-                      <span className="ministry-card-cta">Blog &amp; Updates →</span>
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
+            <MinistryCards ministries={ministries} />
           )}
         </div>
       </section>

@@ -45,8 +45,12 @@ function Photo({ member }) {
   );
 }
 
-export default function LeaderGrid({ members }) {
+// compact: smaller cards, six to a row, bio only in the dialog — for big
+// groups like the ministry leaders. Until "Show all" is pressed only the first
+// two rows show (12 on a computer, 6 on a phone — see leadership.css).
+export default function LeaderGrid({ members, compact = false }) {
   const [openId, setOpenId] = useState(null);
+  const [showAll, setShowAll] = useState(false);
   // Which bios actually overflow four lines (measured in the browser), so every
   // card is cut at the same height and only those get "Read more".
   const [overflowing, setOverflowing] = useState(null);
@@ -89,6 +93,26 @@ export default function LeaderGrid({ members }) {
 
   return (
     <>
+      {compact ? (
+        <div className={'leader-grid leader-grid-compact' + (showAll ? '' : ' is-collapsed')} data-team-list>
+          {members.map((t) => (
+            <button
+              type="button"
+              className="leader-card leader-card-compact"
+              key={t.id}
+              onClick={() => setOpenId(t.id)}
+              aria-haspopup="dialog"
+            >
+              <div className="leader-photo"><Photo member={t} /></div>
+              <div className="leader-info">
+                <div className="leader-name">{t.name}</div>
+                <div className="leader-role">{t.role_title}</div>
+                {bioParagraphs(t.bio).length ? <span className="leader-more">Read bio →</span> : null}
+              </div>
+            </button>
+          ))}
+        </div>
+      ) : (
       <div className="leader-grid" data-team-list ref={gridRef}>
         {members.map((t) => {
           const paras = bioParagraphs(t.bio);
@@ -118,6 +142,15 @@ export default function LeaderGrid({ members }) {
           );
         })}
       </div>
+      )}
+
+      {compact && members.length > 6 ? (
+        <div className={'leader-toggle-row' + (members.length <= 12 ? ' phone-only' : '')}>
+          <button type="button" className="btn btn-secondary leader-toggle" onClick={() => setShowAll((v) => !v)} aria-expanded={showAll}>
+            {showAll ? 'Show fewer' : `Show all ${members.length}`}
+          </button>
+        </div>
+      ) : null}
 
       {open ? (
         <div className="leader-modal-backdrop" onClick={() => setOpenId(null)}>

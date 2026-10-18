@@ -183,6 +183,9 @@
   cursor: pointer;
   transition: transform .22s ease, box-shadow .22s ease;
 }
+/* With a description the card grows to fit its text instead of a fixed shape. */
+.ministry-card-overlay.has-desc { aspect-ratio: auto; min-height: 300px; }
+.ministry-card-overlay.has-desc .ministry-card-body { padding-top: var(--sp-6); }
 .ministry-card-overlay:hover {
   transform: translateY(-4px) scale(1.01);
   box-shadow: 0 16px 40px rgba(0,0,0,.35);
@@ -253,6 +256,7 @@
 @media (max-width: 600px) {
   .ministry-cards-grid { grid-template-columns: 1fr; }
   .ministry-card-overlay { aspect-ratio: 4 / 3; }
+  .ministry-card-overlay.has-desc { aspect-ratio: auto; min-height: 260px; }
 }
 
 /* ── Post photo gallery (public) ── */
