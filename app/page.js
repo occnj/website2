@@ -187,10 +187,10 @@ export default async function HomePage() {
       </section>
 
       {/* ===== GET INVOLVED ===== */}
-      <section style={{ background: 'var(--charcoal)', padding: 'var(--sp-8) 0', position: 'relative', overflow: 'hidden' }} data-screen-label="Get Involved">
+      <section style={{ background: 'var(--charcoal)', padding: 'var(--section-y) 0', position: 'relative', overflow: 'hidden' }} data-screen-label="Get Involved">
         <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 80% 50%,rgba(0,150,199,.08) 0%,transparent 60%)', pointerEvents: 'none' }}></div>
         <div className="container" style={{ position: 'relative', zIndex: 1 }}>
-          <div className="split-2" style={{ alignItems: 'end', marginBottom: 'var(--sp-6)', paddingBottom: 'var(--sp-5)', borderBottom: '1px solid rgba(255,255,255,.1)' }}>
+          <div className="split-2" style={{ alignItems: 'end', marginBottom: 'var(--sp-5)', paddingBottom: 'var(--sp-5)', borderBottom: '1px solid rgba(255,255,255,.1)' }}>
             <div>
               <p className="t-eyebrow" style={{ color: 'var(--amber)' }}>Get Involved</p>
               <h2 style={{ fontFamily: 'var(--font-head)', fontSize: 'clamp(2rem,3.5vw,3.2rem)', fontWeight: 700, lineHeight: 1.1, letterSpacing: '-.025em', color: '#fff', marginTop: 'var(--sp-2)' }}>

@@ -135,7 +135,7 @@ export default async function AboutPage() {
       {/* OUR VALUES */}
       <section className="section" id="our-values" data-screen-label="Our Values">
         <div className="container">
-          <div style={{ maxWidth: 640, margin: '0 auto var(--sp-6)', textAlign: 'center' }}>
+          <div style={{ maxWidth: 640, margin: '0 auto var(--sp-5)', textAlign: 'center' }}>
             <p className="t-eyebrow">Our Values</p>
             <h2 className="t-h1 mt-2">What defines us.</h2>
             <p className="t-body t-muted mt-3">Our values direct the culture of Oasis. They define who we are. These values are so critical to our mission that we will adjust anything to achieve and maintain them.</p>
@@ -155,7 +155,7 @@ export default async function AboutPage() {
       {/* OUR BELIEFS */}
       <section className="section bg-off" id="our-beliefs" data-screen-label="Our Beliefs">
         <div className="container">
-          <div className="split-2" style={{ gap: 'var(--sp-7)', alignItems: 'center', marginBottom: 'var(--sp-6)' }}>
+          <div className="split-2" style={{ gap: 'var(--sp-7)', alignItems: 'center', marginBottom: 'var(--sp-5)' }}>
             <div>
               <p className="t-eyebrow">Our Beliefs</p>
               <h2 className="t-h1 mt-2">What we believe.</h2>
@@ -183,7 +183,7 @@ export default async function AboutPage() {
       {/* LEADERSHIP */}
       <section className="section" id="leadership" data-screen-label="Leadership">
         <div className="container">
-          <div style={{ maxWidth: 640, margin: '0 auto var(--sp-6)', textAlign: 'center' }}>
+          <div style={{ maxWidth: 640, margin: '0 auto var(--sp-5)', textAlign: 'center' }}>
             <p className="t-eyebrow">Leadership</p>
             <h2 className="t-h1 mt-2">Meet our team.</h2>
             <p className="t-body t-muted mt-3">Oasis is led by people who love God, love people, and are committed to serving the Rahway community with integrity and joy.</p>
@@ -266,7 +266,7 @@ export default async function AboutPage() {
       </section>
 
       {/* CTA */}
-      <section style={{ background: 'var(--blue)', padding: 'var(--sp-7) 0' }} data-screen-label="CTA">
+      <section style={{ background: 'var(--blue)', padding: 'var(--section-y) 0' }} data-screen-label="CTA">
         <div className="container text-center">
           <h2 style={{ fontFamily: 'var(--font-head)', fontSize: 'clamp(1.8rem,4vw,3rem)', fontWeight: 700, color: '#fff', marginBottom: 'var(--sp-2)' }}>Ready to take your next step?</h2>
           <p style={{ color: 'rgba(255,255,255,.75)', fontSize: '1.05rem', maxWidth: 440, margin: '0 auto var(--sp-4)', lineHeight: 1.65 }}>Join us this Sunday and find out what Oasis is all about — in person.</p>

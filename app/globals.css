@@ -30,6 +30,8 @@
   --sp-6: 64px;
   --sp-7: 96px;
   --sp-8: 128px;
+  /* Space above and below each page section (smaller on tablets/phones). */
+  --section-y: 72px;
 
   --radius-sm:  6px;
   --radius-md:  12px;
@@ -143,9 +145,14 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
 /* --- LAYOUT --- */
 .container { max-width: var(--max-w); margin: 0 auto; padding: 0 var(--sp-3); }
 .container-narrow { max-width: 800px; margin: 0 auto; padding: 0 var(--sp-3); }
-.section { padding: var(--sp-7) 0; }
-.section-lg { padding: var(--sp-8) 0; }
-.section-sm { padding: var(--sp-5) 0; }
+.section { padding: var(--section-y) 0; }
+.section-lg { padding: calc(var(--section-y) * 1.33) 0; }
+.section-sm { padding: calc(var(--section-y) * .66) 0; }
+/* Two plain (white) sections in a row would stack both paddings into one big
+   gap — the second one starts closer instead. */
+.section:not([class*="bg-"]):not([style*="background"]) + .section:not([class*="bg-"]):not([style*="background"]) {
+  padding-top: calc(var(--section-y) * .4);
+}
 .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-4); }
 .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-4); }
 .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--sp-3); }
@@ -564,7 +571,7 @@ html:not(.hdr-solid) .site-header:not(.menu-open) .header-logo img { filter: dro
 .site-footer {
   background: var(--charcoal);
   color: rgba(255,255,255,.75);
-  padding: var(--sp-7) 0 var(--sp-4);
+  padding: var(--sp-6) 0 var(--sp-4);
 }
 .footer-grid {
   display: flex;
@@ -730,6 +737,7 @@ html:not(.hdr-solid) .site-header:not(.menu-open) .header-logo img { filter: dro
 
 /* --- RESPONSIVE --- */
 @media (max-width: 1024px) {
+  :root { --section-y: 60px; }
   .grid-4 { grid-template-columns: repeat(2, 1fr); }
 }
 @media (max-width: 768px) {
@@ -807,8 +815,7 @@ html:not(.hdr-solid) .site-header:not(.menu-open) .header-logo img { filter: dro
   .hero { min-height: 92svh; }
   .hero-content { padding: var(--sp-6) 0 var(--sp-5); }
   .page-hero { padding: calc(var(--header-h) + var(--sp-5)) 0 var(--sp-5); }
-  .section { padding: var(--sp-6) 0; }
-  .section-lg { padding: var(--sp-7) 0; }
+  :root { --section-y: 52px; }
   .card-body { padding: var(--sp-3); }
   .btn { padding: 13px 22px; }
   .btn-lg { padding: 15px 26px; font-size: .95rem; }
