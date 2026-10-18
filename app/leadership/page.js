@@ -1,8 +1,8 @@
 import Link from 'next/link';
 import './leadership.css';
 import PageHero from '@/components/PageHero';
-import LeaderGrid from '@/components/LeaderGrid';
-import { getPageHero, getTeamMembers } from '@/lib/data';
+import TeamSections, { buildTeamGroups } from '@/components/TeamSections';
+import { getPageHero, getTeamMembers, getTeamSections } from '@/lib/data';
 
 export const metadata = {
   title: 'Leadership — Oasis Christian Centre',
@@ -11,7 +11,8 @@ export const metadata = {
 export const dynamic = 'force-dynamic';
 
 export default async function LeadershipPage() {
-  const [hero, team] = await Promise.all([getPageHero('leadership'), getTeamMembers()]);
+  const [hero, team, sections] = await Promise.all([getPageHero('leadership'), getTeamMembers(), getTeamSections()]);
+  const groups = buildTeamGroups(team, sections);
 
   return (
     <>
@@ -28,7 +29,7 @@ export default async function LeadershipPage() {
             <p style={{ color: 'var(--gray-1)', textAlign: 'center', padding: '60px 0' }}>
               Our leadership team page is being updated. Check back soon!
             </p>
-          ) : <LeaderGrid members={team} />}
+          ) : <TeamSections groups={groups} />}
         </div>
       </section>
 

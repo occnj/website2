@@ -3,7 +3,7 @@ import './about.css';
 import '../leadership/leadership.css';
 import '../ministries/ministries.css';
 import PageHero from '@/components/PageHero';
-import LeaderGrid from '@/components/LeaderGrid';
+import TeamSections, { buildTeamGroups } from '@/components/TeamSections';
 import MinistryCards from '@/components/MinistryCards';
 import AboutSubnav from '@/components/AboutSubnav';
 import BeliefsGrid from '@/components/BeliefsGrid';
@@ -41,32 +41,6 @@ const BELIEFS = [
 ];
 
 
-
-// Build the ordered list of { name, description, members } groups for the
-// leadership area. Preserves each section's admin-defined order and each
-// member's own sort_order within it.
-function buildTeamGroups(team, sections) {
-  const members = team || [];
-  if (!sections || sections.length === 0) {
-    return members.length ? [{ name: null, description: null, members }] : [];
-  }
-  const byName = new Map();
-  const groups = sections.map((s) => {
-    const g = { name: s.name, description: s.description || null, members: [] };
-    byName.set((s.name || '').trim().toLowerCase(), g);
-    return g;
-  });
-  const leftovers = [];
-  members.forEach((m) => {
-    const key = (m.grouping || '').trim().toLowerCase();
-    const g = byName.get(key);
-    if (g) g.members.push(m);
-    else leftovers.push(m);
-  });
-  if (leftovers.length) groups.push({ name: 'More of our team', description: null, members: leftovers });
-  // Drop empty sections so we never render a heading with no people under it.
-  return groups.filter((g) => g.members.length > 0);
-}
 
 export default async function AboutPage() {
   const [hero, team, sections, ministries, dbBeliefs, dbValues, dbHubCards] = await Promise.all([
@@ -219,17 +193,7 @@ export default async function AboutPage() {
               Our leadership team page is being updated. Check back soon!
             </p>
           )}
-          {groups.map((group, gi) => (
-            <div className="leader-section" key={group.name || gi}>
-              {group.name && (
-                <div className="leader-section-head">
-                  <h3 className="leader-section-title">{group.name}</h3>
-                  {group.description ? <p className="leader-section-desc">{group.description}</p> : null}
-                </div>
-              )}
-              <LeaderGrid members={group.members} />
-            </div>
-          ))}
+          <TeamSections groups={groups} />
         </div>
       </section>
 
