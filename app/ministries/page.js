@@ -28,7 +28,7 @@ export default async function MinistriesPage() {
 
       <section className="section">
         <div className="container">
-          <div style={{ maxWidth: 600, margin: '0 auto var(--sp-6)', textAlign: 'center' }}>
+          <div style={{ maxWidth: 600, margin: '0 auto var(--sp-5)', textAlign: 'center' }}>
             <p className="t-body t-muted">
               Each ministry at Oasis is a community within the community — a place to grow, serve, and belong.
             </p>
@@ -44,7 +44,7 @@ export default async function MinistriesPage() {
         </div>
       </section>
 
-      <section style={{ background: 'var(--off-white)', padding: 'var(--sp-6) 0', borderTop: '1px solid var(--border)' }}>
+      <section style={{ background: 'var(--off-white)', padding: 'var(--section-y) 0', borderTop: '1px solid var(--border)' }}>
         <div className="container text-center">
           <h2 style={{ fontFamily: 'var(--font-head)', fontSize: 'clamp(1.4rem,3vw,2rem)', fontWeight: 700, marginBottom: 'var(--sp-2)' }}>
             Not sure where to start?

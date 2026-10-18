@@ -69,7 +69,7 @@ export default async function PlanYourVisitPage() {
 
       <section className="section bg-off" data-screen-label="Service Experience">
         <div className="container">
-          <div className="text-center" style={{ maxWidth: 600, margin: '0 auto var(--sp-6)' }}>
+          <div className="text-center" style={{ maxWidth: 600, margin: '0 auto var(--sp-5)' }}>
             <p className="t-eyebrow">The Experience</p>
             <h2 className="t-h1 mt-2">What our services are like</h2>
             <p className="t-body t-muted mt-3">Expect about 75 minutes of worship, community, and a message that&rsquo;s honest, relevant, and grounded in Scripture.</p>

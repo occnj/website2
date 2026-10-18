@@ -84,7 +84,7 @@ export default async function MinistryPage({ params }) {
         </div>
       </section>
 
-      <section style={{ background: 'var(--blue)', padding: 'var(--sp-6) 0' }}>
+      <section style={{ background: 'var(--blue)', padding: 'var(--section-y) 0' }}>
         <div className="container text-center">
           <h2 style={{ fontFamily: 'var(--font-head)', fontSize: 'clamp(1.5rem,3vw,2.2rem)', fontWeight: 700, color: '#fff', marginBottom: 'var(--sp-2)' }}>
             Want to get involved?

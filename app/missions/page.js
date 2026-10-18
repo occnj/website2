@@ -74,7 +74,7 @@ export default async function MissionsPage() {
         </div>
       </section>
 
-      <section style={{ background: 'var(--charcoal)', padding: 'var(--sp-6) 0' }} data-screen-label="Mission CTA">
+      <section style={{ background: 'var(--charcoal)', padding: 'var(--section-y) 0' }} data-screen-label="Mission CTA">
         <div className="container text-center">
           <p className="t-eyebrow" style={{ color: 'var(--amber)' }}>Join the Mission</p>
           <h2 style={{ fontFamily: 'var(--font-head)', fontSize: 'clamp(1.5rem,3vw,2.2rem)', fontWeight: 700, color: '#fff', margin: 'var(--sp-2) 0' }}>
